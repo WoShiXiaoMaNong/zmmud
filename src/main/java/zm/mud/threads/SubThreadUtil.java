@@ -23,7 +23,7 @@ public class SubThreadUtil implements DisposableBean {
     }
 
     public synchronized void startAllThreads() {
-        if(started) {
+        if (started) {
             logger.warn("Sub-threads have already been started.");
             return;
         }
@@ -37,10 +37,8 @@ public class SubThreadUtil implements DisposableBean {
         }
     }
 
-
-
     public synchronized void shutdownAllThreads() {
-        if(!started) {
+        if (!started) {
             logger.warn("Sub-threads have not been started yet.");
             return;
         }
@@ -52,7 +50,7 @@ public class SubThreadUtil implements DisposableBean {
         }
         for (Thread workerThread : workerThreads) {
             try {
-                if(workerThread.isAlive()) {
+                if (workerThread.isAlive()) {
                     workerThread.interrupt();
                 }
                 workerThread.join(3000); // Wait for the thread to finish, with a timeout

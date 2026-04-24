@@ -41,7 +41,7 @@ public class ZmMud {
                 String line = null;
                 while ((line = consoleReader.readLine()) != null) {
                   OubMessage msg = new NormalOutboundMsg(line);
-                  oubMsgQueue.putMessage(msg);
+                  oubMsgQueue.put(msg);
                 }
             } catch (IOException e) {
                 logger.error("Failed to read from console", e);

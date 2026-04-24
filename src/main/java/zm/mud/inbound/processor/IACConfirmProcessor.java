@@ -2,8 +2,6 @@ package zm.mud.inbound.processor;
 
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.logging.log4j.core.config.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
@@ -13,13 +11,10 @@ import zm.mud.inbound.message.InbMessage;
 import zm.mud.inbound.message.IACConfirmInbMsg;
 
 @Service
-public class IACConfirmProcessor implements InbMsgProcessor,Ordered {
+public class IACConfirmProcessor implements InbMsgProcessor, Ordered {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(IACConfirmProcessor.class);
 
-
-
-    
     public static final int CMD_SE = 240; // subnegotiation end
     public static final int CMD_NOP = 241;
     public static final int CMD_DM = 242;
@@ -33,8 +28,7 @@ public class IACConfirmProcessor implements InbMsgProcessor,Ordered {
     public static final int CMD_SB = 250; // subnegotiation begin
 
     public static final Set<Integer> NON_OPTION_COMMANDS = Set.of(
-        CMD_SE, CMD_NOP, CMD_DM, CMD_BRK, CMD_IP, CMD_AO, CMD_AYT, CMD_EC, CMD_EL, CMD_GA
-    );
+            CMD_SE, CMD_NOP, CMD_DM, CMD_BRK, CMD_IP, CMD_AO, CMD_AYT, CMD_EC, CMD_EL, CMD_GA);
 
     public static final int CMD_WILL = 251;
     public static final int CMD_WONT = 252;
@@ -64,8 +58,8 @@ public class IACConfirmProcessor implements InbMsgProcessor,Ordered {
             CMD_WONT, CMD_WILL);
 
     public static final Map<Integer, Integer> OPTION_ALLOWED_MAP = Map.of(
-            OPTION_MXP0, 0,
-            OPTION_MXP1, 0);
+            OPTION_MXP0, 1,
+            OPTION_MXP1, 1);
 
     @Autowired
     private MudClient mudClient;
@@ -81,7 +75,8 @@ public class IACConfirmProcessor implements InbMsgProcessor,Ordered {
             return true;
         }
 
-        logger.info("服务器发送确认指令:" + String.format("IAC %s %d", CMD_NAME_MAP.getOrDefault(iacMsg.getContentBytes()[1], "UNKNOWN"), iacMsg.getContentBytes()[2]));
+        logger.info("服务器发送确认指令:" + String.format("IAC %s %d",
+                CMD_NAME_MAP.getOrDefault(iacMsg.getContentBytes()[1], "UNKNOWN"), iacMsg.getContentBytes()[2]));
 
         int cmd = iacMsg.getContentBytes()[1];
         int opt = iacMsg.getContentBytes()[2];
@@ -100,7 +95,8 @@ public class IACConfirmProcessor implements InbMsgProcessor,Ordered {
                     (byte) 255, (byte) responseCmd, (byte) responseOpt
             };
             this.mudClient.send(response);
-            logger.info("发送响应指令:" + String.format("IAC %s %d", CMD_NAME_MAP.getOrDefault(responseCmd, "UNKNOWN"), responseOpt));
+            logger.info("发送响应指令:"
+                    + String.format("IAC %s %d", CMD_NAME_MAP.getOrDefault(responseCmd, "UNKNOWN"), responseOpt));
         }
 
         return true;
@@ -108,7 +104,7 @@ public class IACConfirmProcessor implements InbMsgProcessor,Ordered {
 
     @Override
     public int getOrder() {
-       return 2;
+        return 2;
     }
 
 }

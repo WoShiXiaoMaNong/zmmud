@@ -2,7 +2,10 @@ package zm.mud.queue;
 
 import java.util.concurrent.BlockingQueue;
 
-public class InbByteMudGameMsgQueue {
+import org.springframework.stereotype.Service;
+
+@Service
+public class InbByteMudGameMsgQueue implements ZmmudQueue<Integer> {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager.getLogger(InbByteMudGameMsgQueue.class);
 
     private BlockingQueue<Integer> msgQueue;
@@ -11,7 +14,8 @@ public class InbByteMudGameMsgQueue {
         this.msgQueue = new java.util.concurrent.LinkedBlockingQueue<>();
     }
 
-    public void putByte(int b) {
+    @Override
+    public void put(Integer b) {
         try {
             msgQueue.put(b);
         } catch (InterruptedException e) {
@@ -19,7 +23,8 @@ public class InbByteMudGameMsgQueue {
         }
     }
 
-    public Integer takeByte() {
+    @Override
+    public Integer take() {
         try {
             return msgQueue.take();
         } catch (InterruptedException e) {

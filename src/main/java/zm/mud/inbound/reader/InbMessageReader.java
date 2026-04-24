@@ -1,8 +1,9 @@
 package zm.mud.inbound.reader;
 
-import zm.mud.client.MudClient;
 import zm.mud.inbound.message.InbMessage;
+import zm.mud.queue.ZmmudQueue;
 
-public interface InbMessageReader { 
-     InbMessage readInbMessage(int firstByte,MudClient client);
+public interface InbMessageReader<T> { 
+     InbMessage readInbMessage(int firstByte,ZmmudQueue<T> iacByteQueue);
+     
 }

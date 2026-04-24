@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 
 @Service
-public class InbByteIACQueue {
+public class InbByteIACQueue implements ZmmudQueue<Integer> {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager.getLogger(InbByteIACQueue.class);
 
     private BlockingQueue<Integer> msgQueue;
@@ -15,7 +15,8 @@ public class InbByteIACQueue {
         this.msgQueue = new java.util.concurrent.LinkedBlockingQueue<>();
     }
 
-    public void putByte(int b) {
+    @Override
+    public void put(Integer b) {
         try {
             msgQueue.put(b);
         } catch (InterruptedException e) {
@@ -23,7 +24,8 @@ public class InbByteIACQueue {
         }
     }
 
-    public Integer takeByte() {
+    @Override
+    public Integer take() {
         try {
             return msgQueue.take();
         } catch (InterruptedException e) {

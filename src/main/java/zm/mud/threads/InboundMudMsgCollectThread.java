@@ -1,27 +1,27 @@
 package zm.mud.threads;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import zm.mud.inbound.message.InbMessage;
-import zm.mud.inbound.processor.InbMsgProcessor;
+import zm.mud.inbound.reader.MudGameMsgReader;
+import zm.mud.queue.InbByteMudGameMsgQueue;
 import zm.mud.queue.InbMsgQueue;
 
 @Service
-public class InboundMsgProcessThread implements ZmmudThread {
+public class InboundMudMsgCollectThread implements ZmmudThread {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
-            .getLogger(InboundMsgProcessThread.class);
+            .getLogger(InboundMudMsgCollectThread.class);
+    @Autowired
+    private InbMsgQueue inbMsgQueue;
 
     @Autowired
-    private InbMsgQueue msgQueue;
+    private InbByteMudGameMsgQueue mudGameMsgByteQueue;
 
     @Autowired
-    private List<InbMsgProcessor> printProcessor;
+    private MudGameMsgReader mudGameMsgReader;
 
     private volatile boolean running = true;
-
     private Thread workerThread;
 
     @Override
@@ -37,18 +37,14 @@ public class InboundMsgProcessThread implements ZmmudThread {
         workerThread = Thread.currentThread();
         while (running && !Thread.currentThread().isInterrupted()) {
             try {
-                InbMessage msg = msgQueue.take();
-                for (InbMsgProcessor inbMsgProcessor : printProcessor) {
-                    boolean shouldContinue = inbMsgProcessor.processMessage(msg);
-                    if (!shouldContinue) {
-                        break;
-                    }
-                }
-
+                int firstByte = mudGameMsgByteQueue.take();
+                InbMessage inbMsg = mudGameMsgReader.readInbMessage(firstByte, mudGameMsgByteQueue);
+                inbMsgQueue.put(inbMsg);
             } catch (Exception e) {
-                logger.error("Failed to process inbound message", e);
+                logger.error("Failed to read from server", e);
             }
         }
+
     }
 
 }

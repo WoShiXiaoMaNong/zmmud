@@ -9,9 +9,9 @@ import zm.mud.outbound.processor.OubMsgProcessor;
 import zm.mud.queue.OubMsgQueue;
 
 @Service
-public class OutboundMessageProcessThread implements ZmmudThread{
-    private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager.getLogger(OutboundMessageProcessThread.class);
-
+public class OutboundMessageProcessThread implements ZmmudThread {
+    private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
+            .getLogger(OutboundMessageProcessThread.class);
 
     @Autowired
     private OubMsgQueue oubMsgQueue;
@@ -26,7 +26,7 @@ public class OutboundMessageProcessThread implements ZmmudThread{
     @Override
     public void shutdown() {
         running = false;
-        if(workerThread != null) {
+        if (workerThread != null) {
             workerThread.interrupt();
         }
     }
@@ -34,10 +34,10 @@ public class OutboundMessageProcessThread implements ZmmudThread{
     @Override
     public void run() {
         workerThread = Thread.currentThread();
-        logger.info("OutboundMessageProcessThread started");    
+        logger.info("OutboundMessageProcessThread started");
         while (running && !Thread.currentThread().isInterrupted()) {
             try {
-                zm.mud.outbound.message.OubMessage msg = oubMsgQueue.takeMessage();
+                zm.mud.outbound.message.OubMessage msg = oubMsgQueue.take();
                 for (OubMsgProcessor processor : oubMsgProcessors) {
                     if (processor.processMessage(msg)) {
                         break; // Message processed, move to next message
