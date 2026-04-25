@@ -1,11 +1,13 @@
-package zm.mud.network.queue;
+package zm.mud.network.queue.raw;
 
 import java.util.concurrent.BlockingQueue;
 
 import org.springframework.stereotype.Service;
 
+import zm.mud.network.queue.IZmmudQueue;
+
 @Service
-public class InbByteMudGameMsgQueue implements ZmmudQueue<Integer> {
+public class InbByteMudGameMsgQueue implements IZmmudQueue<Integer> {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager.getLogger(InbByteMudGameMsgQueue.class);
 
     private BlockingQueue<Integer> msgQueue;

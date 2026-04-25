@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import zm.mud.client.MudClient;
 import zm.mud.network.inbound.message.InbMessage;
 import zm.mud.network.inbound.message.NormalInbMsg;
-import zm.mud.network.queue.ZmmudQueue;
+import zm.mud.network.queue.IZmmudQueue;
 
 @Service
 public class MudGameMsgReader implements InbMessageReader<Integer> {
@@ -18,7 +18,7 @@ public class MudGameMsgReader implements InbMessageReader<Integer> {
     private MudClient client;
 
     @Override
-    public InbMessage readInbMessage(int firstByte, ZmmudQueue<Integer> iacByteQueue) {
+    public InbMessage readInbMessage(int firstByte, IZmmudQueue<Integer> iacByteQueue) {
         List<Integer> byteList = new ArrayList<>();
         byteList.add(firstByte);
 

@@ -1,6 +1,6 @@
 package zm.mud.network.queue;
 
-public interface ZmmudQueue<T> {
+public interface IZmmudQueue<T> {
     void put(T b);
     T take();
 }

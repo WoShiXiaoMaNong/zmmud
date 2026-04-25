@@ -15,7 +15,7 @@ import zm.mud.client.MudClient;
 import zm.mud.network.outbound.message.NormalOutboundMsg;
 import zm.mud.network.outbound.message.OubMessage;
 import zm.mud.network.queue.OubMsgQueue;
-import zm.mud.network.threads.SubThreadUtil;
+import zm.mud.network.utils.SubThreadUtil;
 
 /**
  * Hello world!
