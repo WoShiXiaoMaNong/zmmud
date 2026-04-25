@@ -12,10 +12,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import zm.mud.client.MudClient;
-import zm.mud.outbound.message.NormalOutboundMsg;
-import zm.mud.outbound.message.OubMessage;
-import zm.mud.queue.OubMsgQueue;
-import zm.mud.threads.SubThreadUtil;
+import zm.mud.network.outbound.message.NormalOutboundMsg;
+import zm.mud.network.outbound.message.OubMessage;
+import zm.mud.network.queue.OubMsgQueue;
+import zm.mud.network.threads.SubThreadUtil;
 
 /**
  * Hello world!
@@ -27,7 +27,7 @@ public class ZmMud {
         ApplicationContext  context = new AnnotationConfigApplicationContext("zm.mud");
         MudClient client = context.getBean(MudClient.class);
 
-        client.connect("mud.pkuxkx.net", 8080, null);
+        client.connect();
 
         SubThreadUtil threadStarter = context.getBean(SubThreadUtil.class);
         threadStarter.startAllThreads();
