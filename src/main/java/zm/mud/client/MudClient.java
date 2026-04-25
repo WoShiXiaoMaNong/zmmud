@@ -9,10 +9,12 @@ import java.nio.charset.Charset;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import zm.mud.outbound.message.OubMessage;
-import zm.mud.utils.CloseUtil;
+import zm.mud.network.ConnectionManager;
+import zm.mud.network.outbound.message.OubMessage;
+import zm.mud.network.utils.CloseUtil;
 
 @Service
 public class MudClient implements AutoCloseable {
@@ -22,49 +24,43 @@ public class MudClient implements AutoCloseable {
     private int port;
     private Charset charset;
 
-    private Socket socket;
-
-
-    private InputStream inputStream;
-    private OutputStream  outputStream;
-
     @Autowired
     private CloseUtil closeUtil;
+
+    @Autowired
+    private ConnectionManager connectionManager;
 
     public MudClient() {
     }
 
-    
-
-    public void connect(String host, int port, Charset charset) {
-        this.host = host;
-        this.port = port;
-        this.charset = charset == null ? Charset.forName("GBK") : charset;
-        try{
-        socket = new Socket(this.host, this.port);
-        // reader = new BufferedReader(
-        //         new InputStreamReader(socket.getInputStream(), this.charset));
-        outputStream = socket.getOutputStream();
-        inputStream = socket.getInputStream();
-        logger.info("Connected to server {}:{}", this.host, this.port);
-    } catch (IOException e) {
-        logger.error("Failed to connect to server", e);
+    /**
+     * <pre>
+     * 提供一个无参的 connect 方法，
+     * 使用已经设置好的 host、port 和 charset 进行连接。
+     * 这对于在 Spring 中通过配置文件注入参数后直接连接非常有用。
+     * </pre>
+     */
+    public void connect() {
+        this.connect(this.host, this.port, this.charset);
     }
 
-}
+    public void connect(String host, int port, Charset charset) {
+        if (this.connectionManager == null) {
+            this.connectionManager = new ConnectionManager();
+        }
 
-    // public String readLine(){
-    //     try {
-    //         return reader.readLine();
-    //     } catch (IOException e) {
-    //         logger.error("Failed to read line from server", e);
-    //         return null;
-    //     }
-    // }
+        if (this.connectionManager.isConnected()) {
+            logger.warn("Already connected to server {}:{}", this.host, this.port);
+            return;
+        }
 
-    public int read(){
+        this.connectionManager.connect(host, port, charset);
+
+    }
+
+    public int read() {
         try {
-            return inputStream.read();
+            return this.connectionManager.readByte();
         } catch (IOException e) {
             logger.error("Failed to read byte from server", e);
             Thread.currentThread().interrupt();
@@ -75,9 +71,7 @@ public class MudClient implements AutoCloseable {
     public synchronized void sendLine(OubMessage msg) {
         try {
             String line = msg.getContent();
-            outputStream.write(line.getBytes(this.charset));
-            outputStream.write("\r\n".getBytes(this.charset)); // 发送行结束符
-            outputStream.flush();
+            this.connectionManager.sendLine(line);
         } catch (IOException e) {
             logger.error("Failed to send line to server", e);
         }
@@ -85,8 +79,7 @@ public class MudClient implements AutoCloseable {
 
     public synchronized void send(byte[] data) {
         try {
-            outputStream.write(data);
-            outputStream.flush();
+            this.connectionManager.sendData(data);
         } catch (IOException e) {
             logger.error("Failed to send data to server", e);
         }
@@ -98,6 +91,26 @@ public class MudClient implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        this.closeUtil.close(inputStream, outputStream, socket);
+        this.closeUtil.close(this.connectionManager);
+    }
+
+    @Value("${mud.server.host}")
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    @Value("${mud.server.port}")
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    @Value("${mud.server.charset}")
+    public void setCharset(String charset) {
+        if (charset == null || charset.isEmpty()) {
+            this.charset = Charset.forName("GBK");
+        } else {
+            this.charset = Charset.forName(charset);
+        }
+        logger.info("Charset set to {}", this.charset.name());
     }
 }
