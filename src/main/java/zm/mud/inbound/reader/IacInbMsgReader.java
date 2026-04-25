@@ -16,13 +16,13 @@ public class IacInbMsgReader implements InbMessageReader<Integer> {
     public InbMessage readInbMessage(int firstByte, ZmmudQueue<Integer> iacByteQueue) {
         int cmd = iacByteQueue.take();
         if (IACConfirmProcessor.NON_OPTION_COMMANDS.contains(cmd)) {
-            logger.info("Received IAC command from server: "
+            logger.debug("Received IAC command from server: "
                     + IACConfirmProcessor.CMD_NAME_MAP.getOrDefault(cmd, "UNKNOWN"));
             return new NormalInbMsg(""); // or a specific IAC message object
         }
         if (cmd == IACConfirmProcessor.CMD_SB) {
             // Handle subnegotiation
-            logger.info("Received IAC SB command, starting to read subnegotiation content...");
+            logger.debug("Received IAC SB command, starting to read subnegotiation content...");
             // For simplicity, we will just read until we encounter IAC SE. In a real
             // implementation, you would want to handle this more robustly.
             StringBuilder sbContent = new StringBuilder();
@@ -39,7 +39,7 @@ public class IacInbMsgReader implements InbMessageReader<Integer> {
                     sbContent.append((char) b);
                 }
             }
-            logger.info("Finished reading subnegotiation content: " + sbContent.toString());
+            logger.debug("Finished reading subnegotiation content: " + sbContent.toString());
             return new NormalInbMsg(sbContent.toString()); // or a specific SubnegotiationInbMsg object
         }
         // Currently we only handle option negotiation commands, other IAC commands are
