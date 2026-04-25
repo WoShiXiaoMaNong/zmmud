@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import zm.mud.network.outbound.message.OubMessage;
 
 @Service
-public class OubMsgQueue implements ZmmudQueue<OubMessage> {
+public class OubMsgQueue implements IZmmudQueue<OubMessage> {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(OubMsgQueue.class);
     private final BlockingQueue<OubMessage> msgQueue;

@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 
 import zm.mud.client.MudClient;
 import zm.mud.network.inbound.processor.IACConfirmProcessor;
-import zm.mud.network.queue.InbByteIACQueue;
-import zm.mud.network.queue.InbByteMudGameMsgQueue;
+import zm.mud.network.queue.raw.InbByteIACQueue;
+import zm.mud.network.queue.raw.InbByteMudGameMsgQueue;
 
 @Service
 public class InboundByteDispatcherThread implements ZmmudThread {

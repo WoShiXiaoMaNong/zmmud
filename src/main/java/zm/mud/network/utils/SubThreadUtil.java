@@ -1,10 +1,12 @@
-package zm.mud.network.threads;
+package zm.mud.network.utils;
 
 import java.util.List;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import zm.mud.network.threads.ZmmudThread;
 
 @Service
 public class SubThreadUtil implements DisposableBean {

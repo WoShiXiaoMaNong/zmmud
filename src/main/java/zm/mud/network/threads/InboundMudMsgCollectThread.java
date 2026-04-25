@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 
 import zm.mud.network.inbound.message.InbMessage;
 import zm.mud.network.inbound.reader.MudGameMsgReader;
-import zm.mud.network.queue.InbByteMudGameMsgQueue;
 import zm.mud.network.queue.InbMsgQueue;
+import zm.mud.network.queue.raw.InbByteMudGameMsgQueue;
 
 @Service
 public class InboundMudMsgCollectThread implements ZmmudThread {

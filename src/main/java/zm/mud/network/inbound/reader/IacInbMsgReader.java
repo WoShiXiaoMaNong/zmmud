@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import zm.mud.network.inbound.message.InbMessage;
 import zm.mud.network.inbound.message.NormalInbMsg;
 import zm.mud.network.inbound.processor.IACConfirmProcessor;
-import zm.mud.network.queue.ZmmudQueue;
+import zm.mud.network.queue.IZmmudQueue;
 
 @Service
 public class IacInbMsgReader implements InbMessageReader<Integer> {
@@ -13,7 +13,7 @@ public class IacInbMsgReader implements InbMessageReader<Integer> {
             .getLogger(IacInbMsgReader.class);
 
     @Override
-    public InbMessage readInbMessage(int firstByte, ZmmudQueue<Integer> iacByteQueue) {
+    public InbMessage readInbMessage(int firstByte, IZmmudQueue<Integer> iacByteQueue) {
         int cmd = iacByteQueue.take();
         if (IACConfirmProcessor.NON_OPTION_COMMANDS.contains(cmd)) {
             logger.debug("Received IAC command from server: "

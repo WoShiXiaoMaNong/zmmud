@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import zm.mud.network.inbound.message.InbMessage;
 
 @Service
-public class InbMsgQueue implements ZmmudQueue<InbMessage> {
+public class InbMsgQueue implements IZmmudQueue<InbMessage> {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(InbMsgQueue.class);
 
