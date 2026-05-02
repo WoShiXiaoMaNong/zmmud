@@ -1,12 +1,10 @@
 package zm.mud.network.inbound.reader;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import zm.mud.network.inbound.consts.IACConsts;
@@ -16,7 +14,7 @@ import zm.mud.network.queue.InbMsgQueue;
 @Service
 public class InbMsgReader {
      private static final Logger logger = LogManager.getLogger(InbMsgReader.class);
-
+    
      enum InbReaderState {
           NOT_STARTED,
           NORMAL_READING,
@@ -31,26 +29,40 @@ public class InbMsgReader {
           IAC_END
      }
 
-     private List<Integer> buf;
+  
+     private int[] buf;
+     private int currentIndex;
      private InbReaderState state;
+
+     
+     private int maxLength;
 
      @Autowired
      private InbMsgQueue inbMsgQueue;
 
      public InbMsgReader() {
-          this.buf = new ArrayList<>();
+          this.clear();
           this.state = InbReaderState.NOT_STARTED;
      }
 
+     @Value("${mud.inbound.reader.buffer.maxLength:1024}")
+     public void  setMaxLength(int maxLength) {
+          this.maxLength = maxLength;
+          this.buf = new int[maxLength];
+     }
+
      public synchronized void handleByte(int currentByte, Charset c) {
-     
+          OversizeCallback oversizeCallback = () -> {
+               //logger.warn("Message exceeds max length of " + MAX_LENGTH + " bytes. Processing current buffer as a message.");
+               this.procesEnd(c);
+          };
           if (currentByte == IACConsts.IAC) {
                if(state == InbReaderState.NORMAL_READING){
                     state = InbReaderState.NORMAL_END;
                     this.procesEnd(c);
                }
                state = InbReaderState.IAC_READING;
-               buf.add(currentByte);
+               this.add(currentByte, oversizeCallback);
                return;
               
           }
@@ -61,13 +73,13 @@ public class InbMsgReader {
                     } else {
                          state = InbReaderState.NORMAL_READING;
                     }
-                    buf.add(currentByte);
+                    this.add(currentByte, oversizeCallback);
                     break;
                case NORMAL_READING:
                     if (currentByte == '\r') {
                          state = InbReaderState.NORMAL_READING_CR;
                     } else {
-                         buf.add(currentByte);
+                         this.add(currentByte, oversizeCallback);
                     }
                     break;
                case NORMAL_READING_CR:
@@ -75,7 +87,7 @@ public class InbMsgReader {
                          state = InbReaderState.NORMAL_READING_CRLF;
                          state = InbReaderState.NORMAL_END;
                     } else {
-                         buf.add(currentByte);
+                         this.add(currentByte, oversizeCallback);
                          state = InbReaderState.NORMAL_READING;
                     }
                     break;
@@ -89,18 +101,18 @@ public class InbMsgReader {
                          } else {
                               state = InbReaderState.IAC_COMMAND_WITH_OPTION;
                          }
-                         buf.add(currentByte);
+                         this.add(currentByte, oversizeCallback);
                     }
                     break;
                case IAC_SUBNEGOTIATION:
                     if (currentByte == IACConsts.CMD_SE) { // SE
                          state = InbReaderState.IAC_END; // <<<<<< END
                     } else {
-                         buf.add(currentByte);
+                         this.add(currentByte, oversizeCallback);
                     }
                     break;
                case IAC_COMMAND_WITH_OPTION:
-                    buf.add(currentByte);
+                    this.add(currentByte, oversizeCallback);
                     state = InbReaderState.IAC_END; // <<<<<< END
                     break;
                case NORMAL_END:
@@ -110,28 +122,48 @@ public class InbMsgReader {
                     state = InbReaderState.NORMAL_READING; // reset to normal reading on invalid state
           }
 
-          // read end, convert buf to message and put to queue
           if (state == InbReaderState.NORMAL_END || state == InbReaderState.IAC_END) {
                this.procesEnd(c);
           }
      }
 
-     private void procesEnd(Charset c){
-           // convert buf to byte array and then to string
-               byte[] bytes = new byte[buf.size()];
-               for (int i = 0; i < buf.size(); i++) {
-                    bytes[i] = buf.get(i).byteValue();
-               }
-               String msgContent = new String(bytes, c);
-               InbMsg msg = null;
-               if (state == InbReaderState.IAC_END) {
-                    msg = InbMsg.buildIACConfirmMsg(buf.stream().mapToInt(Integer::intValue).toArray());
-               } else {
-                    msg = InbMsg.build(msgContent);
-               }
-               inbMsgQueue.put(msg);
-               buf.clear();
-               state = InbReaderState.NOT_STARTED;
+     private void procesEnd(Charset c) {
+          // convert buf to byte array and then to string
+          byte[] bytes = new byte[this.currentIndex];
+          for (int i = 0; i < this.currentIndex; i++) {
+               bytes[i] = (byte) buf[i];
+          }
+          String msgContent = new String(bytes, c);
+          InbMsg msg = null;
+          if (state == InbReaderState.IAC_END) {
+               msg = InbMsg.buildIACConfirmMsg(bytes);
+          } else {
+               msg = InbMsg.build(msgContent);
+          }
+          inbMsgQueue.put(msg);
+          this.clear();
+          state = InbReaderState.NOT_STARTED;
+     }
+
+     /**
+      * Add current byte to buffer and check for oversize. If oversize, call the callback to handle it and clear the buffer.
+      * @param currentByte
+      * @param oversizeCallback
+      */
+     private void add(int currentByte, OversizeCallback oversizeCallback){
+           if(this.currentIndex >= maxLength){
+               oversizeCallback.handle();
+               this.clear();
+          }
+          this.buf[currentIndex++] = currentByte;
+     }
+     private void clear(){
+          this.currentIndex = 0;
+     }
+
+     @FunctionalInterface
+     interface OversizeCallback {
+          void handle();
      }
 
 }
