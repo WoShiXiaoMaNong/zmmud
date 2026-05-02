@@ -6,7 +6,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import zm.mud.network.threads.ZmmudThread;
+import zm.mud.network.threads.IZmmudThread;
 
 @Service
 public class SubThreadUtil implements DisposableBean {
@@ -14,7 +14,7 @@ public class SubThreadUtil implements DisposableBean {
             .getLogger(SubThreadUtil.class);
 
     @Autowired
-    private List<ZmmudThread> threads;
+    private List<IZmmudThread> threads;
 
     private List<Thread> workerThreads;
 
@@ -31,7 +31,7 @@ public class SubThreadUtil implements DisposableBean {
         }
         started = true;
         logger.info("Starting all sub-threads...");
-        for (ZmmudThread thread : threads) {
+        for (IZmmudThread thread : threads) {
             Thread workerThread = new Thread(thread, thread.getClass().getSimpleName() + "-Thread");
             workerThread.start();
             workerThreads.add(workerThread);
@@ -46,7 +46,7 @@ public class SubThreadUtil implements DisposableBean {
         }
         started = false;
         logger.info("Shutting down all sub-threads...");
-        for (ZmmudThread thread : threads) {
+        for (IZmmudThread thread : threads) {
             thread.shutdown();
             logger.info("Shutdown signal sent to thread: " + thread.getClass().getSimpleName());
         }

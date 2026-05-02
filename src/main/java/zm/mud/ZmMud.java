@@ -13,7 +13,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import zm.mud.client.MudClient;
 import zm.mud.network.outbound.message.NormalOutboundMsg;
-import zm.mud.network.outbound.message.OubMessage;
+import zm.mud.network.outbound.message.OubMsg;
 import zm.mud.network.queue.OubMsgQueue;
 import zm.mud.network.utils.SubThreadUtil;
 
@@ -54,7 +54,7 @@ public class ZmMud {
                 );
                 String line = null;
                 while ((line = consoleReader.readLine()) != null) {
-                  OubMessage msg = new NormalOutboundMsg(line);
+                  OubMsg msg = new NormalOutboundMsg(line);
                   oubMsgQueue.put(msg);
                 }
             } catch (IOException e) {

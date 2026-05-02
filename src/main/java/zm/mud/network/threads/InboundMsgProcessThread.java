@@ -5,12 +5,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import zm.mud.network.inbound.message.InbMessage;
-import zm.mud.network.inbound.processor.InbMsgProcessor;
+import zm.mud.network.inbound.message.InbMsg;
+import zm.mud.network.inbound.processor.IInbMsgProcessor;
 import zm.mud.network.queue.InbMsgQueue;
 
 @Service
-public class InboundMsgProcessThread extends ZmmudThread {
+public class InboundMsgProcessThread extends IZmmudThread {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(InboundMsgProcessThread.class);
 
@@ -18,13 +18,13 @@ public class InboundMsgProcessThread extends ZmmudThread {
     private InbMsgQueue msgQueue;
 
     @Autowired
-    private List<InbMsgProcessor> printProcessor;
+    private List<IInbMsgProcessor> printProcessor;
 
     @Override
     public void doRun() {
         try {
-            InbMessage msg = msgQueue.take();
-            for (InbMsgProcessor inbMsgProcessor : printProcessor) {
+            InbMsg msg = msgQueue.take();
+            for (IInbMsgProcessor inbMsgProcessor : printProcessor) {
                 boolean shouldContinue = inbMsgProcessor.processMessage(msg);
                 if (!shouldContinue) {
                     break;

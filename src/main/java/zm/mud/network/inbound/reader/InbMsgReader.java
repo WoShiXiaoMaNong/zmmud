@@ -10,12 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import zm.mud.network.inbound.consts.IACConsts;
-import zm.mud.network.inbound.message.InbMessage;
+import zm.mud.network.inbound.message.InbMsg;
 import zm.mud.network.queue.InbMsgQueue;
 
 @Service
-public class InbMessageReader {
-     private static final Logger logger = LogManager.getLogger(InbMessageReader.class);
+public class InbMsgReader {
+     private static final Logger logger = LogManager.getLogger(InbMsgReader.class);
 
      enum InbReaderState {
           NOT_STARTED,
@@ -37,7 +37,7 @@ public class InbMessageReader {
      @Autowired
      private InbMsgQueue inbMsgQueue;
 
-     public InbMessageReader() {
+     public InbMsgReader() {
           this.buf = new ArrayList<>();
           this.state = InbReaderState.NOT_STARTED;
      }
@@ -123,11 +123,11 @@ public class InbMessageReader {
                     bytes[i] = buf.get(i).byteValue();
                }
                String msgContent = new String(bytes, c);
-               InbMessage msg = null;
+               InbMsg msg = null;
                if (state == InbReaderState.IAC_END) {
-                    msg = InbMessage.buildIACConfirmMsg(buf.stream().mapToInt(Integer::intValue).toArray());
+                    msg = InbMsg.buildIACConfirmMsg(buf.stream().mapToInt(Integer::intValue).toArray());
                } else {
-                    msg = InbMessage.build(msgContent);
+                    msg = InbMsg.build(msgContent);
                }
                inbMsgQueue.put(msg);
                buf.clear();

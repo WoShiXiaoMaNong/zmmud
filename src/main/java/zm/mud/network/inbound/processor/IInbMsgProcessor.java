@@ -1,9 +1,9 @@
 package zm.mud.network.inbound.processor;
 
-import zm.mud.network.inbound.message.InbMessage;
+import zm.mud.network.inbound.message.InbMsg;
 
-public interface InbMsgProcessor {
+public interface IInbMsgProcessor {
 
-    boolean processMessage(InbMessage msg);
+    boolean processMessage(InbMsg msg);
 
 }

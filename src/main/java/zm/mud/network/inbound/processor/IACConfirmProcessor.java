@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 import zm.mud.client.MudClient;
 import zm.mud.network.inbound.consts.IACConsts;
 import zm.mud.network.inbound.message.IACConfirmInbMsg;
-import zm.mud.network.inbound.message.InbMessage;
+import zm.mud.network.inbound.message.InbMsg;
 
 @Service
-public class IACConfirmProcessor implements InbMsgProcessor, Ordered {
+public class IACConfirmProcessor implements IInbMsgProcessor, Ordered {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(IACConfirmProcessor.class);
 
@@ -20,7 +20,7 @@ public class IACConfirmProcessor implements InbMsgProcessor, Ordered {
     private MudClient mudClient;
 
     @Override
-    public boolean processMessage(InbMessage msg) {
+    public boolean processMessage(InbMsg msg) {
         if (msg == null || !(msg instanceof IACConfirmInbMsg)) {
             return true; // Not an IAC confirm message, ignore
         }

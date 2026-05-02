@@ -1,9 +1,9 @@
 package zm.mud.network.outbound.processor;
 
-import zm.mud.network.outbound.message.OubMessage;
+import zm.mud.network.outbound.message.OubMsg;
 
-public interface OubMsgProcessor {
+public interface IOubMsgProcessor {
 
-    boolean processMessage(OubMessage msg);
+    boolean processMessage(OubMsg msg);
 
 }

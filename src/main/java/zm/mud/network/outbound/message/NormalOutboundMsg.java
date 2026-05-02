@@ -1,6 +1,6 @@
 package zm.mud.network.outbound.message;
 
-public class NormalOutboundMsg  implements OubMessage {
+public class NormalOutboundMsg  implements OubMsg {
 
     private String content;
 
