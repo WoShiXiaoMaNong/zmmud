@@ -23,11 +23,25 @@ import zm.mud.network.utils.SubThreadUtil;
 public class ZmMud {
     private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ZmMud.class);
 
+    private static final ApplicationContext  context = new AnnotationConfigApplicationContext("zm.mud");
+
     public static void main(String[] args) throws UnknownHostException, IOException {
-        ApplicationContext  context = new AnnotationConfigApplicationContext("zm.mud");
+        ZmMud app = new ZmMud();
+        app.start();
+    }
+
+
+    public void start(){
+        
         MudClient client = context.getBean(MudClient.class);
 
-        client.connect();
+        boolean isConnected = client.connect();
+
+        if(!isConnected) {
+            logger.error("Failed to connect to server");
+            return;
+        }
+        logger.info("Connected to server successfully");
 
         SubThreadUtil threadStarter = context.getBean(SubThreadUtil.class);
         threadStarter.startAllThreads();
@@ -47,8 +61,9 @@ public class ZmMud {
                 logger.error("Failed to read from console", e);
             }
         }).start();
+    }
 
-      
-
+    public static ApplicationContext getContext() {
+        return context;
     }
 }

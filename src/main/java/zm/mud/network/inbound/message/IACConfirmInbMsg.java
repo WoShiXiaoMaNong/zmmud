@@ -26,7 +26,7 @@ public class IACConfirmInbMsg implements InbMessage  {
     }
 
     public String toString() {
-        return "MXPConfirmInbMsg{content=" + java.util.Arrays.toString(this.content) + ", timestamp=" + this.timestamp + "}";
+        return "IACConfirmMessage {content=" + java.util.Arrays.toString(this.content) + ", timestamp=" + this.timestamp + "}";
     }
 
     
