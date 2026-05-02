@@ -4,20 +4,20 @@ import java.util.concurrent.BlockingQueue;
 
 import org.springframework.stereotype.Service;
 
-import zm.mud.network.outbound.message.OubMessage;
+import zm.mud.network.outbound.message.OubMsg;
 
 @Service
-public class OubMsgQueue implements IZmmudQueue<OubMessage> {
+public class OubMsgQueue implements IZmmudQueue<OubMsg> {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(OubMsgQueue.class);
-    private final BlockingQueue<OubMessage> msgQueue;
+    private final BlockingQueue<OubMsg> msgQueue;
 
     public OubMsgQueue() {
         this.msgQueue = new java.util.concurrent.LinkedBlockingQueue<>();
     }
 
     @Override
-    public void put(OubMessage msg) {
+    public void put(OubMsg msg) {
         try {
             msgQueue.put(msg);
         } catch (InterruptedException e) {
@@ -27,7 +27,7 @@ public class OubMsgQueue implements IZmmudQueue<OubMessage> {
     }
 
     @Override
-    public OubMessage take() {
+    public OubMsg take() {
         try {
             return msgQueue.take();
         } catch (InterruptedException e) {

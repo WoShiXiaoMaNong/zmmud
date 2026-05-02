@@ -3,8 +3,8 @@ package zm.mud.network.threads;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class ZmmudThread implements Runnable {
-    private static final Logger logger = LogManager.getLogger(ZmmudThread.class);
+public abstract class IZmmudThread implements Runnable {
+    private static final Logger logger = LogManager.getLogger(IZmmudThread.class);
     private volatile boolean running = true;
 
     private Thread workerThread;

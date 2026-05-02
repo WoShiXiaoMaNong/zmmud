@@ -2,7 +2,7 @@ package zm.mud.network.inbound.message;
 
 import java.time.LocalDateTime;
 
-public class IACConfirmInbMsg implements InbMessage  {
+public class IACConfirmInbMsg implements InbMsg  {
     private int[] content;
     private LocalDateTime timestamp;
 

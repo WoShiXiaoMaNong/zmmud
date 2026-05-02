@@ -2,7 +2,7 @@ package zm.mud.network.inbound.message;
 
 import java.time.LocalDateTime;
 
-public interface InbMessage {
+public interface InbMsg {
    
     String getContent();
 
@@ -13,7 +13,7 @@ public interface InbMessage {
         return new IACConfirmInbMsg(content);
     }
 
-    public static InbMessage build(String content) {
+    public static InbMsg build(String content) {
         return new NormalInbMsg(content);
     }
 }

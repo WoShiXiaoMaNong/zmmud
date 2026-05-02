@@ -1,6 +1,6 @@
 package zm.mud.network.outbound.message;
 
-public interface OubMessage {
+public interface OubMsg {
 
     String getContent();
 }

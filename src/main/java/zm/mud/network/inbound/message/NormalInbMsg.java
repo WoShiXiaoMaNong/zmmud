@@ -2,7 +2,7 @@ package zm.mud.network.inbound.message;
 
 import java.time.LocalDateTime;
 
-public class NormalInbMsg implements InbMessage {
+public class NormalInbMsg implements InbMsg {
     private String content;
     private LocalDateTime timestamp;
 

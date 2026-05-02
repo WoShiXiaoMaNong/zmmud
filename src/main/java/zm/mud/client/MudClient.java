@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import zm.mud.network.ConnectionManager;
-import zm.mud.network.outbound.message.OubMessage;
+import zm.mud.network.outbound.message.OubMsg;
 import zm.mud.network.utils.CloseUtil;
 
 @Service
@@ -70,7 +70,7 @@ public class MudClient implements AutoCloseable {
         }
     }
 
-    public synchronized void sendLine(OubMessage msg) {
+    public synchronized void sendLine(OubMsg msg) {
         try {
             String line = msg.getContent();
             this.connectionManager.sendLine(line);
