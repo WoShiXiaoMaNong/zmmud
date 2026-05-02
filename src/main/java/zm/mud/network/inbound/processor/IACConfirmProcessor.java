@@ -1,7 +1,5 @@
 package zm.mud.network.inbound.processor;
 
-import java.util.Map;
-import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
@@ -32,7 +30,7 @@ public class IACConfirmProcessor implements InbMsgProcessor, Ordered {
             return true;
         }
 
-        logger.info("服务器发送确认指令:" + String.format("IAC %s %d",
+        logger.debug("服务器发送确认指令:" + String.format("IAC %s %d",
                 IACConsts.CMD_NAME_MAP.getOrDefault(iacMsg.getContentBytes()[1], "UNKNOWN"), iacMsg.getContentBytes()[2]));
 
         int cmd = iacMsg.getContentBytes()[1];
@@ -52,7 +50,7 @@ public class IACConfirmProcessor implements InbMsgProcessor, Ordered {
                     (byte) 255, (byte) responseCmd, (byte) responseOpt
             };
             this.mudClient.send(response);
-            logger.info("发送响应指令:"
+            logger.debug("发送响应指令:"
                     + String.format("IAC %s %d", IACConsts.CMD_NAME_MAP.getOrDefault(responseCmd, "UNKNOWN"), responseOpt));
         }
 
