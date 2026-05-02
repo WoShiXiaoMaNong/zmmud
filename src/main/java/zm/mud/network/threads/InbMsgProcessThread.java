@@ -10,9 +10,9 @@ import zm.mud.network.inbound.processor.IInbMsgProcessor;
 import zm.mud.network.queue.InbMsgQueue;
 
 @Service
-public class InboundMsgProcessThread extends IZmmudThread {
+public class InbMsgProcessThread extends IZmmudThread {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
-            .getLogger(InboundMsgProcessThread.class);
+            .getLogger(InbMsgProcessThread.class);
 
     @Autowired
     private InbMsgQueue msgQueue;

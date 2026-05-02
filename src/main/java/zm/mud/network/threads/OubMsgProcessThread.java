@@ -9,9 +9,9 @@ import zm.mud.network.outbound.processor.IOubMsgProcessor;
 import zm.mud.network.queue.OubMsgQueue;
 
 @Service
-public class OutboundMessageProcessThread extends IZmmudThread {
+public class OubMsgProcessThread extends IZmmudThread {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
-            .getLogger(OutboundMessageProcessThread.class);
+            .getLogger(OubMsgProcessThread.class);
 
     @Autowired
     private OubMsgQueue oubMsgQueue;
