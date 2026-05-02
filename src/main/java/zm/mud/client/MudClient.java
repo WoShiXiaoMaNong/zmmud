@@ -1,9 +1,6 @@
 package zm.mud.client;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
 import java.nio.charset.Charset;
 
 import org.apache.logging.log4j.LogManager;
@@ -40,22 +37,27 @@ public class MudClient implements AutoCloseable {
      * 这对于在 Spring 中通过配置文件注入参数后直接连接非常有用。
      * </pre>
      */
-    public void connect() {
-        this.connect(this.host, this.port, this.charset);
+    public boolean connect() {
+        return this.connect(this.host, this.port, this.charset);
     }
 
-    public void connect(String host, int port, Charset charset) {
-        if (this.connectionManager == null) {
-            this.connectionManager = new ConnectionManager();
+    public boolean connect(String host, int port, Charset charset) {
+        try {
+            if (this.connectionManager == null) {
+                this.connectionManager = new ConnectionManager();
+            }
+
+            if (this.connectionManager.isConnected()) {
+                logger.warn("Already connected to server {}:{}", this.host, this.port);
+                return true;
+            }
+
+            this.connectionManager.connect(host, port, charset);
+            return true;
+        } catch (Exception e) {
+            logger.error("Failed to connect to server {}:{}", host, port, e);
+            return false;
         }
-
-        if (this.connectionManager.isConnected()) {
-            logger.warn("Already connected to server {}:{}", this.host, this.port);
-            return;
-        }
-
-        this.connectionManager.connect(host, port, charset);
-
     }
 
     public int read() {

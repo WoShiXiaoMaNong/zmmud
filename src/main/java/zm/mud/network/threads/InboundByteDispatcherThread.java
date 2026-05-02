@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import zm.mud.client.MudClient;
+import zm.mud.network.inbound.consts.IACConsts;
 import zm.mud.network.inbound.processor.IACConfirmProcessor;
 import zm.mud.network.queue.raw.InbByteIACQueue;
 import zm.mud.network.queue.raw.InbByteMudGameMsgQueue;
@@ -62,13 +63,13 @@ public class InboundByteDispatcherThread implements ZmmudThread {
         int commandByte = client.read();
         iacByteQueue.put(commandByte);
 
-        if (IACConfirmProcessor.NON_OPTION_COMMANDS.contains(commandByte)) { // These commands do not have an option
+        if (IACConsts.NON_OPTION_COMMANDS.contains(commandByte)) { // These commands do not have an option
                                                                              // byte, we can directly log them and
                                                                              // return.
             logger.debug("Received IAC command from server: "
-                    + IACConfirmProcessor.CMD_NAME_MAP.getOrDefault(commandByte, "UNKNOWN"));
+                    + IACConsts.CMD_NAME_MAP.getOrDefault(commandByte, "UNKNOWN"));
             return;
-        } else if (commandByte == IACConfirmProcessor.CMD_SB) { // Subnegotiation command, we need to read until we
+        } else if (commandByte == IACConsts.CMD_SB) { // Subnegotiation command, we need to read until we
                                                                 // encounter IAC SE
             // format 255 CMD_SB <opt> ...data... 255 CMD_SE
             logger.debug("Received IAC SB command, starting to read subnegotiation content...");
@@ -77,7 +78,7 @@ public class InboundByteDispatcherThread implements ZmmudThread {
                 int b = client.read();
                 if (b == 255) { // IAC
                     int next = client.read();
-                    if (next == IACConfirmProcessor.CMD_SE) {
+                    if (next == IACConsts.CMD_SE) {
                         break; // end of subnegotiation
                     } else {
                         iacByteQueue.put(b);

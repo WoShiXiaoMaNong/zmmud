@@ -2,9 +2,9 @@ package zm.mud.network.inbound.reader;
 
 import org.springframework.stereotype.Service;
 
+import zm.mud.network.inbound.consts.IACConsts;
 import zm.mud.network.inbound.message.InbMessage;
 import zm.mud.network.inbound.message.NormalInbMsg;
-import zm.mud.network.inbound.processor.IACConfirmProcessor;
 import zm.mud.network.queue.IZmmudQueue;
 
 @Service
@@ -15,12 +15,12 @@ public class IacInbMsgReader implements InbMessageReader<Integer> {
     @Override
     public InbMessage readInbMessage(int firstByte, IZmmudQueue<Integer> iacByteQueue) {
         int cmd = iacByteQueue.take();
-        if (IACConfirmProcessor.NON_OPTION_COMMANDS.contains(cmd)) {
+        if (IACConsts.NON_OPTION_COMMANDS.contains(cmd)) {
             logger.debug("Received IAC command from server: "
-                    + IACConfirmProcessor.CMD_NAME_MAP.getOrDefault(cmd, "UNKNOWN"));
+                    + IACConsts.CMD_NAME_MAP.getOrDefault(cmd, "UNKNOWN"));
             return new NormalInbMsg(""); // or a specific IAC message object
         }
-        if (cmd == IACConfirmProcessor.CMD_SB) {
+        if (cmd == IACConsts.CMD_SB) {
             // Handle subnegotiation
             logger.debug("Received IAC SB command, starting to read subnegotiation content...");
             // For simplicity, we will just read until we encounter IAC SE. In a real
@@ -30,7 +30,7 @@ public class IacInbMsgReader implements InbMessageReader<Integer> {
                 int b = iacByteQueue.take();
                 if (b == 255) { // IAC
                     int next = iacByteQueue.take();
-                    if (next == IACConfirmProcessor.CMD_SE) {
+                    if (next == IACConsts.CMD_SE) {
                         break; // end of subnegotiation
                     } else {
                         sbContent.append((char) b).append((char) next); // append the IAC and the next byte as content
