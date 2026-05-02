@@ -55,7 +55,8 @@ public class IACConsts {
 
         public static final Map<Integer, Integer> OPTION_ALLOWED_MAP = Map.of(
                         OPTION_MXP0, 1,
-                        OPTION_MXP1, 1);
+                        OPTION_MXP1, 1,
+                1,1);
 
         private IACConsts() {
                 // private constructor to prevent instantiation
