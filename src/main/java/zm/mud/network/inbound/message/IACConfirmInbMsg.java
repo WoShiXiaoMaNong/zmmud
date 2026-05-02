@@ -3,10 +3,10 @@ package zm.mud.network.inbound.message;
 import java.time.LocalDateTime;
 
 public class IACConfirmInbMsg implements InbMsg  {
-    private int[] content;
+    private byte[] content;
     private LocalDateTime timestamp;
 
-    public IACConfirmInbMsg(int[] content) {
+    public IACConfirmInbMsg(byte[] content) {
         this.content = content;
         this.timestamp = LocalDateTime.now();
     }
@@ -16,7 +16,7 @@ public class IACConfirmInbMsg implements InbMsg  {
        return "";
     }
 
-    public int[] getContentBytes() {
+    public byte[] getContentBytes() {
         return this.content;
     }
 

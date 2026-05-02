@@ -9,7 +9,7 @@ public interface InbMsg {
     LocalDateTime getTimestamp();
 
 
-    public static IACConfirmInbMsg buildIACConfirmMsg(int[] content) {
+    public static IACConfirmInbMsg buildIACConfirmMsg(byte[] content) {
         return new IACConfirmInbMsg(content);
     }
 

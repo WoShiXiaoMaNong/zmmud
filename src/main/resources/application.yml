@@ -3,3 +3,7 @@ mud:
     host: mud.pkuxkx.net
     port: 8080
     charset: GBK
+  inbound:
+    reader:
+      buffer:
+        maxLength: 1024
