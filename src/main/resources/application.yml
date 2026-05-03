@@ -1,5 +1,7 @@
 mud:
+  name: Zm Mud
   server:
+    name: 北大侠客行
     host: mud.pkuxkx.net
     port: 8080
     charset: GBK
@@ -7,3 +9,10 @@ mud:
     reader:
       buffer:
         maxLength: 1024
+  ui:
+    size:
+      width: 800
+      height: 600
+    font:
+      name: 宋体
+      size: 12

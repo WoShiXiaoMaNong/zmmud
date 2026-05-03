@@ -9,6 +9,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import zm.mud.client.MudClient;
 import zm.mud.network.threads.ThreadPoolService;
+import zm.mud.ui.ZmMudUI;
 
 /**
  * Hello world!
@@ -25,19 +26,27 @@ public class ZmMud {
 
 
     public void start(){
-        
+        ZmMudUI zmMudUI = context.getBean(ZmMudUI.class);
+        zmMudUI.start();
         MudClient client = context.getBean(MudClient.class);
-
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            logger.error("Slowdown error",e);
+        }
         boolean isConnected = client.connect();
+
 
         if(!isConnected) {
             logger.error("Failed to connect to server");
             return;
         }
         logger.info("Connected to server successfully");
-
+      
         ThreadPoolService threadStarter = context.getBean(ThreadPoolService.class);
         threadStarter.startAllThreads();
+
+       
 
     }
 

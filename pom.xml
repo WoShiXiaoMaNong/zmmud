@@ -58,6 +58,13 @@
         <artifactId>jakarta.annotation-api</artifactId>
         <version>3.0.0</version> <!-- 根据您的 Spring Boot 版本而定 -->
       </dependency>
+
+<dependency>
+    <groupId>org.fusesource.jansi</groupId>
+    <artifactId>jansi</artifactId>
+    <version>2.4.0</version>
+</dependency>
+
     </dependencies>
   </dependencyManagement>
 
@@ -91,6 +98,10 @@
       <artifactId>junit-jupiter-api</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+    <groupId>org.fusesource.jansi</groupId>
+    <artifactId>jansi</artifactId>
+</dependency>
 
     <!-- Optionally: parameterized tests support -->
     <dependency>

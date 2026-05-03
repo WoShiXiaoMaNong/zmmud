@@ -12,7 +12,7 @@ import zm.mud.network.outbound.message.NrmOubMsg;
 import zm.mud.network.outbound.message.OubMsg;
 import zm.mud.network.queue.OubMsgQueue;
 
-@Service
+// @Service
 public class ConsoleInputThread  extends IZmmudThread {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(ConsoleInputThread.class);
