@@ -53,7 +53,7 @@ public class InbMsgReader {
 
      public synchronized void handleByte(int currentByte, Charset c) {
           OversizeCallback oversizeCallback = () -> {
-               //logger.warn("Message exceeds max length of " + MAX_LENGTH + " bytes. Processing current buffer as a message.");
+               logger.warn("Message exceeds max length of " + maxLength + " bytes. Processing current buffer as a message.");
                this.procesEnd(c);
           };
           if (currentByte == IACConsts.IAC) {
