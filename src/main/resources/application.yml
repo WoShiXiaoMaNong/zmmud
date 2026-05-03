@@ -17,3 +17,4 @@ mud:
       name: 宋体
       size: 12
     showTimestamp: false
+    displayBufLineNumber: 100
