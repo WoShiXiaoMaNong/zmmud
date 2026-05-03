@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import zm.mud.network.outbound.message.OubMsg;
 import zm.mud.network.outbound.processor.IOubMsgProcessor;
 import zm.mud.network.queue.OubMsgQueue;
 
@@ -20,14 +21,15 @@ public class OubMsgProcessThread extends IZmmudThread {
     private List<IOubMsgProcessor> oubMsgProcessors;
 
     @Override
-    public void doRun() {
+    public boolean doRun() {
         try {
-            zm.mud.network.outbound.message.OubMsg msg = oubMsgQueue.take();
+            OubMsg msg = oubMsgQueue.take();
             for (IOubMsgProcessor processor : oubMsgProcessors) {
                 if (processor.processMessage(msg)) {
                     break; // Message processed, move to next message
                 }
             }
+            return true;
         } catch (Exception e) {
             logger.error("Error occurred in OutboundMessageProcessThread", e);
             throw e;

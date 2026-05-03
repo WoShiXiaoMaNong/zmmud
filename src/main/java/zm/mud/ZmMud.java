@@ -15,7 +15,7 @@ import zm.mud.client.MudClient;
 import zm.mud.network.outbound.message.NrmOubMsg;
 import zm.mud.network.outbound.message.OubMsg;
 import zm.mud.network.queue.OubMsgQueue;
-import zm.mud.network.utils.SubThreadUtil;
+import zm.mud.network.threads.ThreadPoolService;
 
 /**
  * Hello world!
@@ -43,27 +43,9 @@ public class ZmMud {
         }
         logger.info("Connected to server successfully");
 
-        SubThreadUtil threadStarter = context.getBean(SubThreadUtil.class);
+        ThreadPoolService threadStarter = context.getBean(ThreadPoolService.class);
         threadStarter.startAllThreads();
 
-        OubMsgQueue oubMsgQueue = context.getBean(OubMsgQueue.class);
-          new Thread(() -> {
-            try {
-                BufferedReader consoleReader = new BufferedReader(
-                    new InputStreamReader(System.in, Charset.forName("GBK"))
-                );
-                String line = null;
-                while ((line = consoleReader.readLine()) != null) {
-                  OubMsg msg = new NrmOubMsg(line);
-                  oubMsgQueue.put(msg);
-                }
-            } catch (IOException e) {
-                logger.error("Failed to read from console", e);
-            }
-        }).start();
     }
 
-    public static ApplicationContext getContext() {
-        return context;
-    }
 }

@@ -32,6 +32,7 @@ public class InbMsgQueue implements IZmmudQueue<InbMsg> {
             return msgQueue.take();
         } catch (InterruptedException e) {
             logger.error("Failed to take message from queue", e);
+            Thread.currentThread().interrupt();
             return null;
         }
     }
