@@ -3,7 +3,7 @@
 
 
 
-import zm.mud.ui.component.MudMain;
+import zm.mud.ui.component.MudMainScreen;
 import zm.mud.ui.component.MudTextAare;
 import zm.mud.ui.util.AnsiToStyleDocUtil;
 
@@ -45,12 +45,12 @@ public class ZmMudUI {
    
     private static ApplicationContext context;
 
-    private MudMain mudMain;
+    private MudMainScreen mudMain;
 
 
     @PostConstruct
     public void init(){
-         mudMain = new MudMain(title + "( " + serverName + " )", width, height);
+         mudMain = new MudMainScreen(title + "( " + serverName + " )", width, height);
     }
 
   

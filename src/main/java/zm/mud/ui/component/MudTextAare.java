@@ -32,7 +32,7 @@ public class MudTextAare extends JTextPane {
         }else{
             this.font = DEFAUL_FONT;
         }
-        this.setEditable(true);
+        this.setEditable(false);
         
         this.setParagraphAttributes(this.getParagraphAttributes(), true);
         this.doc = this.getStyledDocument();

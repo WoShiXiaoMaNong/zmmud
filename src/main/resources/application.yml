@@ -16,3 +16,4 @@ mud:
     font:
       name: 宋体
       size: 12
+    showTimestamp: false

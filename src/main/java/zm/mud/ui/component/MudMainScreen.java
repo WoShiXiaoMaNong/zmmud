@@ -7,15 +7,15 @@ import java.awt.Font;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
-public class MudMain extends JFrame {
+public class MudMainScreen extends JFrame {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
-            .getLogger(MudMain.class);
+            .getLogger(MudMainScreen.class);
 
     private MudTextAare mudTextAare;
 
     private MudInputField mudInputField;
 
-    public MudMain(String title, int width, int height) {
+    public MudMainScreen(String title, int width, int height) {
         setTitle(title);
         setSize(new Dimension(width, height)); 
 
