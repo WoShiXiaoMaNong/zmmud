@@ -1,4 +1,4 @@
-package zm.mud.network.utils;
+package zm.mud;
 
 import java.util.List;
 
@@ -8,7 +8,8 @@ import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
-import zm.mud.IShutdownFunc;
+import zm.mud.network.inbound.message.NormalInbMsg;
+import zm.mud.network.queue.InbMsgQueue;
 
 @Service
 public class ShutdownWorld extends Thread {
@@ -17,6 +18,9 @@ public class ShutdownWorld extends Thread {
 
     @Autowired
     List<IShutdownFunc> shutdownFuncs;
+
+    @Autowired
+    private InbMsgQueue inbMsgQueue;
 
     @Autowired
     private ApplicationContext context;
@@ -31,6 +35,7 @@ public class ShutdownWorld extends Thread {
     @Override
     public void run() {
         logger.info("ShutdownWorld is running. Performing cleanup tasks...");
+        this.inbMsgQueue.put(new NormalInbMsg("按任意键后退出。。。"));
             if (context instanceof AbstractApplicationContext) {
                 ((AbstractApplicationContext) context).close();
             }
