@@ -14,8 +14,8 @@ mud:
       width: 800
       height: 600
     font:
-      # name: 宋体
-      name: Sarasa Mono SC
+      name: 宋体
+      # name: Consolas
       size: 12
     showTimestamp: false
-    displayBufLineNumber: 100
+    displayBufLineNumber: 500

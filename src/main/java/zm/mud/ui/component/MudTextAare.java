@@ -8,6 +8,9 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
 
 import zm.mud.ui.ZmMudUI;
+import zm.mud.ui.theme.Dark;
+import zm.mud.ui.theme.ITheme;
+import zm.mud.ui.theme.Light;
 import zm.mud.ui.util.AnsiToStyleDocUtil;
 
 
@@ -20,6 +23,7 @@ public class MudTextAare extends JTextPane {
     private StyledDocument doc;
     private AnsiToStyleDocUtil ansiToStyleDocUtil;
     private Font font;
+    private ITheme theme = Dark.INSTANCE;
 
     public MudTextAare() {
         this(null);
@@ -34,7 +38,8 @@ public class MudTextAare extends JTextPane {
             this.font = DEFAUL_FONT;
         }
         this.setEditable(false);
-        
+        this.setBackground(this.theme.getDefaultBackground());
+        this.setForeground(this.theme.getDefaultBackground());
         this.setParagraphAttributes(this.getParagraphAttributes(), true);
         this.doc = this.getStyledDocument();
         this.ansiToStyleDocUtil = ZmMudUI.getContext().getBean(AnsiToStyleDocUtil.class);
@@ -51,7 +56,7 @@ public class MudTextAare extends JTextPane {
     public void printlnToScreen(String text) {
         SwingUtilities.invokeLater(() -> {
             try {
-                ansiToStyleDocUtil.parseAnsiToStyledDocument(text + "\r\n", doc,this.font);
+                ansiToStyleDocUtil.parseAnsiToStyledDocument(text + "\r\n", doc,this.font, this.theme);
                 trimLines();
                 this.setCaretPosition(doc.getLength());
             } catch (BadLocationException e) {
