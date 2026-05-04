@@ -3,6 +3,8 @@ package zm.mud.ui.theme;
 import java.awt.Color;
 import java.awt.Font;
 
+import zm.mud.ui.cfg.ThemeType;
+
 public interface ITheme {
     Color getDefaultForeground();
     Color getDefaultBackground();

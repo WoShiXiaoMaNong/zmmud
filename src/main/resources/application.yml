@@ -17,5 +17,7 @@ mud:
       name: 宋体
       # name: Consolas
       size: 12
+    # theme: LIGHT
+    theme: DARK
     showTimestamp: false
     displayBufLineNumber: 500

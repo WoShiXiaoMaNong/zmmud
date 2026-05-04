@@ -7,6 +7,8 @@ import java.awt.Font;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
+import zm.mud.ui.cfg.GlobleCfg;
+
 public class MudMainScreen extends JFrame {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(MudMainScreen.class);
@@ -15,9 +17,12 @@ public class MudMainScreen extends JFrame {
 
     private MudInputField mudInputField;
 
-    public MudMainScreen(String title, int width, int height) {
-        setTitle(title);
-        setSize(new Dimension(width, height)); 
+    private GlobleCfg globleCfg;
+
+    public MudMainScreen(GlobleCfg cfg) {
+        this.globleCfg = cfg;
+        setTitle(this.globleCfg.getTitle());
+        setSize(new Dimension(this.globleCfg.getWidth(), this.globleCfg.getHeight())); 
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -30,7 +35,7 @@ public class MudMainScreen extends JFrame {
         setLayout(new BorderLayout());
 
         // 设置文本区固定高度
-        this.mudTextAare = new MudTextAare();
+        this.mudTextAare = new MudTextAare(this.globleCfg);
         mudTextAare.setPreferredSize(new Dimension(this.getSize().width, this.getSize().height - 30));
         JScrollPane scrollPane = new JScrollPane(mudTextAare);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);

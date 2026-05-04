@@ -8,9 +8,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
 
 import zm.mud.ui.ZmMudUI;
-import zm.mud.ui.theme.Dark;
-import zm.mud.ui.theme.ITheme;
-import zm.mud.ui.theme.Light;
+import zm.mud.ui.cfg.GlobleCfg;
 import zm.mud.ui.util.AnsiToStyleDocUtil;
 
 
@@ -19,27 +17,17 @@ public class MudTextAare extends JTextPane {
             .getLogger(MudTextAare.class);
 
     private static final int MAX_LINES = 100;
-    private static final Font DEFAUL_FONT = new Font("Consolas", Font.PLAIN, 14);
+
     private StyledDocument doc;
     private AnsiToStyleDocUtil ansiToStyleDocUtil;
-    private Font font;
-    private ITheme theme = Dark.INSTANCE;
 
-    public MudTextAare() {
-        this(null);
-        
-    }
+    private GlobleCfg globleCfg;
 
-    public MudTextAare(Font f) {
-        if(f != null){
-            this.font = f;
-            this.setFont(this.font);
-        }else{
-            this.font = DEFAUL_FONT;
-        }
+    public MudTextAare(GlobleCfg cfg) {
+        this.globleCfg = cfg;
         this.setEditable(false);
-        this.setBackground(this.theme.getDefaultBackground());
-        this.setForeground(this.theme.getDefaultBackground());
+        this.setBackground(this.globleCfg.getThemeType().getTheme().getDefaultBackground());
+        this.setForeground(this.globleCfg.getThemeType().getTheme().getDefaultBackground());
         this.setParagraphAttributes(this.getParagraphAttributes(), true);
         this.doc = this.getStyledDocument();
         this.ansiToStyleDocUtil = ZmMudUI.getContext().getBean(AnsiToStyleDocUtil.class);
@@ -47,16 +35,11 @@ public class MudTextAare extends JTextPane {
     }
 
 
-    @Override
-    public void setFont(Font f){
-        this.font = f;
-        super.setFont(f);
-    }
 
     public void printlnToScreen(String text) {
         SwingUtilities.invokeLater(() -> {
             try {
-                ansiToStyleDocUtil.parseAnsiToStyledDocument(text + "\r\n", doc,this.font, this.theme);
+                ansiToStyleDocUtil.parseAnsiToStyledDocument(text + "\r\n", doc,this.globleCfg.getFont(), this.globleCfg.getThemeType().getTheme());
                 trimLines();
                 this.setCaretPosition(doc.getLength());
             } catch (BadLocationException e) {
