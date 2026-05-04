@@ -14,7 +14,8 @@ mud:
       width: 800
       height: 600
     font:
-      name: 宋体
+      # name: 宋体
+      name: Sarasa Mono SC
       size: 12
     showTimestamp: false
     displayBufLineNumber: 100

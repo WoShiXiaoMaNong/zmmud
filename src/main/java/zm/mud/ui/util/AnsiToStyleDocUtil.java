@@ -134,7 +134,8 @@ public class AnsiToStyleDocUtil {
                     if (next == -1)
                         next = text.length();
                     String segment = text.substring(index, next);
-
+                    segment = segment.replace("\t", "    ")
+                    .replace('\u3000', ' ');
                     // 使用 currentAttr 插入文本
                     doc.insertString(doc.getLength(), segment, currentAttr);
 

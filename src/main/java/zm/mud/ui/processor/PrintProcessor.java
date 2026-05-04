@@ -32,7 +32,6 @@ public class PrintProcessor implements IInbMsgProcessor, Ordered {
             return true;
         }
         mainScreen.printlnToScreen(this.getMsgStr(msg));
-         System.out.println(msg);
         return true;
     }
 
