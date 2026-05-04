@@ -25,7 +25,7 @@ public class AnsiToStyleDocUtil {
             Map.entry("34", new Color(0, 0, 238)), // 蓝
             Map.entry("35", new Color(205, 0, 205)), // 品红 / 紫
             Map.entry("36", new Color(0, 205, 205)), // 青
-            // Map.entry("37", new Color(229, 229, 229)), // 白（浅灰）
+            //Map.entry("37", new Color(229, 229, 229)), // 白（浅灰）
             Map.entry("37", new Color(117, 117, 117)), // 白（浅灰）
 
             // 高亮前景色 (Bright)
@@ -58,10 +58,10 @@ public class AnsiToStyleDocUtil {
             Map.entry("107", new Color(255, 255, 255)) // 高亮白
     );
 
-    public void parseAnsiToStyledDocument(String text, StyledDocument doc,Font font) throws BadLocationException {
+    public void parseAnsiToStyledDocument(String text, StyledDocument doc, Font font) throws BadLocationException {
         SimpleAttributeSet currentAttr = new SimpleAttributeSet();
         StyleConstants.setForeground(currentAttr, Color.BLACK);
-        StyleConstants.setFontFamily(currentAttr, font.getName()); 
+        StyleConstants.setFontFamily(currentAttr, font.getName());
         StyleConstants.setFontSize(currentAttr, font.getSize());
         StyleConstants.setBackground(currentAttr, Color.WHITE); // 默认背景
         StyleConstants.setBold(currentAttr, false);
@@ -89,7 +89,8 @@ public class AnsiToStyleDocUtil {
                                 StyleConstants.setBold(currentAttr, true);
                                 break;
                             case "2":
-                                StyleConstants.setForeground(currentAttr, dimColor(StyleConstants.getForeground(currentAttr)));
+                                StyleConstants.setForeground(currentAttr,
+                                        dimColor(StyleConstants.getForeground(currentAttr)));
                                 break;
                             case "4":
                                 StyleConstants.setUnderline(currentAttr, true);
@@ -113,9 +114,13 @@ public class AnsiToStyleDocUtil {
                                 break;
                             default:
                                 if (ANSI_FOREGROUND_MAP.containsKey(code)) {
-                                    StyleConstants.setForeground(currentAttr, ANSI_FOREGROUND_MAP.get(code));
+                                    Color fg = ANSI_FOREGROUND_MAP.get(code);
+                                    StyleConstants.setForeground(currentAttr, fg);
                                 } else if (ANSI_BACKGROUND_MAP.containsKey(code)) {
-                                    StyleConstants.setBackground(currentAttr, ANSI_BACKGROUND_MAP.get(code));
+                                    Color bg = ANSI_BACKGROUND_MAP.get(code);
+                                    Color fg = this.ensureContrast(StyleConstants.getForeground(currentAttr), bg);
+                                    StyleConstants.setForeground(currentAttr, fg);
+                                    StyleConstants.setBackground(currentAttr, bg);
                                 } else {
                                     logger.error("Unknown ANSI code: " + codeStr);
                                 }
@@ -149,14 +154,14 @@ public class AnsiToStyleDocUtil {
     }
 
     private Color dimColor(Color c) {
-    int brightness = (int)(0.299*c.getRed() + 0.587*c.getGreen() + 0.114*c.getBlue());
-    // 如果太亮，就不调暗
-    if (brightness > 200) return c;
-    int r = (int)(c.getRed() * 0.7);
-    int g = (int)(c.getGreen() * 0.7);
-    int b = (int)(c.getBlue() * 0.7);
-    return new Color(r, g, b);
-}
+        // 如果太亮，就不调暗
+        if (isLightColor(c))
+            return c;
+        int r = (int) (c.getRed() * 0.7);
+        int g = (int) (c.getGreen() * 0.7);
+        int b = (int) (c.getBlue() * 0.7);
+        return new Color(r, g, b);
+    }
 
     private boolean isLightColor(Color color) {
         // 亮度公式：0.299*R + 0.587*G + 0.114*B
@@ -164,42 +169,80 @@ public class AnsiToStyleDocUtil {
         return brightness > 200; // 可调阈值
     }
 
-    private Color ansi256ToColor(int index) {
-    if (index < 16) {
-        // Standard + bright colors (reuse your maps)
-        return switch (index) {
-            case 0 -> new Color(0,0,0);
-            case 1 -> new Color(205,0,0);
-            case 2 -> new Color(0,205,0);
-            case 3 -> new Color(205,205,0);
-            case 4 -> new Color(0,0,238);
-            case 5 -> new Color(205,0,205);
-            case 6 -> new Color(0,205,205);
-            case 7 -> new Color(229,229,229);
-            case 8 -> new Color(127,127,127);
-            case 9 -> new Color(255,0,0);
-            case 10 -> new Color(0,255,0);
-            case 11 -> new Color(255,255,0);
-            case 12 -> new Color(92,92,255);
-            case 13 -> new Color(255,0,255);
-            case 14 -> new Color(0,255,255);
-            case 15 -> new Color(255,255,255);
-            default -> Color.BLACK;
-        };
-    } else if (index >= 16 && index <= 231) {
-        // 6x6x6 color cube
-        int idx = index - 16;
-        int r = (idx / 36) % 6;
-        int g = (idx / 6) % 6;
-        int b = idx % 6;
-        return new Color(r == 0 ? 0 : 55 + r * 40,
-                         g == 0 ? 0 : 55 + g * 40,
-                         b == 0 ? 0 : 55 + b * 40);
-    } else if (index >= 232 && index <= 255) {
-        // grayscale
-        int gray = 8 + (index - 232) * 10;
-        return new Color(gray, gray, gray);
+    private Color ensureContrast(Color fg, Color bg) {
+
+        while (getContrastRatio(fg, bg) < 4.5) {
+            fg = (luminance(bg) < 0.5)
+                    ? brightenStrong(fg)
+                    : darkenStrong(fg);
+        }
+        return fg;
     }
-    return Color.BLACK; // fallback
-}
+
+    private double luminance(Color c) {
+        return 0.2126 * c.getRed() / 255.0 +
+                0.7152 * c.getGreen() / 255.0 +
+                0.0722 * c.getBlue() / 255.0;
+    }
+
+    private double getContrastRatio(Color c1, Color c2) {
+        double l1 = luminance(c1);
+        double l2 = luminance(c2);
+        double brighter = Math.max(l1, l2);
+        double darker = Math.min(l1, l2);
+        return (brighter + 0.05) / (darker + 0.05);
+    }
+
+    private Color brightenStrong(Color c) {
+        return new Color(
+                Math.min(255, c.getRed() + 120),
+                Math.min(255, c.getGreen() + 120),
+                Math.min(255, c.getBlue() + 120));
+    }
+
+    private Color darkenStrong(Color c) {
+        return new Color(
+                Math.max(0, c.getRed() - 120),
+                Math.max(0, c.getGreen() - 120),
+                Math.max(0, c.getBlue() - 120));
+    }
+
+    private Color ansi256ToColor(int index) {
+        if (index < 16) {
+            // Standard + bright colors (reuse your maps)
+            return switch (index) {
+                case 0 -> new Color(0, 0, 0);
+                case 1 -> new Color(205, 0, 0);
+                case 2 -> new Color(0, 205, 0);
+                case 3 -> new Color(205, 205, 0);
+                case 4 -> new Color(0, 0, 238);
+                case 5 -> new Color(205, 0, 205);
+                case 6 -> new Color(0, 205, 205);
+                case 7 -> new Color(229, 229, 229);
+                case 8 -> new Color(127, 127, 127);
+                case 9 -> new Color(255, 0, 0);
+                case 10 -> new Color(0, 255, 0);
+                case 11 -> new Color(255, 255, 0);
+                case 12 -> new Color(92, 92, 255);
+                case 13 -> new Color(255, 0, 255);
+                case 14 -> new Color(0, 255, 255);
+                case 15 -> new Color(255, 255, 255);
+                default -> Color.BLACK;
+            };
+        } else if (index >= 16 && index <= 231) {
+            // 6x6x6 color cube
+            int idx = index - 16;
+            int r = (idx / 36) % 6;
+            int g = (idx / 6) % 6;
+            int b = idx % 6;
+            return new Color(r == 0 ? 0 : 55 + r * 40,
+                    g == 0 ? 0 : 55 + g * 40,
+                    b == 0 ? 0 : 55 + b * 40);
+        } else if (index >= 232 && index <= 255) {
+            // grayscale
+            int gray = 8 + (index - 232) * 10;
+            return new Color(gray, gray, gray);
+        }
+        return Color.BLACK; // fallback
+    }
 }
