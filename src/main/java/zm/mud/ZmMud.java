@@ -9,6 +9,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import zm.mud.client.MudClient;
 import zm.mud.network.threads.ThreadPoolService;
+import zm.mud.network.threads.ZmmudThreadPools;
 import zm.mud.ui.ZmMudUI;
 
 /**

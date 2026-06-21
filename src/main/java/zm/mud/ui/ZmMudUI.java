@@ -1,7 +1,10 @@
  package zm.mud.ui;
 
+import zm.mud.api.InbMsgService;
 import zm.mud.ui.cfg.GlobleCfg;
 import zm.mud.ui.component.MudMainScreen;
+import zm.mud.ui.processor.MsgPrintProcessor;
+
 import javax.swing.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,10 +21,15 @@ public class ZmMudUI {
     @Autowired
     private GlobleCfg globleCfg;
 
+    @Autowired
+    private MsgPrintProcessor msgPinter;
+
     private static ApplicationContext context;
 
     private MudMainScreen mudMain;
 
+    @Autowired
+    private InbMsgService inbMsgService;
 
     @PostConstruct
     public void init(){
@@ -33,6 +41,7 @@ public class ZmMudUI {
         SwingUtilities.invokeLater(() -> {
             mudMain.setShow();
             mudMain.resetFont(this.globleCfg.getFontName(), this.globleCfg.getFontSize());
+            inbMsgService.registerMsgHandler(msgPinter);
         });
     }
 
