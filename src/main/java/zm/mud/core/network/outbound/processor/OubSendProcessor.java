@@ -16,7 +16,7 @@ public class OubSendProcessor implements IOubMsgProcessor,Ordered {
     @Override
     public boolean processMessage(OubMsg msg) {
         oubMessageSender.send(msg);
-        return true;
+        return false;
     }
 
     @Override

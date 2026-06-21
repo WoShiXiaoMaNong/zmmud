@@ -1,4 +1,4 @@
-package zm.mud.core.network.threads;
+package zm.mud.core.thread;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -10,8 +10,7 @@ import org.apache.logging.log4j.Logger;
 public enum ZmmudThreadPools {
    
 
-    MUD_TRRIGER_MATCH("Mud Trigger Match",1,4),
-    MUD_TRRIGER_ACTION("Mud Trigger Action",1,4)
+    MUD_TRRIGER("Mud Trigger",1,5),
     ;
     String name;
     int corePoolSize;
