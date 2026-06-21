@@ -7,9 +7,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import zm.mud.client.MudClient;
-import zm.mud.network.threads.ThreadPoolService;
-import zm.mud.network.threads.ZmmudThreadPools;
+import zm.mud.core.client.MudClient;
+import zm.mud.core.network.threads.ThreadPoolService;
 import zm.mud.ui.ZmMudUI;
 
 /**

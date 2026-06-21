@@ -1,6 +1,6 @@
  package zm.mud.ui;
 
-import zm.mud.api.InbMsgService;
+import zm.mud.core.api.InbMsgService;
 import zm.mud.ui.cfg.GlobleCfg;
 import zm.mud.ui.component.MudMainScreen;
 import zm.mud.ui.processor.MsgPrintProcessor;
