@@ -5,7 +5,8 @@
 
         <!-- 控制台输出 -->
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss} %-5level %c{1} - %msg%n"/>
+            <PatternLayout pattern="%d{HH:mm:ss} [%t] %-5level %c{1} - %msg%n"/>
+
         </Console>
 
     </Appenders>
