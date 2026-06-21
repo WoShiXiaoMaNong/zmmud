@@ -5,6 +5,7 @@ import java.nio.charset.Charset;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,7 @@ import zm.mud.network.outbound.message.OubMsg;
 import zm.mud.network.utils.CloseUtil;
 
 @Service
-public class MudClient implements AutoCloseable {
+public class MudClient implements AutoCloseable,DisposableBean {
     private static final Logger logger = LogManager.getLogger(MudClient.class);
 
     private String host;
@@ -114,5 +115,11 @@ public class MudClient implements AutoCloseable {
             this.charset = Charset.forName(charset);
         }
         logger.info("Charset set to {}", this.charset.name());
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        logger.info("Destroying MudClient and closing connection...");
+        this.close();
     }
 }

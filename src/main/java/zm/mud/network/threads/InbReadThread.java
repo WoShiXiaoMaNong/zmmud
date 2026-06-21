@@ -18,9 +18,10 @@ public class InbReadThread extends IZmmudThread {
     private InbMsgReader reader;
 
     @Override
-    public void doRun() {
+    public boolean doRun() {
         try {
             reader.handleByte(client.read(), client.getCharset());
+            return true;
         } catch (Exception e) {
             logger.error("Failed to read from server", e);
             throw e;

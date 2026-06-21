@@ -3,7 +3,9 @@ package zm.mud.network.threads;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class IZmmudThread implements Runnable {
+import zm.mud.IShutdownFunc;
+
+public abstract class IZmmudThread implements Runnable ,IShutdownFunc{
     private static final Logger logger = LogManager.getLogger(IZmmudThread.class);
     private volatile boolean running = true;
 
@@ -15,20 +17,26 @@ public abstract class IZmmudThread implements Runnable {
         logger.info(this.getClass().getSimpleName() + " Start.");
         while (running && !Thread.currentThread().isInterrupted()) {
             try {
-               this.doRun();
+                this.beforeLoop();
+                boolean shouldContinue = this.doRun();
+                if (!shouldContinue) {
+                    break;
+                }
             } catch (Exception e) {
                 logger.error("Failed to process inbound message", e);
             }
         }
     }
 
-
-   public final void shutdown(){
+   @Override
+   public void shutdown(){
         running = false;
         if (workerThread != null) {
             workerThread.interrupt();
         }
     }
 
-    protected abstract void doRun();
+    protected abstract boolean doRun();
+
+    protected void beforeLoop(){}
 }

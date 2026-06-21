@@ -21,7 +21,7 @@ public class InbMsgProcessThread extends IZmmudThread {
     private List<IInbMsgProcessor> printProcessor;
 
     @Override
-    public void doRun() {
+    public boolean doRun() {
         try {
             InbMsg msg = msgQueue.take();
             for (IInbMsgProcessor inbMsgProcessor : printProcessor) {
@@ -30,7 +30,7 @@ public class InbMsgProcessThread extends IZmmudThread {
                     break;
                 }
             }
-
+            return true;
         } catch (Exception e) {
             logger.error("Failed to process inbound message", e);
             throw e;
