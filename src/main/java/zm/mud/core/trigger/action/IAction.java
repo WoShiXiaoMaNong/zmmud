@@ -5,5 +5,8 @@ import zm.mud.core.trigger.cfg.MatchResult;
 
 public interface IAction {
     
-    void execute(Trigger tirgger, MatchResult ret);
+    void setExpression(String expression);
+    String getExpression();
+
+    void execute(Trigger trigger, MatchResult ret);
 }

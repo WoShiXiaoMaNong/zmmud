@@ -1,6 +1,7 @@
 package zm.mud.core.network.inbound.processor;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -13,7 +14,6 @@ import zm.mud.core.network.inbound.message.InbMsg;
 import zm.mud.core.thread.ZmmudThreadPools;
 import zm.mud.core.trigger.Trigger;
 import zm.mud.core.trigger.cfg.MatchResult;
-import zm.mud.core.trigger.matcher.IMatcher;
 
 @Service
 public class InbTriggerProcessor implements IInbMsgProcessor, Ordered {
@@ -23,7 +23,7 @@ public class InbTriggerProcessor implements IInbMsgProcessor, Ordered {
     private Lock lock;
     private List<Trigger> triggers;
 
-    public InbTriggerProcessor(){
+    public InbTriggerProcessor() {
         this.triggers = new ArrayList<>();
         this.lock = new ReentrantLock();
     }
@@ -35,36 +35,45 @@ public class InbTriggerProcessor implements IInbMsgProcessor, Ordered {
         }
         this.lock.lock();
         try {
-            ZmmudThreadPools.MUD_TRRIGER.execute(
-                    () -> {
-                        invokeTrigger(msg);
-                    });
+            Iterator<Trigger> iterator = this.triggers.iterator();
+            while (iterator.hasNext()) {
+                Trigger trigger = iterator.next();
+                // 1. 检查调用前是否已死亡（例如被其他线程或之前的逻辑改变了状态）
+                if (trigger.died()) {
+                    iterator.remove(); // 安全删除
+                    logger.debug(trigger.getTriggerName() + " : removed !");
+                    continue;
+                }
+                try {
+                    tryInvokeTrigger(trigger, msg);
+                } catch (Exception e) {
+                    logger.error("Trigger process error!", e);
+                }
+                
+            }
+           
         } finally {
             this.lock.unlock();
         }
         return true;
     }
 
-    private void invokeTrigger(InbMsg msg) {
-        for (Trigger trigger : this.triggers) {
-            try {
-                IMatcher matcher = trigger.getMatcher();
-                MatchResult ret = matcher.match(msg);
-                if (ret.isMatched()) {
-                    trigger.getAction().execute(trigger, ret);
-                }
+    private void tryInvokeTrigger(Trigger trigger, InbMsg msg) {
+        ZmmudThreadPools.MUD_TRRIGER.execute(
+                () -> {
+                    MatchResult ret = trigger.match(msg.getContent());
+                    if (ret.isMatched()) {
+                        trigger.fire(ret);
+                    }
+                });
 
-            } catch (Exception e) {
-                logger.error("Trigger process error!", e);
-            }
-        }
     }
 
-    public void register(Trigger trigger){
+    public void register(Trigger trigger) {
         this.lock.lock();
-        try{
+        try {
             this.triggers.add(trigger);
-        }finally{
+        } finally {
             this.lock.unlock();
         }
     }
@@ -74,5 +83,4 @@ public class InbTriggerProcessor implements IInbMsgProcessor, Ordered {
         return 3;
     }
 
-  
 }

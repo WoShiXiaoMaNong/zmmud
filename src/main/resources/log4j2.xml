@@ -14,7 +14,7 @@
     <Loggers>
 
         <!-- 业务日志 -->
-        <Root level="info">
+        <Root level="debug">
             <AppenderRef ref="Console"/>
         </Root>
 

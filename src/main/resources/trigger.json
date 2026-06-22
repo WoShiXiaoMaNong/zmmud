@@ -1,0 +1,17 @@
+{
+    "triggers":[
+                {
+                    "name":"fullme",
+                    "matcher":{
+                        "type":"Equals",
+                        "expression":"fullme"
+                    },
+                    "action":{
+                        "type":"SendCommand",
+                        "expression":"l"
+                    },
+                    "type":"outbound",
+                    "remainningCount":1
+                }
+    ]
+}
