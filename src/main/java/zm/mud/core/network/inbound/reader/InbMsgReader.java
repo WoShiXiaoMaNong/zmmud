@@ -94,6 +94,7 @@ public class InbMsgReader {
                case IAC_READING:
                     if (currentByte == IACConsts.CMD_SB) { // SB COMMAND
                          state = InbReaderState.IAC_SUBNEGOTIATION;
+                          this.add(currentByte, oversizeCallback);
                     } else {
                          if (IACConsts.NON_OPTION_COMMANDS.contains(currentByte)) {
                               state = InbReaderState.IAC_COMMAND_WITHOUT_OPTION;

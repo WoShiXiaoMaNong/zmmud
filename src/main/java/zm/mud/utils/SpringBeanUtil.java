@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,11 +20,22 @@ public class SpringBeanUtil {
             T bean = ctx.getBean(t);
             return (T)bean;
         }catch(Exception e){
-            logger.error(e);
+            logger.debug(e);
         }
        
         return null;
     }
+
+    public static <T> T getBean(@NonNull String beanId,Class<T> t){
+        try{
+            T bean = (T) ctx.getBean(beanId);
+            return (T)bean;
+        }catch(Exception e){
+            logger.debug(e);
+        }
+       
+        return null;
+    } 
 
      
     @Autowired

@@ -1,23 +1,30 @@
 package zm.mud.core.network.inbound.processor;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
 
 import zm.mud.core.client.MudClient;
+import zm.mud.core.network.iac.handler.IIACCommandHandler;
+import zm.mud.core.network.iac.sbhandler.IIACSBCommandHandler;
 import zm.mud.core.network.inbound.consts.IACConsts;
 import zm.mud.core.network.inbound.message.IACConfirmInbMsg;
 import zm.mud.core.network.inbound.message.InbMsg;
+import zm.mud.utils.HexUtil;
+import zm.mud.utils.SpringBeanUtil;
 
 @Service
 public class IACConfirmProcessor implements IInbMsgProcessor, Ordered {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(IACConfirmProcessor.class);
 
-   
-
     @Autowired
     private MudClient mudClient;
+
+    @Autowired
+    private HexUtil hexUtil;
 
     @Override
     public boolean processMessage(InbMsg msg) {
@@ -30,29 +37,21 @@ public class IACConfirmProcessor implements IInbMsgProcessor, Ordered {
             return true;
         }
 
-        logger.debug("服务器发送确认指令:" + String.format("IAC %s %d",
-                IACConsts.CMD_NAME_MAP.getOrDefault(iacMsg.getContentBytes()[1], "UNKNOWN"), iacMsg.getContentBytes()[2]));
+        logger.debug("收到服务器指令：" + Arrays.toString(this.hexUtil.toHex(iacMsg.getContentBytes())));
 
-        int cmd = iacMsg.getContentBytes()[1];
-        int opt = iacMsg.getContentBytes()[2];
-
-        int isEnable = IACConsts.OPTION_ALLOWED_MAP.getOrDefault(opt, 0);
-        int responseCmd = -1;
-        int responseOpt = opt;
-        if (isEnable == 1) {
-            responseCmd = IACConsts.ACCEPT_RESPONSE_MAP.getOrDefault(cmd, -1);
+        byte[] response = null;
+        if (!this.isSBCommand(iacMsg.getContentBytes())) {
+            response = this.handleIAC(iacMsg.getContentBytes());
         } else {
-            responseCmd = IACConsts.REJECT_RESPONSE_MAP.getOrDefault(cmd, -1);
+            response = this.handleIACSub(iacMsg.getContentBytes());
+        }
+        if (response == null) {
+            logger.debug("不支持当前IAC指令或者不响应：" + Arrays.toString(this.hexUtil.toHex(iacMsg.getContentBytes())));
+            return true;
         }
 
-        if (responseCmd != -1) {
-            byte[] response = new byte[] {
-                    (byte) 255, (byte) responseCmd, (byte) responseOpt
-            };
-            this.mudClient.send(response);
-            logger.debug("发送响应指令:"
-                    + String.format("IAC %s %d", IACConsts.CMD_NAME_MAP.getOrDefault(responseCmd, "UNKNOWN"), responseOpt));
-        }
+        logger.debug("发送响应指令" + Arrays.toString(this.hexUtil.toHex(response)));
+        this.mudClient.send(response);
 
         return true;
     }
@@ -60,6 +59,35 @@ public class IACConfirmProcessor implements IInbMsgProcessor, Ordered {
     @Override
     public int getOrder() {
         return 2;
+    }
+
+    private byte[] handleIAC(byte[] iacCommand) {
+        byte optionCode = iacCommand[2];
+        String beanId = IACConsts.IAC_HANDLER_BEAN_PREFIX + this.hexUtil.toHex(optionCode);
+        IIACCommandHandler handler = SpringBeanUtil.getBean(beanId, IIACCommandHandler.class);
+        if (handler == null) {
+            logger.debug("No special handler found. Process with common handler:" + beanId);
+            handler = SpringBeanUtil.getBean(IACConsts.IAC_HANDLER_COMMON, IIACCommandHandler.class);
+        }
+
+        return handler.handle(iacCommand);
+    }
+
+    private byte[] handleIACSub(byte[] iacCommand) {
+        byte optionCode = iacCommand[2];
+        String beanId = IACConsts.IAC_SB_HANDLER_BEAN_PREFIX + this.hexUtil.toHex(optionCode);
+        IIACSBCommandHandler handler = SpringBeanUtil.getBean(beanId, IIACSBCommandHandler.class);
+        if (handler == null) {
+            logger.warn("[Process as Default] Unsupport IAC Command:" + beanId);
+            handler = SpringBeanUtil.getBean(IACConsts.IAC_SB_HANDLER_DEFAULT, IIACSBCommandHandler.class);
+        }
+
+        return handler.handle(iacCommand);
+    }
+
+    // SB format: [FF, FA, xx,xx,..., FF, SE]
+    private boolean isSBCommand(byte[] iacCommand) {
+        return IACConsts.CMD_SB == (iacCommand[1] & 0xFF);
     }
 
 }

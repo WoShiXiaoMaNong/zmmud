@@ -10,6 +10,8 @@ mud:
       buffer:
         maxLength: 1024
   ui:
+    # 客户端模拟的终端类型名（必须是标准的大写 ASCII 字符串，如 VT100, XTERM, ANSI）
+    terminalType: ANSI 
     size:
       width: 800
       height: 600

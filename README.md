@@ -212,6 +212,17 @@ public static void main(String[] args) {
 
 ---
 
+## 相关IAC的支持开关
+* [√]         FF FD 18    IAC DO TERMINAL-TYPE (服务器要求你通报终端类型)
+* [x]         FF FB 5A    IAC WILL START-TLS (服务器声明支持安全传输 TLS 加密)
+* [x]         FF FD 1F    IAC DO NAWS (服务器要求你通报窗口大小)
+* [x]         FF FB C9    IAC WILL SUPDUP (服务器声明它支持 SUPDUP 协议，C9即201，Java中显示为 -55)
+* [x]         FF FB 56    IAC WILL TN3270E (服务器声明它支持 TN3270 增强模式)
+* [x]         FF FB 46    IAC WILL VT320-REGIME (服务器声明支持 VT320 模式)
+* [x]         FF FD 27    IAC DO NEW-ENVIRONMENT (服务器要求协商环境变量)
+* [x]         FF FB 2A    IAC WILL CHARSET (服务器声明支持字符集协商)
+
+
 ## 🧠 设计理念
 
 * 分层清晰（Reader / Message / Processor）
