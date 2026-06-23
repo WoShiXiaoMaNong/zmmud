@@ -36,6 +36,7 @@ public class ZmMud {
         }
         boolean isConnected = client.connect();
 
+        zmMudUI.showFullme("http://fullme.pkuxkx.net/b2evo_captcha_tmp/b2evo_captcha_79AAB9509F5BA2B401F2C6D815730154.jpg");
 
         if(!isConnected) {
             logger.error("Failed to connect to server");

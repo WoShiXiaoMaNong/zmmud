@@ -2,6 +2,7 @@
 
 import zm.mud.core.api.InbMsgService;
 import zm.mud.ui.cfg.GlobleCfg;
+import zm.mud.ui.component.FullmeImgPopup;
 import zm.mud.ui.component.MudMainScreen;
 import zm.mud.ui.processor.MsgPrintProcessor;
 
@@ -27,12 +28,16 @@ public class ZmMudUI {
 
     private MudMainScreen mudMain;
 
+
+    private FullmeImgPopup fullmeImgPopup;
+    
     @Autowired
     private InbMsgService inbMsgService;
 
     @PostConstruct
     public void init(){
          mudMain = new MudMainScreen(globleCfg,this);
+         this.fullmeImgPopup = new FullmeImgPopup();
     }
 
   
@@ -47,6 +52,10 @@ public class ZmMudUI {
    
     public void printlnToScreen(String text) {
         this.mudMain.printlnToScreen(text);
+    }
+
+    public void showFullme(String imgUrl){
+        this.fullmeImgPopup.show(imgUrl);
     }
 
 

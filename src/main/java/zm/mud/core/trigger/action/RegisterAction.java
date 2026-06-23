@@ -19,6 +19,7 @@ public class RegisterAction implements IAction{
     private static final Logger logger = LogManager.getLogger(RegisterAction.class);
     private String actionCfgJsonStr;
 
+
     @Override
     public void setExpression(String expression) {
         actionCfgJsonStr = expression;
