@@ -17,6 +17,8 @@ public class MudTextAare extends JTextPane {
             .getLogger(MudTextAare.class);
 
     private static final int MAX_LINES = 100;
+    // 新增：引入 50 行的缓冲区，避免每来一行就执行删除导致的界面抖动
+    private static final int BUFFER_LINES = 50;
 
     private StyledDocument doc;
     private AnsiToStyleDocUtil ansiToStyleDocUtil;
@@ -52,7 +54,8 @@ public class MudTextAare extends JTextPane {
         javax.swing.text.Element root = doc.getDefaultRootElement();
         int lineCount = root.getElementCount();
 
-        if (lineCount <= MAX_LINES) {
+        // 优化：只有当总行数超过 最大限制 + 缓冲限制 (150行) 时，才集中清理一次
+        if (lineCount <= MAX_LINES + BUFFER_LINES) {
             return;
         }
 
