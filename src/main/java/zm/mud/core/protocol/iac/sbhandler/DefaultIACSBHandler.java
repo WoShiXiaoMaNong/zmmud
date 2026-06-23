@@ -1,9 +1,9 @@
-package zm.mud.core.network.iac.sbhandler;
+package zm.mud.core.protocol.iac.sbhandler;
 
 
 import org.springframework.stereotype.Component;
 
-import zm.mud.core.network.iac.consts.IACConsts;
+import zm.mud.core.protocol.iac.consts.IACConsts;
 
 @Component(IACConsts.IAC_SB_HANDLER_DEFAULT)
 public class DefaultIACSBHandler implements IIACSBCommandHandler{

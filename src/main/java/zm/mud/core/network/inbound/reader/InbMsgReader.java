@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import zm.mud.core.network.iac.consts.IACConsts;
 import zm.mud.core.network.inbound.message.InbMsg;
 import zm.mud.core.network.queue.InbMsgQueue;
+import zm.mud.core.protocol.iac.consts.IACConsts;
 
 @Service
 public class InbMsgReader {

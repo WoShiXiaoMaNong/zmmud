@@ -1,4 +1,4 @@
-package zm.mud.core.network.iac.consts;
+package zm.mud.core.protocol.iac.consts;
 
 
 import java.util.HashMap;

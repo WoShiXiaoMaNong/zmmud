@@ -1,4 +1,4 @@
-package zm.mud.core.network.iac.sbhandler;
+package zm.mud.core.protocol.iac.sbhandler;
 
 public interface IIACSBCommandHandler {
     

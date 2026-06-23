@@ -1,10 +1,10 @@
-package zm.mud.core.network.iac.sbhandler;
+package zm.mud.core.protocol.iac.sbhandler;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import zm.mud.core.cfg.ApplicationConfig;
-import zm.mud.core.network.iac.consts.IACConsts;
+import zm.mud.core.protocol.iac.consts.IACConsts;
 /**
  * IAC TERMINAL-TYPE (服务器要求你通报终端类型)
  */

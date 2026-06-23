@@ -61,7 +61,7 @@ public class Trigger {
         
         this.countDownRemaining();
 
-        if(this.action != null){
+        if(this.action == null){
             return;
         }
         try{

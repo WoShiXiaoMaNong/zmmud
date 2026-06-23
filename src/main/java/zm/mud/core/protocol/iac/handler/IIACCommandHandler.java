@@ -1,4 +1,4 @@
-package zm.mud.core.network.iac.handler;
+package zm.mud.core.protocol.iac.handler;
 
 public interface IIACCommandHandler {
     
