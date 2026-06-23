@@ -1,6 +1,6 @@
 package zm.mud.core.network.iac.handler;
 
-import zm.mud.core.network.inbound.consts.IACConsts;
+import zm.mud.core.network.iac.consts.IACConsts;
 
 public abstract class AbsIACHandler implements IIACCommandHandler{
 

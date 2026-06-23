@@ -1,4 +1,4 @@
-package zm.mud.core.network.inbound.consts;
+package zm.mud.core.network.iac.consts;
 
 
 import java.util.HashMap;
@@ -54,7 +54,6 @@ public class IACConsts {
         public static final int OPTION_18       = 0x18; // TERMINAL-TYPE (服务器要求你通报终端类型)
         public static final int OPTION_1F       = 0x1F; // NAWS (服务器要求你通报窗口大小)
         public static final int OPTION_5A       = 0x5A; //START-TLS (服务器声明支持安全传输 TLS 加密)
-        public static final int OPTION_5B       = 0x5B;
         
         public static final Set<Integer> enabledOpsSet = new HashSet<>();
         static{
