@@ -45,7 +45,12 @@ public class OubTriggerProcessor implements IOubMsgProcessor, Ordered {
                     continue;
                 }
                 try {
-                    tryInvokeTrigger(trigger, msg);
+                    if(trigger.isSync()){
+                        tryInvokeTrigger(trigger, msg);
+                    }else{
+                        tryInvokeTriggerWithThreadPool(trigger, msg);
+                    }
+                    
                 } catch (Exception e) {
                     logger.error("Trigger process error!", e);
                 }
@@ -58,13 +63,17 @@ public class OubTriggerProcessor implements IOubMsgProcessor, Ordered {
         return false;
     }
 
-   private void tryInvokeTrigger(Trigger trigger, OubMsg msg) {
-        ZmmudThreadPools.MUD_TRRIGER.execute(
-                () -> {
-                    MatchResult ret = trigger.match(msg.getContent());
+    private void tryInvokeTrigger(Trigger trigger, OubMsg msg){
+        MatchResult ret = trigger.match(msg.getContent());
                     if (ret.isMatched()) {
                         trigger.fire(ret);
                     }
+    }
+
+   private void tryInvokeTriggerWithThreadPool(Trigger trigger, OubMsg msg) {
+        ZmmudThreadPools.MUD_TRRIGER.execute(
+                () -> {
+                   tryInvokeTrigger(trigger,msg);
                 });
 
     }
@@ -79,7 +88,7 @@ public class OubTriggerProcessor implements IOubMsgProcessor, Ordered {
     }
     @Override
     public int getOrder() {
-        return 2;
+        return 1;
     }
 
   

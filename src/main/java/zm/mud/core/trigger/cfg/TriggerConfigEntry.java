@@ -6,7 +6,16 @@ public class TriggerConfigEntry {
     private Integer remainningCount;
     private MatcherAndActionConfigEntry matcher;
     private MatcherAndActionConfigEntry action;
-    
+    private Boolean sync;
+
+    /**
+     * 当sync是空时，返回false，即：配置表中不配置的时候，默认为false
+     * @return
+     */
+    public Boolean isSync() {
+        return Boolean.TRUE.equals(sync);
+    }
+
     public String getName() {
         return name;
     }
@@ -36,6 +45,10 @@ public class TriggerConfigEntry {
     }
     public void setAction(MatcherAndActionConfigEntry action) {
         this.action = action;
+    }
+    
+    public void setSync(Boolean sync) {
+        this.sync = sync;
     }
 
     

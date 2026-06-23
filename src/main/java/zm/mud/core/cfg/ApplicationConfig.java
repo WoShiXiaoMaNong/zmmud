@@ -8,14 +8,21 @@ import org.springframework.context.annotation.Configuration;
 public class ApplicationConfig {
     
 
-    @Value("${mud.ui.terminalType}")
+    @Value("${mud.terminalType}")
     private String terminalType;
+
+      @Value("${mud.version}")
+    private String version;
 
     public String getTerminalType() {
         return terminalType;
     }
 
+    public String getVersion() {
+        return version;
+    }
 
+    
 
     
 }

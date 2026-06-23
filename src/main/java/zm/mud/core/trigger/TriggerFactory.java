@@ -13,11 +13,9 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import zm.mud.core.trigger.action.IAction;
-import zm.mud.core.trigger.action.SendCommand;
 import zm.mud.core.trigger.cfg.MatcherAndActionConfigEntry;
 import zm.mud.core.trigger.cfg.TriggerConfigEntry;
 import zm.mud.core.trigger.cfg.TriggerType;
-import zm.mud.core.trigger.matcher.Equals;
 import zm.mud.core.trigger.matcher.IMatcher;
 
 @Service
@@ -72,6 +70,7 @@ public class TriggerFactory {
 
 
         Trigger trigger = new Trigger(triggerType,trggerName,matcher, action,remainningCount);
+        trigger.setSync(cfgEntry.isSync());
         return trigger;
 
     }

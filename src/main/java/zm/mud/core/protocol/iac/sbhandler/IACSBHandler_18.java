@@ -39,7 +39,7 @@ public class IACSBHandler_18 implements IIACSBCommandHandler{
         // 如果确定是服务器索要名字的请求
         if (isSendRequest) {
             // 定义客户端模拟的终端类型名（必须是标准的大写 ASCII 字符串，如 VT100, XTERM, ANSI）
-            String terminalType = appCfg.getTerminalType(); 
+            String terminalType = appCfg.getTerminalType() + " " + appCfg.getVersion(); 
             byte[] typeBytes = terminalType.getBytes(java.nio.charset.StandardCharsets.US_ASCII);
             
             // 标准返回格式：IAC (FF) + SB (FA) + OPTION (18) + IS (00) + [终端名] + IAC (FF) + SE (F0)

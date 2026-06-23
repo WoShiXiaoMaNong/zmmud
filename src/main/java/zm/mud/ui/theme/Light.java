@@ -11,39 +11,37 @@ public class Light implements ITheme {
     // 前景色（白底优化版）
     // =========================
     private static final Map<String, Color> ANSI_FOREGROUND_MAP = Map.ofEntries(
-            // 普通色（降低亮度，提升可读性）
-            Map.entry("30", new Color(30, 30, 30)),     // 黑（主文字）
-            Map.entry("31", new Color(180, 0, 0)),      // 红（降低刺眼）
-            Map.entry("32", new Color(0, 140, 0)),      // 绿（收敛）
-            Map.entry("33", new Color(180, 140, 0)),    // 黄（关键！避免看不见）
-            Map.entry("34", new Color(0, 0, 180)),      // 蓝（加深）
+            Map.entry("30", new Color(30, 30, 30)),     // 黑
+            Map.entry("31", new Color(180, 0, 0)),      // 红
+            Map.entry("32", new Color(0, 140, 0)),      // 绿
+            Map.entry("33", new Color(150, 110, 0)),    // 黄（微调，使其在白底下更清晰）
+            Map.entry("34", new Color(0, 0, 180)),      // 蓝
             Map.entry("35", new Color(160, 0, 160)),    // 品红
             Map.entry("36", new Color(0, 140, 140)),    // 青
-            Map.entry("37", new Color(120, 120, 120)),  // 灰（辅助文本）
+            Map.entry("37", new Color(120, 120, 120)),  // 灰
 
-            // 高亮色（更清晰但不过曝）
-            Map.entry("90", new Color(150, 150, 150)),
+            Map.entry("90", new Color(100, 100, 100)), // 深灰
             Map.entry("91", new Color(220, 50, 50)),
-            Map.entry("92", new Color(50, 180, 50)),
-            Map.entry("93", new Color(220, 180, 50)),
-            Map.entry("94", new Color(80, 80, 220)),
-            Map.entry("95", new Color(200, 80, 200)),
-            Map.entry("96", new Color(50, 180, 180)),
-            Map.entry("97", new Color(0, 0, 0)) // 高亮白 → 黑（避免白底白字）
+            Map.entry("92", new Color(30, 160, 30)),
+            Map.entry("93", new Color(190, 150, 20)),
+            Map.entry("94", new Color(60, 60, 200)),
+            Map.entry("95", new Color(180, 50, 180)),
+            Map.entry("96", new Color(30, 150, 150)),
+            Map.entry("97", new Color(0, 0, 0))         // 高亮白 → 黑
     );
 
     // =========================
     // 背景色（白底优化）
     // =========================
     private static final Map<String, Color> ANSI_BACKGROUND_MAP = Map.ofEntries(
-            Map.entry("40", new Color(40, 40, 40)),
-            Map.entry("41", new Color(255, 220, 220)),
-            Map.entry("42", new Color(220, 255, 220)),
-            Map.entry("43", new Color(255, 250, 200)),
-            Map.entry("44", new Color(220, 220, 255)),
-            Map.entry("45", new Color(255, 220, 255)),
-            Map.entry("46", new Color(220, 255, 255)),
-            Map.entry("47", new Color(245, 245, 245)), // 主背景（柔白）
+            Map.entry("40", new Color(230, 230, 230)), // 防穿帮：MUD黑背景在白底下映射为浅浅灰
+            Map.entry("41", new Color(255, 210, 210)),
+            Map.entry("42", new Color(210, 255, 210)),
+            Map.entry("43", new Color(255, 245, 190)),
+            Map.entry("44", new Color(210, 210, 255)),
+            Map.entry("45", new Color(255, 210, 255)),
+            Map.entry("46", new Color(210, 255, 255)),
+            Map.entry("47", new Color(245, 245, 245)), // 主背景
 
             Map.entry("100", new Color(200, 200, 200)),
             Map.entry("101", new Color(255, 180, 180)),
@@ -52,14 +50,12 @@ public class Light implements ITheme {
             Map.entry("104", new Color(180, 180, 255)),
             Map.entry("105", new Color(255, 180, 255)),
             Map.entry("106", new Color(180, 255, 255)),
-            Map.entry("107", new Color(255, 255, 255)) // 纯白（少用）
+            Map.entry("107", new Color(255, 255, 255)) 
     );
 
-    // =========================
-    // 默认颜色
-    // =========================
-    private static final Color BACKGROUND_COLOR = new Color(245, 245, 245); // 柔白
-    private static final Color FOREGROUND_COLOR = new Color(30, 30, 30);   // 深灰（护眼）
+    private static final Color BACKGROUND_COLOR = new Color(245, 245, 245); 
+    private static final Color FOREGROUND_COLOR = new Color(30, 30, 30);   
+    private static final double CONTRAST_THRESHOLD = 4.5;
 
     private Light() {}
 
@@ -98,12 +94,13 @@ public class Light implements ITheme {
         return BACKGROUND_COLOR;
     }
 
-    // =========================
-    // ANSI 256（保持不变）
-    // =========================
+    @Override
     public Color ansi256ToColor(int index) {
-        if (index < 16) {
+        // 修复 8-15 映射错误
+        if (index < 8) {
             return ANSI_FOREGROUND_MAP.getOrDefault(String.valueOf(30 + index), FOREGROUND_COLOR);
+        } else if (index < 16) {
+            return ANSI_FOREGROUND_MAP.getOrDefault(String.valueOf(90 + (index - 8)), FOREGROUND_COLOR);
         } else if (index <= 231) {
             int idx = index - 16;
             int r = (idx / 36) % 6;
@@ -120,35 +117,56 @@ public class Light implements ITheme {
         }
     }
 
-    // =========================
-    // dim（白底适当减弱）
-    // =========================
     @Override
     public Color dimColor(Color c) {
-        int r = (int) (c.getRed() * 0.8);
-        int g = (int) (c.getGreen() * 0.8);
-        int b = (int) (c.getBlue() * 0.8);
+        // 👉 修复：白底下的 dim 是让颜色变淡（向白色靠拢），而不是变暗！
+        int r = (int) (c.getRed() + (255 - c.getRed()) * 0.4);
+        int g = (int) (c.getGreen() + (255 - c.getGreen()) * 0.4);
+        int b = (int) (c.getBlue() + (255 - c.getBlue()) * 0.4);
         return new Color(r, g, b);
     }
 
-    // =========================
-    // 对比度增强
-    // =========================
     @Override
     public Color ensureContrast(Color fg, Color bg) {
-        int guard = 0;
-        while (getContrastRatio(fg, bg) < 4.5 && guard++ < 10) {
-            fg = (luminance(bg) < 0.5)
-                    ? brightenStrong(fg)
-                    : darkenStrong(fg);
+        if (fg == null || bg == null) return fg;
+
+        double contrast = getContrastRatio(fg, bg);
+        if (contrast >= CONTRAST_THRESHOLD) {
+            return fg; 
         }
-        return fg;
+
+        // 步进式精确调整，最多微调 5 次，大幅减少对象创建，防止死循环
+        boolean bgIsDark = luminance(bg) < 0.5;
+        int r = fg.getRed();
+        int g = fg.getGreen();
+        int b = fg.getBlue();
+
+        for (int i = 0; i < 5; i++) {
+            if (bgIsDark) {
+                // 背景暗，文字需要变亮
+                r = Math.min(255, (int)(r * 1.2 + 10));
+                g = Math.min(255, (int)(g * 1.2 + 10));
+                b = Math.min(255, (int)(b * 1.2 + 10));
+            } else {
+                // 背景亮（白底常见），文字需要变暗
+                r = (int)(r * 0.75);
+                g = (int)(g * 0.75);
+                b = (int)(b * 0.75);
+            }
+            Color checkColor = new Color(r, g, b);
+            if (getContrastRatio(checkColor, bg) >= CONTRAST_THRESHOLD) {
+                return checkColor;
+            }
+        }
+        
+        // 兜底策略
+        return bgIsDark ? new Color(255, 255, 255) : new Color(30, 30, 30);
     }
 
     private double luminance(Color c) {
-        return 0.2126 * c.getRed() / 255.0 +
-               0.7152 * c.getGreen() / 255.0 +
-               0.0722 * c.getBlue() / 255.0;
+        return 0.2126 * (c.getRed() / 255.0) +
+               0.7152 * (c.getGreen() / 255.0) +
+               0.0722 * (c.getBlue() / 255.0);
     }
 
     private double getContrastRatio(Color c1, Color c2) {
@@ -157,21 +175,5 @@ public class Light implements ITheme {
         double brighter = Math.max(l1, l2);
         double darker = Math.min(l1, l2);
         return (brighter + 0.05) / (darker + 0.05);
-    }
-
-    private Color brightenStrong(Color c) {
-        return new Color(
-                Math.min(255, c.getRed() + 80),
-                Math.min(255, c.getGreen() + 80),
-                Math.min(255, c.getBlue() + 80)
-        );
-    }
-
-    private Color darkenStrong(Color c) {
-        return new Color(
-                Math.max(0, c.getRed() - 80),
-                Math.max(0, c.getGreen() - 80),
-                Math.max(0, c.getBlue() - 80)
-        );
     }
 }

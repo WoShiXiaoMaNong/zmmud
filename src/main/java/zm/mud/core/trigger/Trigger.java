@@ -17,6 +17,7 @@ public class Trigger {
     private String triggerName;
     private IMatcher matcher;
     private IAction action;
+    private boolean sync;
 
     /*
        1. 用于记录触发器还可以被触发几次。
@@ -95,9 +96,13 @@ public class Trigger {
        public boolean died(){
         return this.remainingTriggerCount == 0;
     }
-    
 
+    public boolean isSync() {
+        return sync;
+    }
 
-    
+    public void setSync(boolean sync) {
+        this.sync = sync;
+    }
     
 }   

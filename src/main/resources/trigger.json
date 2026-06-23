@@ -2,16 +2,30 @@
     "triggers":[
                 {
                     "name":"fullme",
+                    "sync":true,  
                     "matcher":{
                         "type":"Equals",
                         "expression":"fullme"
                     },
                     "action":{
-                        "type":"SendCommand",
-                        "expression":"l"
+                        "type":"RegisterAction",
+                        "expression":"fullme-url"
                     },
                     "type":"outbound",
                     "remainningCount":-1
+                },
+                {
+                    "name":"fullme-url",
+                    "matcher":{
+                        "type":"StartWith",
+                        "expression":"http://fullme.pkuxkx.net/"
+                    },
+                    "action":{
+                        "type":"SendCommand",
+                        "expression":"l"
+                    },
+                    "type":"inbound",
+                    "remainningCount":1
                 }
     ]
 }
