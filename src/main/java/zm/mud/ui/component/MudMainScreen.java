@@ -7,7 +7,9 @@ import java.awt.Font;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
+import zm.mud.core.api.ClientService;
 import zm.mud.ui.cfg.GlobleCfg;
+import zm.mud.utils.SpringBeanUtil;
 
 public class MudMainScreen extends JFrame {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
@@ -24,7 +26,25 @@ public class MudMainScreen extends JFrame {
         setTitle(this.globleCfg.getTitle());
         setSize(new Dimension(this.globleCfg.getWidth(), this.globleCfg.getHeight())); 
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // 1. ✨ 必须改成 DO_NOTHING，把红叉的控制权拿回手里
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        // 2. 绑定窗口关闭事件监听器
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                // 在后台或当前线程中优雅发送 quit，并层层关闭本地网络句柄
+                logger.info("用户点击关闭窗口，开始执行安全断开流程...");
+                try {
+                    SpringBeanUtil.getBean(ClientService.class).quit(); 
+                } catch (Exception ex) {
+                    logger.error("安全断开期间发生异常: ", ex);
+                } finally {
+                    logger.info("网络资源已安全释放，进程即将安全退出。");
+                    System.exit(0); 
+                }
+            }
+        });
         setLocationRelativeTo(null);
         this.init();
         pack(); // 根据组件首选大小调整窗口
@@ -44,7 +64,7 @@ public class MudMainScreen extends JFrame {
         add(scrollPane, BorderLayout.CENTER);
 
         // 输入框在底部
-        this.mudInputField = new MudInputField();
+        this.mudInputField = new MudInputField(this);
         add(this.mudInputField, BorderLayout.SOUTH);
 
     }

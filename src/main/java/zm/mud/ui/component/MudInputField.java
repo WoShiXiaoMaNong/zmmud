@@ -21,8 +21,10 @@ public class MudInputField extends javax.swing.JTextField {
     private int maxHistoryCnt;
     private int currentHistoryIndex;
     private OubMsgService oms;
+    private MudMainScreen mainScreen;
 
-    public MudInputField() {
+    public MudInputField(MudMainScreen mainScreen) {
+        this.mainScreen = mainScreen;
         oms = ZmMudUI.getContext().getBean(OubMsgService.class);
 
         this.initHistoryRelated();
@@ -51,9 +53,18 @@ public class MudInputField extends javax.swing.JTextField {
             if (!input.isEmpty()) {
                 setText("");
                 this.pushToHistory(input);
+                this.showCurrentInput(input);
                 handleInput(input);
             }
         });
+    }
+
+    /**
+     * 用于回显命令
+     * @param input
+     */
+    private void showCurrentInput(String input){
+        this.mainScreen.printlnToScreen("> " + input);
     }
 
     private void pushToHistory(String input) {
