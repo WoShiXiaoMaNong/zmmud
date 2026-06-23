@@ -8,6 +8,7 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
 import zm.mud.core.api.ClientService;
+import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.cfg.GlobleCfg;
 import zm.mud.utils.SpringBeanUtil;
 
@@ -21,8 +22,11 @@ public class MudMainScreen extends JFrame {
 
     private GlobleCfg globleCfg;
 
-    public MudMainScreen(GlobleCfg cfg) {
+    private ZmMudUI ui;
+
+    public MudMainScreen(GlobleCfg cfg,ZmMudUI ui) {
         this.globleCfg = cfg;
+        this.ui = ui;
         setTitle(this.globleCfg.getTitle());
         setSize(new Dimension(this.globleCfg.getWidth(), this.globleCfg.getHeight())); 
 
@@ -64,7 +68,7 @@ public class MudMainScreen extends JFrame {
         add(scrollPane, BorderLayout.CENTER);
 
         // 输入框在底部
-        this.mudInputField = new MudInputField(this);
+        this.mudInputField = new MudInputField(this.ui);
         add(this.mudInputField, BorderLayout.SOUTH);
 
     }

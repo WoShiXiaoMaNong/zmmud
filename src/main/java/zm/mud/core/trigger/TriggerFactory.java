@@ -57,6 +57,7 @@ public class TriggerFactory {
 
         IAction action = (IAction) this.ctx.getBean("ACTION_" + actionEntry.getType());
         action.setExpression(actionEntry.getExpression());
+        action.setParams(cfgEntry.getAction().getParams());
 
        TriggerType triggerType = null;
        if("inbound".equalsIgnoreCase(triggerTypeStr)){
@@ -71,6 +72,8 @@ public class TriggerFactory {
 
         Trigger trigger = new Trigger(triggerType,trggerName,matcher, action,remainningCount);
         trigger.setSync(cfgEntry.isSync());
+        trigger.setUnique(cfgEntry.isUnique());
+        trigger.setAutoRegister(cfgEntry.isAutoRegister());
         return trigger;
 
     }
@@ -87,6 +90,10 @@ public class TriggerFactory {
 
         logger.info("Register triggers");
         for(TriggerConfigEntry cfgEntry : this.triggers){
+            if( !cfgEntry.isAutoRegister()){
+                logger.debug("[Skip]Not an Auto-Register Trigger :" + cfgEntry.getName());
+                continue;
+            }
             Trigger trgger = this.build(cfgEntry);
             this.triggerRegister.registerTrigger(trgger);
         }

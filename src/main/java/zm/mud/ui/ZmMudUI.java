@@ -7,7 +7,6 @@ import zm.mud.ui.processor.MsgPrintProcessor;
 
 import javax.swing.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +32,7 @@ public class ZmMudUI {
 
     @PostConstruct
     public void init(){
-         mudMain = new MudMainScreen(globleCfg);
+         mudMain = new MudMainScreen(globleCfg,this);
     }
 
   
@@ -59,7 +58,5 @@ public class ZmMudUI {
     public static ApplicationContext getContext(){
         return context;
     }
-
-    // 解析 ANSI 并映射到 Swing 样式
    
 }

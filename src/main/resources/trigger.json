@@ -3,6 +3,8 @@
                 {
                     "name":"fullme",
                     "sync":true,  
+                    "unique":true,
+                    "autoRegister":true,
                     "matcher":{
                         "type":"Equals",
                         "expression":"fullme"
@@ -16,13 +18,19 @@
                 },
                 {
                     "name":"fullme-url",
+                    "sync":false,  
+                    "unique":true,
+                    "autoRegister":false,
                     "matcher":{
                         "type":"StartWith",
                         "expression":"http://fullme.pkuxkx.net/"
                     },
                     "action":{
-                        "type":"SendCommand",
-                        "expression":"l"
+                        "type":"FullmeShowAction",
+                        "expression":"l",
+                        "params":{
+                            "baseUrl":"http://fullme.pkuxkx.net/"
+                        }
                     },
                     "type":"inbound",
                     "remainningCount":1

@@ -1,8 +1,10 @@
 package zm.mud.core.network.outbound.processor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -22,9 +24,11 @@ public class OubTriggerProcessor implements IOubMsgProcessor, Ordered {
 
     private Lock lock;
     private List<Trigger> triggers;
+    private Map<String,Trigger> triggerMap;
 
     public OubTriggerProcessor(){
         this.triggers = new ArrayList<>();
+        this.triggerMap = new HashMap<>();
         this.lock = new ReentrantLock();
     }
 
@@ -41,6 +45,7 @@ public class OubTriggerProcessor implements IOubMsgProcessor, Ordered {
                 // 1. 检查调用前是否已死亡（例如被其他线程或之前的逻辑改变了状态）
                 if (trigger.died()) {
                     iterator.remove(); // 安全删除
+                    this.triggerMap.remove(trigger.getUniqueKey());
                     logger.debug(trigger.getTriggerName() + " : removed !");
                     continue;
                 }
@@ -78,14 +83,21 @@ public class OubTriggerProcessor implements IOubMsgProcessor, Ordered {
 
     }
 
-    public void register(Trigger trigger){
+    public void register(Trigger trigger) {
+        
         this.lock.lock();
-        try{
+        try {
+            if(trigger.isUnique() && this.triggerMap.containsKey(trigger.getUniqueKey())){
+                logger.debug("[Skip] Unique trigger already existed:" + trigger.getUniqueKey());
+                return;
+            }
             this.triggers.add(trigger);
-        }finally{
+            this.triggerMap.put(trigger.getUniqueKey(), trigger);
+        } finally {
             this.lock.unlock();
         }
     }
+    
     @Override
     public int getOrder() {
         return 1;

@@ -1,6 +1,5 @@
 package zm.mud.ui.component;
 
-import java.awt.Font;
 
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;

@@ -17,8 +17,30 @@ public class Trigger {
     private String triggerName;
     private IMatcher matcher;
     private IAction action;
-    private boolean sync;
+    
 
+    /**
+     * 不配置时，为false。
+     * true: trigger 会在独立的线程中执行
+     * false: trigger 会在主线程中执行（对于outbound trigger，会在执行完整个trigger后，消息才会被发出去）
+     */
+    private Boolean sync;
+
+    /**
+     * 不配置时，为false
+     * true: 不可以同时注册多个相同的trigger
+     * false: 可以同时注册多个相同的trigger
+     */
+    private Boolean unique;
+
+    /**
+     * 不配置时，为false
+     * true: 启动时，自动注册
+     * false: 启动时，不自动注册
+     */
+    private Boolean autoRegister;
+
+    
     /*
        1. 用于记录触发器还可以被触发几次。
        2. 当归零时，该触发器将会被销毁
@@ -104,5 +126,26 @@ public class Trigger {
     public void setSync(boolean sync) {
         this.sync = sync;
     }
+
+    public String getUniqueKey(){
+        return this.triggerName;
+    }
+
+    public void setAutoRegister(boolean autoRegister){
+        this.autoRegister = autoRegister;
+    }
+
+    public boolean isAutoRegister(){
+        return this.autoRegister;
+    }
+
+    public void setUnique(boolean unique){
+        this.unique = unique;
+    }
+
+    public boolean isUnique(){
+        return this.unique;
+    }
+
     
 }   
