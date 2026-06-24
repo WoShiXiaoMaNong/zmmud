@@ -58,12 +58,17 @@
         <artifactId>jakarta.annotation-api</artifactId>
         <version>3.0.0</version> <!-- 根据您的 Spring Boot 版本而定 -->
       </dependency>
+      <dependency>
+        <groupId>com.alibaba.fastjson2</groupId>
+        <artifactId>fastjson2</artifactId>
+        <version>2.0.53</version>
+      </dependency>
 
-<dependency>
-    <groupId>org.fusesource.jansi</groupId>
-    <artifactId>jansi</artifactId>
-    <version>2.4.0</version>
-</dependency>
+      <dependency>
+        <groupId>org.fusesource.jansi</groupId>
+        <artifactId>jansi</artifactId>
+        <version>2.4.0</version>
+      </dependency>
 
     </dependencies>
   </dependencyManagement>
@@ -92,16 +97,19 @@
       <groupId>jakarta.annotation</groupId>
       <artifactId>jakarta.annotation-api</artifactId>
     </dependency>
-
+    <dependency>
+      <groupId>com.alibaba.fastjson2</groupId>
+      <artifactId>fastjson2</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-    <groupId>org.fusesource.jansi</groupId>
-    <artifactId>jansi</artifactId>
-</dependency>
+      <groupId>org.fusesource.jansi</groupId>
+      <artifactId>jansi</artifactId>
+    </dependency>
 
     <!-- Optionally: parameterized tests support -->
     <dependency>
@@ -122,6 +130,16 @@
       </plugins>
     </pluginManagement>
     <plugins>
+        <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.10.1</version>
+        <configuration>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
+          <release>${maven.compiler.release}</release>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>

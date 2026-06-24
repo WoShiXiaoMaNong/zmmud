@@ -1,13 +1,17 @@
  package zm.mud.ui;
 
-import zm.mud.api.InbMsgService;
+import zm.mud.core.api.InbMsgService;
 import zm.mud.ui.cfg.GlobleCfg;
 import zm.mud.ui.component.MudMainScreen;
+import zm.mud.ui.component.MudTextAare;
 import zm.mud.ui.processor.MsgPrintProcessor;
+
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
@@ -31,9 +35,20 @@ public class ZmMudUI {
     @Autowired
     private InbMsgService inbMsgService;
 
+      private static final ThreadPoolExecutor uiThreadPool = new ThreadPoolExecutor(
+                                    1, 3, 60L, TimeUnit.SECONDS,
+                                    new LinkedBlockingQueue<>(1024),
+                                    r -> {
+                                        Thread t = new Thread(r,   "fullme-thread");
+                                        t.setDaemon(true); // 强烈建议：客户端退出时，这些线程会自动销毁
+                                        return t;
+                                    },
+                                    new ThreadPoolExecutor.CallerRunsPolicy()
+                            );
+
     @PostConstruct
     public void init(){
-         mudMain = new MudMainScreen(globleCfg);
+         mudMain = new MudMainScreen(globleCfg,this);
     }
 
   
@@ -45,11 +60,31 @@ public class ZmMudUI {
         });
     }
 
-   
-    public void printlnToScreen(String text) {
-        this.mudMain.printlnToScreen(text);
+
+    public int getMsgOffset(String msg){
+        return this.mudMain.getMsgOffset(msg);
     }
 
+   
+    public void printlnToScreen(String text) {
+        this.mudMain.printlnToScreen(text,false);
+    }
+
+    public void printlnToScreen(String text,boolean enableBlod) {
+        this.mudMain.printlnToScreen(text,enableBlod);
+    }
+
+    
+      /**
+     * @see MudTextAare#printImg(String, int)
+     * @param imgUrl
+     * @param offset
+     */
+    public void printImg(String imgUrl,int offset,boolean insertMode) {
+        uiThreadPool.execute(()->{
+            mudMain.printImg(imgUrl,offset,insertMode);
+        });
+    }
 
     @Autowired
     public void setContext(ApplicationContext aContext){
@@ -59,7 +94,5 @@ public class ZmMudUI {
     public static ApplicationContext getContext(){
         return context;
     }
-
-    // 解析 ANSI 并映射到 Swing 样式
    
 }

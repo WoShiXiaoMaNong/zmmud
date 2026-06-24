@@ -181,17 +181,7 @@ mvn clean install
 java -jar zm-mud.jar
 ```
 
-或直接运行：
-
-```java
-public static void main(String[] args) {
-    ApplicationContext context =
-        new AnnotationConfigApplicationContext("zm.mud");
-
-    MudClient client = context.getBean(MudClient.class);
-    client.connect();
-}
-```
+或直接运行：ZmMud.java中的main方法
 
 ---
 
@@ -202,21 +192,27 @@ public static void main(String[] args) {
 * [x] 入站/出站分层
 * [x] IAC 协议初步支持
 * [x] 多线程处理模型（初版）
-* [ ] 线程模型优化（进行中）
-* [ ] 消息模型优化以及收敛
-* [ ] Trigger / Alias 系统
+* [x] 线程模型优化
+* [x] 消息模型优化以及收敛
+* [x] Trigger（进行中）
+* [ ] Alias 系统
 * [ ] 人物信息 系统
 * [ ] 地图房间绘制
-* [ ] UI 支持
-* [ ] ANSI 渲染
+* [x] UI 支持
+* [x] ANSI 渲染
 
 ---
 
-## 🧠 设计理念
+## 相关IAC的支持开关
+* [x]         FF FD 18    IAC DO TERMINAL-TYPE (服务器要求通报终端类型)
+* [ ]         FF FB 5A    IAC WILL START-TLS (服务器声明支持安全传输 TLS 加密)
+* [ ]         FF FD 1F    IAC DO NAWS (服务器要求通报窗口大小)
+* [ ]         FF FB C9    IAC WILL SUPDUP (服务器声明它支持 SUPDUP 协议，C9即201)
+* [ ]         FF FB 56    IAC WILL TN3270E (服务器声明它支持 TN3270 增强模式)
+* [ ]         FF FB 46    IAC WILL VT320-REGIME (服务器声明支持 VT320 模式)
+* [ ]         FF FD 27    IAC DO NEW-ENVIRONMENT (服务器要求协商环境变量)
+* [ ]         FF FB 2A    IAC WILL CHARSET (服务器声明支持字符集协商)
 
-* 分层清晰（Reader / Message / Processor）
-* 解耦（队列 + 多线程）
-* 可扩展（协议与业务分离）
 
 ---
 
@@ -242,7 +238,7 @@ public static void main(String[] args) {
 
 ## 👨‍💻 作者
 
-ZmMud 项目由个人开发，目标是构建一个高可扩展的 MUD 客户端框架。
+zhongming139@126.com
 
 ---
 

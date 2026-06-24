@@ -1,0 +1,39 @@
+package zm.mud.core.network.threads;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import zm.mud.core.network.outbound.message.OubMsg;
+import zm.mud.core.network.outbound.processor.IOubMsgProcessor;
+import zm.mud.core.network.queue.OubMsgQueue;
+
+@Service
+public class OubMsgProcessThread extends IZmmudThread {
+    private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
+            .getLogger(OubMsgProcessThread.class);
+
+    @Autowired
+    private OubMsgQueue oubMsgQueue;
+
+    @Autowired
+    private List<IOubMsgProcessor> oubMsgProcessors;
+
+    @Override
+    public boolean doRun() {
+        try {
+            OubMsg msg = oubMsgQueue.take();
+            for (IOubMsgProcessor processor : oubMsgProcessors) {
+                if (processor.processMessage(msg)) {
+                    break; // Message processed, move to next message
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            logger.error("Error occurred in OutboundMessageProcessThread", e);
+            throw e;
+        }
+    }
+
+}
