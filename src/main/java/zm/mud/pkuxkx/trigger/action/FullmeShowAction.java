@@ -1,4 +1,4 @@
-package zm.mud.core.trigger.action;
+package zm.mud.pkuxkx.trigger.action;
 
 import java.net.HttpURLConnection;
 
@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import zm.mud.core.trigger.Trigger;
+import zm.mud.core.trigger.action.IAction;
 import zm.mud.core.trigger.cfg.MatchResult;
 import zm.mud.ui.ZmMudUI;
 
@@ -19,10 +20,16 @@ public class FullmeShowAction implements IAction {
     private static final Logger logger = LogManager.getLogger(FullmeShowAction.class);
     private String actionCfgJsonStr;
 
+
+    @Autowired
+    private ZmMudUI ui;
+
     @Override
     public void setExpression(String expression) {
         actionCfgJsonStr = expression;
     }
+
+
 
     @Override
     public String getExpression() {
@@ -78,6 +85,8 @@ public class FullmeShowAction implements IAction {
                 String relativeSrc = matcher.group(1); // 拿到 "./b2evo_captcha_tmp/xxxx.jpg"
                 // 使用 URL 上下文构造，自动洗掉 "./" 并剔除 robot.php?filename=xxx
                 imgUrl = new java.net.URL(pageUrl, relativeSrc).toString();
+                int fullmeUrlOffset = ui.getMsgOffset(fullmeUrl);
+                ui.printImg(imgUrl,fullmeUrlOffset,false); //不使用insert模式，直接覆盖
             } else {
                 logger.error("解析 fullme 验证码 URL 失败: " + fullmeUrl);
             }

@@ -17,11 +17,7 @@ public class AnsiToStyleDocUtil {
     
     public void parseAnsiToStyledDocument(String text, StyledDocument doc, Font font, ITheme theme) throws BadLocationException {
         if (text == null || text.isEmpty()) return;
-
-        if(text.contains("以下是最近一小时之内死于非命的江湖儿女")){
-            logger.debug("fordebug!!!!!!!!!!!!!!!!!!!!!!!!");
-        }
-
+        
         SimpleAttributeSet currentAttr = new SimpleAttributeSet();
         StyleConstants.setFontFamily(currentAttr, font.getName());
         StyleConstants.setFontSize(currentAttr, font.getSize());

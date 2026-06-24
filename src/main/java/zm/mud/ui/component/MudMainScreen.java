@@ -75,7 +75,19 @@ public class MudMainScreen extends JFrame {
 
     public void printlnToScreen(String text) {
         this.mudTextAare.printlnToScreen(text);
-        ;
+        
+    }
+    public int getMsgOffset(String msg){
+        return this.mudTextAare.getMsgOffset(msg);
+    }
+
+    /**
+     * @see MudTextAare#printImg(String, int)
+     * @param imgUrl
+     * @param offset
+     */
+    public void printImg(String imgUrl,int offset,boolean insertMode) {
+        this.mudTextAare.printImg(imgUrl,offset,insertMode);
     }
 
     public void setShow() {
