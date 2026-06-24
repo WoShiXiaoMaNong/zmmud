@@ -46,12 +46,25 @@ public class MudTextAare extends JTextPane {
         logger.info("displayBufLineNumber :" + MAX_LINES);
     }
 
+    /**
+     * 
+     * @param text
+     */
     public void printlnToScreen(String text) {
+        this.printlnToScreen(text,false);
+    }
+
+    /**
+     * 
+     * @param text
+     * @param enableBlod 使用加粗来表示 高亮 ，注意，会引起字符无法对齐问题！！！
+     */
+    public void printlnToScreen(String text,boolean enableBlod) {
         SwingUtilities.invokeLater(() -> {
             printLock.lock();
             try {
                 ansiToStyleDocUtil.parseAnsiToStyledDocument(text + "\r\n", doc, this.globleCfg.getFont(),
-                        this.globleCfg.getThemeType().getTheme());
+                        this.globleCfg.getThemeType().getTheme(),enableBlod);
                 trimLines();
                 this.setCaretPosition(doc.getLength());
             } catch (BadLocationException e) {

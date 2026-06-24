@@ -67,7 +67,11 @@ public class ZmMudUI {
 
    
     public void printlnToScreen(String text) {
-        this.mudMain.printlnToScreen(text);
+        this.mudMain.printlnToScreen(text,false);
+    }
+
+    public void printlnToScreen(String text,boolean enableBlod) {
+        this.mudMain.printlnToScreen(text,enableBlod);
     }
 
     

@@ -10,6 +10,6 @@ public class ClientService {
     private OubMsgService oubMsgService;
 
     public void quit(){
-        this.oubMsgService.send("quit");
+        //this.oubMsgService.send("quit");
     }
 }

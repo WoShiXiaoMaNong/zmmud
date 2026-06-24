@@ -15,7 +15,7 @@ import zm.mud.ui.theme.ITheme;
 public class AnsiToStyleDocUtil {
     private static final Logger logger = LogManager.getLogger(AnsiToStyleDocUtil.class);
     
-    public void parseAnsiToStyledDocument(String text, StyledDocument doc, Font font, ITheme theme) throws BadLocationException {
+    public void parseAnsiToStyledDocument(String text, StyledDocument doc, Font font, ITheme theme,boolean enableBlod) throws BadLocationException {
         if (text == null || text.isEmpty()) return;
         
         SimpleAttributeSet currentAttr = new SimpleAttributeSet();
@@ -74,7 +74,17 @@ public class AnsiToStyleDocUtil {
                                     resetAttributes(currentAttr, lastRawFg, lastRawBg);
                                     break;
                                 case "1":
-                                    StyleConstants.setBold(currentAttr, true);
+                                    if(enableBlod){
+                                        StyleConstants.setBold(currentAttr, true);
+                                    }else{
+                                         lastRawFg = new Color(
+                                        Math.min(255, theme.getDefaultBackground().getRed() + 10),
+                                        Math.min(255, theme.getDefaultBackground().getGreen() + 10),
+                                        Math.min(255, theme.getDefaultBackground().getBlue() + 10)
+                                    );
+                                    StyleConstants.setForeground(currentAttr, lastRawFg);
+                                    }
+                                   
                                     break;
                                 case "2":
                                     // 弱化当前颜色
