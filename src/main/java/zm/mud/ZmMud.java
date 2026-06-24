@@ -1,21 +1,15 @@
 package zm.mud;
 
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.UnknownHostException;
-import java.nio.charset.Charset;
-
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import zm.mud.client.MudClient;
-import zm.mud.network.outbound.message.NormalOutboundMsg;
-import zm.mud.network.outbound.message.OubMessage;
-import zm.mud.network.queue.OubMsgQueue;
-import zm.mud.network.utils.SubThreadUtil;
+import zm.mud.core.client.MudClient;
+import zm.mud.core.network.threads.ThreadPoolService;
+import zm.mud.ui.ZmMudUI;
 
 /**
  * Hello world!
@@ -23,32 +17,36 @@ import zm.mud.network.utils.SubThreadUtil;
 public class ZmMud {
     private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ZmMud.class);
 
+    private static final ApplicationContext  context = new AnnotationConfigApplicationContext("zm.mud");
+
     public static void main(String[] args) throws UnknownHostException, IOException {
-        ApplicationContext  context = new AnnotationConfigApplicationContext("zm.mud");
+        ZmMud app = new ZmMud();
+        app.start();
+    }
+
+
+    public void start(){
+        ZmMudUI zmMudUI = context.getBean(ZmMudUI.class);
+        zmMudUI.start();
         MudClient client = context.getBean(MudClient.class);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            logger.error("Slowdown error",e);
+        }
+        boolean isConnected = client.connect();
 
-        client.connect();
-
-        SubThreadUtil threadStarter = context.getBean(SubThreadUtil.class);
+        if(!isConnected) {
+            logger.error("Failed to connect to server");
+            return;
+        }
+        logger.info("Connected to server successfully");
+      
+        ThreadPoolService threadStarter = context.getBean(ThreadPoolService.class);
         threadStarter.startAllThreads();
 
-        OubMsgQueue oubMsgQueue = context.getBean(OubMsgQueue.class);
-          new Thread(() -> {
-            try {
-                BufferedReader consoleReader = new BufferedReader(
-                    new InputStreamReader(System.in, Charset.forName("GBK"))
-                );
-                String line = null;
-                while ((line = consoleReader.readLine()) != null) {
-                  OubMessage msg = new NormalOutboundMsg(line);
-                  oubMsgQueue.put(msg);
-                }
-            } catch (IOException e) {
-                logger.error("Failed to read from console", e);
-            }
-        }).start();
-
-      
+       
 
     }
+
 }

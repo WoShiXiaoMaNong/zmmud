@@ -1,5 +1,26 @@
 mud:
+  name: Zm Mud
+  # 客户端模拟的终端类型名:ZMMUD, 已经注册到pkuxkx
+  terminalType: ZMMUD 
+  version: 0.1
   server:
+    name: 北大侠客行
     host: mud.pkuxkx.net
     port: 8080
     charset: GBK
+  inbound:
+    reader:
+      buffer:
+        maxLength: 1024
+  ui:
+    size:
+      width: 800
+      height: 600
+    font:
+      name: 宋体
+      # name: Consolas
+      size: 12
+    # theme: LIGHT
+    theme: DARK
+    showTimestamp: false
+    displayBufLineNumber: 500
