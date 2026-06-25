@@ -16,6 +16,14 @@ public interface ITheme {
     Color dimColor(Color c);
     Color ensureContrast(Color fg, Color bg);
     Font geFont();
+
+    /**
+     * 将传入的颜色转换为高亮（或加粗替代）颜色
+     * 注意，目的是为了有对比而更鲜艳，而不一定是提亮
+     * @param color 当前的前景色
+     * @return 调整后的高亮颜色
+     */
+    Color toBrighColor(Color color);
     
     default  Color resolveForeground(String code,Color bg){
         return getForeground(code);

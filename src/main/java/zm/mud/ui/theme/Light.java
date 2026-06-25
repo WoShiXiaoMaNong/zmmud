@@ -176,4 +176,12 @@ public class Light implements ITheme {
         double darker = Math.min(l1, l2);
         return (brighter + 0.05) / (darker + 0.05);
     }
+
+    @Override
+    public Color toBrighColor(Color color) {
+        return new Color(
+                            Math.max(255, color.getRed() + 50),
+                            Math.max(255, color.getGreen() + 50),
+                            Math.max(255, color.getBlue() + 50));
+    }
 }

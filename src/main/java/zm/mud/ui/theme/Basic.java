@@ -204,4 +204,13 @@ public class Basic implements ITheme {
                 Math.max(0, c.getBlue() - 120));
     }
 
+
+    @Override
+    public Color toBrighColor(Color color) {
+        return new Color(
+                            Math.max(255, color.getRed() + 50),
+                            Math.max(255, color.getGreen() + 50),
+                            Math.max(255, color.getBlue() + 50));
+    }
+
 }

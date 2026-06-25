@@ -81,11 +81,7 @@ public class AnsiToStyleDocUtil {
                                         if (currentFg == null) {
                                             currentFg = theme.getDefaultForeground();
                                         }
-                                        lastRawFg = new Color(
-                                        Math.min(255, currentFg.getRed() + 30),
-                                        Math.min(255, currentFg.getGreen() + 30),
-                                        Math.min(255, currentFg.getBlue() + 30)
-                                    );
+                                        lastRawFg = theme.toBrighColor(currentFg);
                                     StyleConstants.setForeground(currentAttr, lastRawFg);
                                     }
                                    

@@ -189,4 +189,13 @@ public class Dark implements ITheme {
         }
         return new Color(30, 30, 30); 
     }
+
+
+    @Override
+    public Color toBrighColor(Color color) {
+        return new Color(
+                            Math.min(255, color.getRed() - 50),
+                            Math.min(255, color.getGreen() - 50),
+                            Math.min(255, color.getBlue() - 50));
+    }
 }
