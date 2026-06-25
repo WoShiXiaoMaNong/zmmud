@@ -77,10 +77,14 @@ public class AnsiToStyleDocUtil {
                                     if(enableBlod){
                                         StyleConstants.setBold(currentAttr, true);
                                     }else{
-                                         lastRawFg = new Color(
-                                        Math.min(255, theme.getDefaultBackground().getRed() + 10),
-                                        Math.min(255, theme.getDefaultBackground().getGreen() + 10),
-                                        Math.min(255, theme.getDefaultBackground().getBlue() + 10)
+                                        Color currentFg = StyleConstants.getForeground(currentAttr);
+                                        if (currentFg == null) {
+                                            currentFg = theme.getDefaultForeground();
+                                        }
+                                        lastRawFg = new Color(
+                                        Math.min(255, currentFg.getRed() + 30),
+                                        Math.min(255, currentFg.getGreen() + 30),
+                                        Math.min(255, currentFg.getBlue() + 30)
                                     );
                                     StyleConstants.setForeground(currentAttr, lastRawFg);
                                     }

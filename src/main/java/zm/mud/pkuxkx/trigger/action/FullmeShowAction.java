@@ -78,7 +78,6 @@ public class FullmeShowAction implements IAction {
 
             // 使用正则表达式从已经截获的 HTML 片段中提取相对路径
             java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("<img\\s+[^>]*src=\"([^\"]+)\"");
-            java.util.regex.Pattern.compile("<img\\s+[^>]*src=\"([^\"]+)\"");
             java.util.regex.Matcher matcher = pattern.matcher(htmlBuilder.toString());
 
             if (matcher.find()) {
