@@ -189,4 +189,10 @@ public class Dark implements ITheme {
         }
         return new Color(30, 30, 30); 
     }
+
+
+@Override
+public Color toBrighColor(Color color) {
+     return this.toUniversalBrightColor(color, true);
+}
 }
