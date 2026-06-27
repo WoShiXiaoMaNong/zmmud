@@ -17,8 +17,8 @@ mud:
       width: 800
       height: 600
     font:
-      name: 宋体
-      # name: Consolas
+      # name: 宋体
+      name: Sarasa Mono SC Nerd for pkuxkx
       size: 12
     # theme: LIGHT
     theme: DARK
