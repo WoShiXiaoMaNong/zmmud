@@ -88,9 +88,16 @@ public class ConnectionManager implements AutoCloseable,DisposableBean  {
             throw new IOException("Connection is not active");
         }
         try {
-            return inputStream.read(); 
+            int data = inputStream.read(); 
+            
+            // 判斷EOF
+            if (data == -1) {
+                connected = false; 
+                throw new IOException("Remote server closed the connection (EOF)");
+            }
+            
+            return data; 
         } catch (IOException e) {
-            // 读取异常时，主动标记连接断开
             connected = false;
             throw e;
         }
