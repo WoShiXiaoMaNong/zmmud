@@ -69,8 +69,7 @@
 * Java中实现了ILuaApi.java 接口的所有Spring bean，都可以在lua中直接使用
     * 例如以下例子中的 LuaApi:sendMsg(ssinfo)
 * Lua例子
-···
-
+```Lua
     -- scripts/hp_handler.lua
 
     -- 接收 Java 传过来的参数（... 代表入参列表）
@@ -102,6 +101,83 @@
     -- if tonumber(num1) < 100 then
     --     print("血量过低，执行吃药！")
     -- end
+```
 
 
-···
+* 配置样例
+```json
+{
+    "triggers":[
+                {
+                    "name":"fullme",
+                    "sync":true,  
+                    "unique":true,
+                    "autoRegister":true,
+                    "matcher":{
+                        "type":"Equals",
+                        "expression":"fullme"
+                    },
+                    "action":{
+                        "type":"RegisterAction",
+                        "expression":"fullme-url"
+                    },
+                    "type":"outbound",
+                    "remainningCount":-1
+                },
+                {
+                    "name":"fullme-url",
+                    "sync":false,  
+                    "unique":true,
+                    "autoRegister":false,
+                    "matcher":{
+                        "type":"StartWith",
+                        "expression":"http://fullme.pkuxkx.net/"
+                    },
+                    "action":{
+                        "type":"FullmeShowAction",
+                        "expression":"l",
+                        "params":{
+                            "baseUrl":"http://fullme.pkuxkx.net/"
+                        }
+                    },
+                    "type":"inbound",
+                    "remainningCount":1
+                },
+                {
+                    "name":"hpbrief-oub-trigger",
+                    "sync":true,  
+                    "unique":true,
+                    "autoRegister":true,
+                    "matcher":{
+                        "type":"Equals",
+                        "expression":"hpbrief"
+                    },
+                    "action":{
+                        "type":"RegisterAction",
+                        "expression":"hpbrief-inb-trigger"
+                    },
+                    "type":"outbound",
+                    "remainningCount":-1
+                },
+                {
+                    "name":"hpbrief-inb-trigger",
+                    "sync":false,  
+                    "unique":true,
+                    "autoRegister":false,
+                    "matcher":{
+                        "type":"Regex",
+                        "expression":"^#(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)$"
+                    },
+                    "action":{
+                        "type":"LuaScriptAction",
+                        "expression":"C:\\Users\\zhong\\Desktop\\dev\\zmmud\\Lua-Scirpts\\hp_handler.lua",
+                        "params":{
+                            "baseUrl":"test"
+                        }
+                    },
+                    "type":"inbound",
+                    "remainningCount":3
+                }
+    ]
+}
+```
