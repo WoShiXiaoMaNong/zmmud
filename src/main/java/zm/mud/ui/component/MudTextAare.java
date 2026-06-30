@@ -25,9 +25,8 @@ public class MudTextAare extends JTextPane {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(MudTextAare.class);
 
-    private static final int MAX_LINES = 100;
     // 新增：引入 50 行的缓冲区，避免每来一行就执行删除导致的界面抖动
-    private static final int BUFFER_LINES = 50;
+    private static final int BUFFER_LINES = 200;
 
     private StyledDocument doc;
     private AnsiToStyleDocUtil ansiToStyleDocUtil;
@@ -36,16 +35,19 @@ public class MudTextAare extends JTextPane {
 
     private Lock printLock;
 
+    private int displayBufLineNumber;
+
     public MudTextAare(GlobleCfg cfg) {
         this.printLock = new ReentrantLock();
         this.globleCfg = cfg;
+        this.displayBufLineNumber = cfg.getDisplayBufLineNumber();
         this.setEditable(false);
         this.setBackground(this.globleCfg.getThemeType().getTheme().getDefaultBackground());
         this.setForeground(this.globleCfg.getThemeType().getTheme().getDefaultBackground());
         this.setParagraphAttributes(this.getParagraphAttributes(), true);
         this.doc = this.getStyledDocument();
         this.ansiToStyleDocUtil = ZmMudUI.getContext().getBean(AnsiToStyleDocUtil.class);
-        logger.info("displayBufLineNumber :" + MAX_LINES);
+        logger.info("displayBufLineNumber :" + this.displayBufLineNumber );
     }
 
     /**
@@ -257,12 +259,12 @@ public class MudTextAare extends JTextPane {
         int lineCount = root.getElementCount();
 
         // 优化：只有当总行数超过 最大限制 + 缓冲限制 (150行) 时，才集中清理一次
-        if (lineCount <= MAX_LINES + BUFFER_LINES) {
+        if (lineCount <= this.displayBufLineNumber + BUFFER_LINES) {
             return;
         }
 
         // 需要删除的行数
-        int linesToRemove = lineCount - MAX_LINES;
+        int linesToRemove = lineCount - this.displayBufLineNumber;
 
         // 找到第 N 行的结束位置
         javax.swing.text.Element lineElement = root.getElement(linesToRemove - 1);
