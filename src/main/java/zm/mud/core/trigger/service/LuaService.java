@@ -1,21 +1,22 @@
 package zm.mud.core.trigger.service;
 
+import java.util.List;
+
 import org.luaj.vm2.Globals;
-import org.luaj.vm2.LuaNil;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.CoerceJavaToLua;
 import org.luaj.vm2.lib.jse.JsePlatform;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import zm.mud.core.api.LuaApi;
+import zm.mud.core.api.ILuaApi;
 
 @Service
 public class LuaService {
     
 
     @Autowired
-    private LuaApi luaApi;
+    private List<ILuaApi> luaApi;
 
     // 创建一个全局的 Lua 运行环境
     private final Globals globals = JsePlatform.standardGlobals();
@@ -26,10 +27,7 @@ public class LuaService {
      */
     public void runScript(String scriptPath, Object trigger, Object matchResult) {
 
-        if(  globals.get("MudLuaApi").isnil()){
-            LuaValue luaService = CoerceJavaToLua.coerce(luaApi);
-            globals.set("MudLuaApi", luaService);
-        }
+        this.registerLuaApi();
 
         // 1. 加载 Lua 脚本文件
         LuaValue chunk = globals.loadfile(scriptPath);
@@ -40,5 +38,20 @@ public class LuaService {
         
         // 3. 执行 Lua 脚本，并将两个对象作为参数传入
         chunk.call(luaTrigger, luaRet);
+    }
+
+    private void registerLuaApi(){
+        if( this.luaApi == null){
+            return;
+        }
+
+        for(ILuaApi api: this.luaApi){
+            String apiClassName = api.getClass().getSimpleName();
+
+            if(  globals.get(apiClassName).isnil()){
+                LuaValue luaService = CoerceJavaToLua.coerce(api);
+                globals.set(apiClassName, luaService);
+            }
+        }
     }
 }

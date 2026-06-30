@@ -21,7 +21,7 @@ for i = 0, size - 1 do
     -- print(i .. " : " .. tostring(value))
     ssinfo = ssinfo .. tostring(value) .. ","
 end
-MudLuaApi:sendMsg(ssinfo)
+LuaApi:sendMsg(ssinfo)
 
 -- 你可以在这里写你核心的 MUD 机器人逻辑（比如血量过低自动吃药等）
 -- if tonumber(num1) < 100 then

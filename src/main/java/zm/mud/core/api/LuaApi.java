@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
  */
 
 @Service
-public class LuaApi {
+public class LuaApi implements ILuaApi{
     private static final Logger logger = LogManager.getLogger(LuaApi.class);
     
     
