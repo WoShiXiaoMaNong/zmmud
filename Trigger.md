@@ -120,6 +120,27 @@
 
 
 * 配置样例
+## 触发器配置说明 (Triggers Configuration)
+
+本配置文件包含两组**链式触发器**（通过 Outbound 触发器动态注册对应的 Inbound 触发器），主要用于 MUD 游戏中的自动化数据处理。
+
+### 1. Fullme 验证码显示组
+*   **fullme (外发触发)**: 
+    *   当匹配到精确文本 `"fullme"` 时触发。
+    *   **动作**: 动态注册 `fullme-url` 接收器。可无限次触发 (`-1`)。
+*   **fullme-url (接收触发)**: 
+    *   当匹配到以 `http://pkuxkx.net` 开头的 URL 时触发。
+    *   **动作**: 调用 `FullmeShowAction` 模块在客户端渲染并显示验证码图片。
+    *   **限制**: 触发 `1` 次后自动销毁，防止历史链接干扰。
+
+### 2. HPBrief 状态解析组
+*   **hpbrief-oub-trigger (外发触发)**: 
+    *   当匹配到精确文本 `"hpbrief"` 时触发。
+    *   **动作**: 动态注册 `hpbrief-inb-trigger` 接收器。可无限次触发 (`-1`)。
+*   **hpbrief-inb-trigger (接收触发)**: 
+    *   当正则匹配到形如 `#数字,数字,数字,数字,数字,数字` 的血量状态数据时触发。
+    *   **动作**: 调用本地 Lua 脚本 `hp_handler.lua` 进行数据解析与状态刷新。
+    *   **限制**: 触发 `3` 次后自动销毁，防止长时间监听污染日志。
 ```json
 {
     "triggers":[
@@ -185,7 +206,7 @@
                     },
                     "action":{
                         "type":"LuaScriptAction",
-                        "expression":"C:\\Users\\zhong\\Desktop\\dev\\zmmud\\Lua-Scirpts\\hp_handler.lua",
+                        "expression":"C:\\aaa\\bbb\\hp_handler.lua",
                         "params":{
                             "baseUrl":"test"
                         }
