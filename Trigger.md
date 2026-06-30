@@ -24,6 +24,7 @@
 ------------------------------
 ## 三、 匹配器组件 (matcher)
 用于指定文本过滤规则。包含 type（匹配类型）和 expression（表达式）两个核心字段。
+
 ## 可用匹配类型 (type)
 
 * Equals
@@ -41,7 +42,14 @@
 * Regex / RegexMatcher
 * 语义：正则表达式匹配。
    * 匹配到的group，会按正则中的顺序，通过 MatchResult.matchedRet 传给Action
-
+> 注意:所有匹配器的BeanID的格式都必须是： MATCHER_{matcher.type} 
+> 例如，MATCHER_Equals,就可以在json配置文件中使用,如下:
+```json
+  "matcher":{
+            "type":"Equals",
+             "expression":"fullme"
+    }
+```
 ------------------------------
 ## 四、 动作器组件 (action)
 用于定义触发成功后的行为。除通用的 type 和 expression 外，还支持通过 params 传递自定义参数。
@@ -62,7 +70,14 @@
    * 业务场景：处理高级复杂逻辑。系统会将匹配到的文本和正则分组变量传递给 Lua 脚本进行二次解析。
 * FullmeShowAction (特定业务扩展)
     * 北侠特有的动作器。专用于拦截 URL 链接，并在客户端内嵌组件中直接弹窗渲染对应的验证码图片。
-
+> 注意:所有动作其的BeanID的格式都必须是： ACTION_{matcher.type} 
+> 例如，ACTION_LuaScriptAction,就可以在json配置文件中使用,如下:
+```json
+  "action":{
+            "type":"LuaScriptAction",
+            "expression":"C:\\aaa\\bbb\\hp_handler.lua"
+    }
+```
 ## 五、 关于Lua脚本
 
 
