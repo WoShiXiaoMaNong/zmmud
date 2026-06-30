@@ -30,6 +30,9 @@ public class GlobleCfg {
     @Value("${mud.ui.theme:Basic}")
     private ThemeType themeType;
 
+    @Value("${mud.ui.displayBufLineNumber:100}")
+    private int displayBufLineNumber;
+
     public int getWidth() {
         return width;
     }
@@ -89,6 +92,14 @@ public class GlobleCfg {
 
     public Font getFont(){
         return new Font(this.getFontName(),Font.PLAIN,this.getFontSize());
+    }
+
+    public int getDisplayBufLineNumber() {
+        return displayBufLineNumber;
+    }
+
+    public void setDisplayBufLineNumber(int displayBufLineNumber) {
+        this.displayBufLineNumber = displayBufLineNumber;
     }
 
     
