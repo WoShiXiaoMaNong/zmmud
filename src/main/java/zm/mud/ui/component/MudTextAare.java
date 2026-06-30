@@ -3,6 +3,8 @@ package zm.mud.ui.component;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
@@ -51,7 +53,7 @@ public class MudTextAare extends JTextPane {
      * @param text
      */
     public void printlnToScreen(String text) {
-        this.printlnToScreen(text,false);
+        this.printlnToScreen(text, false);
     }
 
     /**
@@ -59,12 +61,12 @@ public class MudTextAare extends JTextPane {
      * @param text
      * @param enableBlod 使用加粗来表示 高亮 ，注意，会引起字符无法对齐问题！！！
      */
-    public void printlnToScreen(String text,boolean enableBlod) {
+    public void printlnToScreen(String text, boolean enableBlod) {
         SwingUtilities.invokeLater(() -> {
             printLock.lock();
             try {
                 ansiToStyleDocUtil.parseAnsiToStyledDocument(text + "\r\n", doc, this.globleCfg.getFont(),
-                        this.globleCfg.getThemeType().getTheme(),enableBlod);
+                        this.globleCfg.getThemeType().getTheme(), enableBlod);
                 trimLines();
                 this.setCaretPosition(doc.getLength());
             } catch (BadLocationException e) {
@@ -75,8 +77,8 @@ public class MudTextAare extends JTextPane {
         });
     }
 
-    public void printImg(String imgUrl) {
-        this.printImg(imgUrl, doc.getLength(), true);
+    public void printImg(List<ImageInfo> imgUrls) {
+        this.printImg(imgUrls, doc.getLength());
     }
 
     /**
@@ -85,108 +87,53 @@ public class MudTextAare extends JTextPane {
      * @param imgUrl
      * @param offset
      */
-    public void printImg(String imgUrl, int offset, boolean insertMode) {
-        try {
-            logger.info("开始下载 MUD 图片: " + imgUrl);
-            HttpUtil httpUtil = SpringBeanUtil.getBean(HttpUtil.class);
-            BufferedImage image = httpUtil.download(imgUrl,
-                    new Function<InputStream, BufferedImage>() {
-                        @Override
-                        public BufferedImage apply(InputStream inputStream) {
-                            try {
-                                return javax.imageio.ImageIO.read(inputStream);
-                            } catch (IOException e) {
-                                logger.error("下载图片失败！", e);
-                            }
-                            return null;
-                        }
-                    }, BufferedImage.class);
+    public void printImg(List<ImageInfo> imgUrls, int offset) {
 
-            if (image == null) {
-                logger.error("图片解析失败，未获得有效图像数据: " + imgUrl);
-                printErrorToScreenAsync("[图片解析失败]");
-                return;
+        try {
+            List<ImageInfo> fetchSucceedImages = new ArrayList<>();
+            for (ImageInfo imageInfo : imgUrls) {
+                logger.info("开始下载 MUD 图片: " + imageInfo);
+                HttpUtil httpUtil = SpringBeanUtil.getBean(HttpUtil.class);
+                BufferedImage image = httpUtil.download(imageInfo.getImgUrl(),
+                        new Function<InputStream, BufferedImage>() {
+                            @Override
+                            public BufferedImage apply(InputStream inputStream) {
+                                try {
+                                    return javax.imageio.ImageIO.read(inputStream);
+                                } catch (IOException e) {
+                                    logger.error("下载图片失败！", e);
+                                }
+                                return null;
+                            }
+                        }, BufferedImage.class);
+
+                if (image == null) {
+                    logger.error("图片解析失败，未获得有效图像数据: " + imageInfo);
+                    printErrorToScreenAsync("[图片解析失败]");
+                    continue;
+                }
+                imageInfo.setBufferedImage(image);
+                fetchSucceedImages.add(imageInfo);
             }
 
-            // 获取图片原始高度（像素）
-            int imageHeight = image.getHeight();
-
-            // 4. 下载成功！构建 ImageIcon
-            ImageIcon imageIcon = new ImageIcon(image);
+            if (fetchSucceedImages.size() == 0) {
+                logger.error("图片解析失败，未获得有效图像数据. ");
+                return;
+            }
 
             // 5. 切回 UI 线程，并严格加锁写入 JTextPane
             SwingUtilities.invokeLater(() -> {
                 printLock.lock(); // 加锁：保证图文严格的时序
                 try {
-                    int baseOffset = offset;
+                    int nextOffset = offset;
+                    for (ImageInfo image : fetchSucceedImages) {
+                        // 获取图片原始高度（像素）
+                        int imageHeight = image.getBufferedImage().getHeight();
 
-                    // 兜底：如果完全没找到对应的 URL 或者超出范围，则强制降级放到最后
-                    if (baseOffset == -1 || baseOffset > doc.getLength()) {
-                        baseOffset = doc.getLength();
-                    }
+                        // 4. 下载成功！构建 ImageIcon
+                        ImageIcon imageIcon = new ImageIcon(image.getBufferedImage());
+                        nextOffset = this.doImageInsert(imageIcon, image.isInsertMode(), nextOffset, imageHeight);
 
-                    // --- 【定位当前行和下一行】 ---
-                    javax.swing.text.Element root = doc.getDefaultRootElement();
-                    int currentLineIndex = root.getElementIndex(baseOffset);
-                    javax.swing.text.Element currentLineElem = root.getElement(currentLineIndex);
-                    
-                    // 当前行的结束位置（即后一行的开始位置）
-                    int nextLineStartOffset = currentLineElem.getEndOffset();
-                    
-                    if (nextLineStartOffset > doc.getLength()) {
-                        nextLineStartOffset = doc.getLength();
-                    }
-
-                    if (insertMode) {
-                        // ====================================================
-                        // 【1. 插入模式】：从后一行开始插入，不破坏任何原有文本
-                        // ====================================================
-                        this.setCaretPosition(nextLineStartOffset);
-                        this.insertIcon(imageIcon);
-                        doc.insertString(this.getCaretPosition(), "\n", null);
-
-                    } else {
-                        // ====================================================
-                        // 【2. 覆盖模式】：动态计算图片占用的行数，并将其全部覆盖（删除）
-                        // ====================================================
-                        int nextLineIndex = currentLineIndex + 1;
-                        
-                        // 1. 根据当前字体动态计算单行文本的像素高度
-                        java.awt.FontMetrics metrics = this.getFontMetrics(this.getFont());
-                        int lineHeight = metrics.getHeight();
-                        if (lineHeight <= 0) {
-                            lineHeight = 16; // 容错兜底高度
-                        }
-
-                        // 2. 计算图片实际会撑开的文本行数（向上取整，例如 5.3 行算作 6 行）
-                        int linesToCover = (int) Math.ceil((double) imageHeight / lineHeight);
-                        logger.debug("图片高度: " + imageHeight + "px, 单行高: " + lineHeight + "px, 预计覆盖行数: " + linesToCover);
-
-                        // 3. 确定被覆盖区域的终点行
-                        int endLineIndex = nextLineIndex + linesToCover - 1;
-                        int totalLines = root.getElementCount();
-                        if (endLineIndex >= totalLines) {
-                            endLineIndex = totalLines - 1; // 确保不越界
-                        }
-
-                        // 4. 如果确实有需要覆盖的行，计算它们的总字符长度并执行删除
-                        if (nextLineIndex < totalLines && endLineIndex >= nextLineIndex) {
-                            javax.swing.text.Element endLineElem = root.getElement(endLineIndex);
-                            int coverEndOffset = endLineElem.getEndOffset();
-                            int lengthToRemove = coverEndOffset - nextLineStartOffset;
-                            
-                            if (lengthToRemove > 0) {
-                                // 一口气删掉接下来的多行文本
-                                doc.remove(nextLineStartOffset, lengthToRemove);
-                            }
-                        }
-                        
-                        // 5. 在清除出来的干净区域插入图片
-                        this.setCaretPosition(nextLineStartOffset);
-                        this.insertIcon(imageIcon);
-                        
-                        // 补回一个换行符，确保后续未被覆盖的文本能正常排在图片下方
-                        doc.insertString(this.getCaretPosition(), "\n", null);
                     }
 
                     // 4. 触发你原有的行数裁剪逻辑
@@ -203,9 +150,88 @@ public class MudTextAare extends JTextPane {
             });
 
         } catch (Exception e) {
-            logger.error("下载 MUD 图片失败: " + imgUrl, e);
+            logger.error("下载 MUD 图片失败: " + imgUrls, e);
             printErrorToScreenAsync("[图片下载失败]");
         }
+    }
+
+    private int doImageInsert(ImageIcon imageIcon, boolean insertMode, int offset, int imageHeight)
+            throws BadLocationException {
+
+        int baseOffset = offset;
+
+        // 兜底：如果完全没找到对应的 URL 或者超出范围，则强制降级放到最后
+        if (baseOffset == -1 || baseOffset > doc.getLength()) {
+            baseOffset = doc.getLength();
+        }
+
+
+        if (insertMode) {
+            // ====================================================
+            // 【1. 插入模式】：从后一行开始插入，不破坏任何原有文本
+            // ====================================================
+            this.setCaretPosition(baseOffset);
+            this.insertIcon(imageIcon);
+            doc.insertString(this.getCaretPosition(), "\n", null);
+
+        } else {
+            // ====================================================
+            // 【2. 覆盖模式】：动态计算图片占用的行数，并将其全部覆盖（删除）
+            // ====================================================
+            
+            // --- 【定位当前行和下一行】 ---
+            javax.swing.text.Element root = doc.getDefaultRootElement();
+            int currentLineIndex = root.getElementIndex(baseOffset);
+            javax.swing.text.Element currentLineElem = root.getElement(currentLineIndex);
+
+            // 当前行的结束位置（即后一行的开始位置）
+            int nextLineStartOffset = currentLineElem.getEndOffset();
+
+            if (nextLineStartOffset > doc.getLength()) {
+                nextLineStartOffset = doc.getLength();
+            }
+
+            int nextLineIndex = currentLineIndex + 1;
+
+            // 1. 根据当前字体动态计算单行文本的像素高度
+            java.awt.FontMetrics metrics = this.getFontMetrics(this.getFont());
+            int lineHeight = metrics.getHeight();
+            if (lineHeight <= 0) {
+                lineHeight = 16; // 容错兜底高度
+            }
+
+            // 2. 计算图片实际会撑开的文本行数（向上取整，例如 5.3 行算作 6 行）
+            int linesToCover = (int) Math.ceil((double) imageHeight / lineHeight);
+            logger.debug("图片高度: " + imageHeight + "px, 单行高: " + lineHeight + "px, 预计覆盖行数: " + linesToCover);
+
+            // 3. 确定被覆盖区域的终点行
+            int endLineIndex = nextLineIndex + linesToCover - 1;
+            int totalLines = root.getElementCount();
+            if (endLineIndex >= totalLines) {
+                endLineIndex = totalLines - 1; // 确保不越界
+            }
+
+            // 4. 如果确实有需要覆盖的行，计算它们的总字符长度并执行删除
+            if (nextLineIndex < totalLines && endLineIndex >= nextLineIndex) {
+                javax.swing.text.Element endLineElem = root.getElement(endLineIndex);
+                int coverEndOffset = endLineElem.getEndOffset();
+                int lengthToRemove = coverEndOffset - nextLineStartOffset;
+
+                if (lengthToRemove > 0) {
+                    // 一口气删掉接下来的多行文本
+                    doc.remove(nextLineStartOffset, lengthToRemove);
+                }
+            }
+
+            // 5. 在清除出来的干净区域插入图片
+            this.setCaretPosition(nextLineStartOffset);
+            this.insertIcon(imageIcon);
+
+            // 补回一个换行符，确保后续未被覆盖的文本能正常排在图片下方
+            doc.insertString(this.getCaretPosition(), "\n", null);
+        }
+
+        return this.getCaretPosition(); // 返回插入image后最新位置
     }
 
     /**
@@ -264,6 +290,5 @@ public class MudTextAare extends JTextPane {
         }
         return -1;
     }
-
 
 }

@@ -13,8 +13,11 @@ import zm.mud.core.trigger.Trigger;
 import zm.mud.core.trigger.action.IAction;
 import zm.mud.core.trigger.cfg.MatchResult;
 import zm.mud.ui.ZmMudUI;
+import zm.mud.ui.component.ImageInfo;
 import zm.mud.utils.HttpUtil;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 
@@ -46,10 +49,22 @@ public class FullmeShowAction implements IAction {
     @Override
     public void execute(Trigger trigger, MatchResult ret) {
         String fullmeUrl = ret.getOriginMsg();
-        String imgUrl = this.fetchImgUrl(fullmeUrl);
+       
+        
+        
+        List<ImageInfo> imgUrls = new ArrayList<>();
+
+        int fetchTimes = 4;
+        for(int i = 0 ; i < fetchTimes; i ++){
+            boolean insertMode = (i == 0 ? false: true );  //第一张图片不使用insert模式，用来覆盖北侠默认预留的空行；
+            String imgUrl = this.fetchImgUrl(fullmeUrl);
+            ImageInfo imageInfo = new ImageInfo(imgUrl, insertMode);
+            imgUrls.add(imageInfo);
+        }
         int fullmeUrlOffset = ui.getMsgOffset(fullmeUrl);
-        ui.printImg(imgUrl,fullmeUrlOffset,false); //不使用insert模式，直接覆盖
-        logger.info(">>>>>>>>>> url:" + imgUrl);
+        logger.debug("Fullme URL offset:" + fullmeUrlOffset);
+        ui.printImg(imgUrls,fullmeUrlOffset);
+        logger.info(">>>>>>>>>> url:" + imgUrls);
     }
 
     private String fetchImgUrl(String fullmeUrl){

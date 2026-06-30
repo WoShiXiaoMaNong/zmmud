@@ -3,6 +3,7 @@ package zm.mud.ui.component;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -86,8 +87,8 @@ public class MudMainScreen extends JFrame {
      * @param imgUrl
      * @param offset
      */
-    public void printImg(String imgUrl,int offset,boolean insertMode) {
-        this.mudTextAare.printImg(imgUrl,offset,insertMode);
+    public void printImg(List<ImageInfo> imgUrls,int offset) {
+        this.mudTextAare.printImg(imgUrls,offset);
     }
 
     public void setShow() {
