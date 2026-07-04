@@ -18,8 +18,8 @@ public class AnsiToStyleDocUtil {
     public void parseAnsiToStyledDocument(String text, StyledDocument doc, Font font, ITheme theme,boolean enableBlod) throws BadLocationException {
         if (text == null || text.isEmpty()) return;
         
-        SimpleAttributeSet currentAttr = new SimpleAttributeSet();
-        StyleConstants.setFontFamily(currentAttr, font.getName());
+        SimpleAttributeSet currentAttr = new SimpleAttributeSet(); 
+        StyleConstants.setFontFamily(currentAttr, font.getFamily());
         StyleConstants.setFontSize(currentAttr, font.getSize());
         
         // 增加两个状态变量，用于记录当前“最原始”的颜色属性，避免 contrast 重复计算导致颜色污染
