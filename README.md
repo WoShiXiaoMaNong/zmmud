@@ -13,140 +13,86 @@
 
 ---
 
+## 触发器说明
+* [点击查看 触发器说明](Trigger.md)
+
 ## 🏗️ 项目结构
 
 ```
-zm.mud
-├─ ZmMud.java                # 程序入口
-├─ cfg                       # 配置相关（YAML支持）
-│  ├─ YamlConfig.java
-│  └─ YamlPropertySourceFactory.java
-│
-├─ client                    # 客户端核心
-│  └─ MudClient.java
-│
-└─ network                   # 网络模块（核心）
-   ├─ ConnectionManager.java
-   │
-   ├─ inbound                # 入站数据处理
-   │  ├─ message             # 入站消息定义
-   │  ├─ processor           # 入站消息处理器
-   │  └─ reader              # 字节流解析器
-   │
-   ├─ outbound               # 出站数据处理
-   │  ├─ message             # 出站消息定义
-   │  └─ processor           # 出站处理器
-   │
-   ├─ queue                  # 队列系统（线程间通信）
-   │
-   ├─ threads                # 多线程处理模块
-   │
-   └─ utils                  # 工具类
+└─ zm
+   └─ mud
+      ├─ ZmMud.java                  # 程序主入口（Spring Boot 引导类）
+      │  
+      ├─ core                        # 🛠️ 核心引擎层
+      │  ├─ IShutdownFunc.java       # 关闭钩子接口
+      │  ├─ ShutdownWorld.java       # 游戏世界关闭逻辑实现
+      │  │  
+      │  ├─ api                      # 内部/外部服务接口
+      │  │  ├─ ClientService.java    # 客户端管理服务
+      │  │  ├─ ILuaApi.java          # Lua 脚本暴露的 API 接口
+      │  │  ├─ InbMsgService.java    # 入站消息服务
+      │  │  ├─ LuaApi.java           # Lua API 具体实现
+      │  │  └─ OubMsgService.java    # 出站消息服务
+      │  │  
+      │  ├─ cfg                      # 配置加载模块
+      │  │  ├─ ApplicationConfig.java
+      │  │  ├─ YamlConfig.java       # YAML 配置解析
+      │  │  └─ YamlPropertySourceFactory.java
+      │  │  
+      │  ├─ client                   # 客户端核心实例
+      │  │  └─ MudClient.java        # MUD 核心连接会话管理
+      │  │  
+      │  ├─ network                  # 🌐 网络通信模块（生产/消费者模型）
+      │  │  ├─ ConnectionManager.java# 网络连接管理器
+      │  │  │  
+      │  │  ├─ inbound               # 入站（接收）数据处理
+      │  │  │  ├─ message            # 入站消息实体定义（如：普通消息、IAC确认）
+      │  │  │  ├─ processor          # 入站消息处理器（包含触发器、普通消息分发）
+      │  │  │  └─ reader             # 原始字节流解析器
+      │  │  │  
+      │  │  ├─ outbound              # 出站（发送）数据处理
+      │  │  │  ├─ message            # 出站消息实体定义
+      │  │  │  ├─ processor          # 出站消息处理器（包含发送控制、发送触发）
+      │  │  │  └─ sender             # 消息底层发送器
+      │  │  │  
+      │  │  ├─ queue                 # 队列系统（数据缓冲区）
+      │  │  │  └─ *Queue.java        # 包含入站/出站阻塞队列，用于线程间异步通信
+      │  │  │  
+      │  │  └─ threads               # 网络专用线程
+      │  │     └─ *Thread.java       # 包含读线程、入站/出站消息独立处理线程
+      │  │  
+      │  ├─ protocol                 # 📜 协议解析层
+      │  │  └─ iac                   # Telnet IAC (Is An Command) 机制处理
+      │  │     ├─ consts             # Telnet 协议常量定义
+      │  │     ├─ handler            # 通用 IAC 命令处理器
+      │  │     └─ sbhandler          # IAC SB 子协商处理器（用于特殊指令/编码）
+      │  │  
+      │  ├─ thread                   # 🧵 线程池管理
+      │  │  └─ ZmmudThreadPools.java # 系统全局线程池配置
+      │  │  
+      │  └─ trigger                  # ⚡ 触发器引擎（核心自动化模块）
+      │     ├─ Trigger*.java         # 触发器定义、加载、注册与工厂模式实现
+      │     ├─ action                # 触发动作（发送命令、执行 Lua 脚本等）
+      │     ├─ cfg                   # 触发器配置实体及匹配结果封装
+      │     ├─ matcher               # 文本匹配算法（正则、全包含、开头/结尾匹配）
+      │     └─ service               # 触发器、匹配及 Lua 执行的底层服务
+      │  
+      ├─ pkuxkx                      # 🎯 游戏定制层（针对知名MUD“北大侠客行”）
+      │  └─ trigger                  
+      │     └─ action                # 定制化触发动作（如：Fullme验证码显示、血量提示解析）
+      │  
+      ├─ ui                          # 🖥️ 界面展示层
+      │  ├─ ZmMudUI.java             # UI 模块主入口
+      │  ├─ cfg                      # UI 全局配置与主题类型定义
+      │  ├─ component                # 自定义 Swing 控件（输入框、主屏幕、文本域）
+      │  ├─ processor                # 文本渲染处理器（将游戏文本输出至屏幕）
+      │  ├─ theme                    # 界面主题管理（支持 Basic、Dark、Light 主题）
+      │  └─ util                     # 颜色解析工具（将 MUD 的 ANSI 颜色码转为 UI 样式）
+      │  
+      └─ utils                       # 🛠️ 通用工具层
+         └─ *Util.java               # 包含流关闭、字体、十六进制、HTTP及SpringBean获取工具
+
 ```
-
----
-
-## 🔄 数据处理流程
-
-### 入站（服务器 → 客户端）
-
-```
-Socket
-  ↓
-InboundByteDispatcherThread
-  ↓
-IAC / 普通数据分流
-  ↓
-Message Reader（解析）
-  ↓
-Message Queue
-  ↓
-Processor（处理）
-```
-
----
-
-### 出站（客户端 → 服务器）
-
-```
-用户输入 / 系统生成
-  ↓
-Outbound Message
-  ↓
-Outbound Queue
-  ↓
-Send Processor
-  ↓
-Socket
-```
-
----
-
-## 🧩 核心模块说明
-
-### 1. ConnectionManager
-
-负责：
-
-* Socket 连接建立
-* 输入输出流管理
-* 生命周期控制
-
----
-
-### 2. Reader（解析层）
-
-| 类名                 | 作用                |
-| ------------------ | ----------------- |
-| `IacInbMsgReader`  | 解析 Telnet IAC 控制流 |
-| `MudGameMsgReader` | 解析普通游戏文本          |
-| `InbMessageReader` | 统一解析入口            |
-
----
-
-### 3. Message（消息模型）
-
-入站消息：
-
-* `NormalInbMsg`：普通文本
-* `IACConfirmInbMsg`：IAC 协议确认
-* `ShutdownInbProcessMessage`：系统控制消息
-
-出站消息：
-
-* `NormalOutboundMsg`
-
----
-
-### 4. Processor（处理器）
-
-| 类名                    | 作用           |
-| --------------------- | ------------ |
-| `IACConfirmProcessor` | 处理 Telnet 协议 |
-| `PrintProcessor`      | 输出文本         |
-| `OubSendProcessor`    | 发送数据到服务器     |
-
----
-
-### 5. Queue（队列）
-
-用于线程之间解耦：
-
-* 字节队列
-* 消息队列
-* 出站队列
-
----
-
-### 6. Threads（线程模型）
-
-当前使用多线程流水线处理：
-
-* 字节分发线程
-* IAC 收集线程
-* MUD 消息收集线程
-* 消息处理线程
-* 出站处理线程
 
 ---
 

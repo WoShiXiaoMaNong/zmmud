@@ -2,11 +2,13 @@ package zm.mud.ui;
 
 import zm.mud.core.api.InbMsgService;
 import zm.mud.ui.cfg.GlobleCfg;
+import zm.mud.ui.component.ImageInfo;
 import zm.mud.ui.component.MudMainScreen;
 import zm.mud.ui.component.MudTextAare;
 import zm.mud.ui.processor.MsgPrintProcessor;
 import zm.mud.utils.FontUtil;
 
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -77,9 +79,9 @@ public class ZmMudUI {
      * @param imgUrl
      * @param offset
      */
-    public void printImg(String imgUrl, int offset, boolean insertMode) {
+    public void printImg(List<ImageInfo> imgUrls, int offset) {
         uiThreadPool.execute(() -> {
-            mudMain.printImg(imgUrl, offset, insertMode);
+            mudMain.printImg(imgUrls, offset);
         });
     }
 

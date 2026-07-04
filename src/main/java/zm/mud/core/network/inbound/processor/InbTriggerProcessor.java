@@ -78,7 +78,10 @@ public class InbTriggerProcessor implements IInbMsgProcessor, Ordered {
         
         this.lock.lock();
         try {
-            if(trigger.isUnique() && this.triggerMap.containsKey(trigger.getUniqueKey())){
+            Trigger originalTrigger = this.triggerMap.get(trigger.getUniqueKey());
+            
+            boolean triggerExisting = originalTrigger!=null && !originalTrigger.died();
+            if(trigger.isUnique() && triggerExisting){
                 logger.debug("[Skip] Unique trigger already existed:" + trigger.getUniqueKey());
                 return;
             }
