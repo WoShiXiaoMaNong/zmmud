@@ -15,7 +15,7 @@ import zm.mud.ui.theme.ITheme;
 public class AnsiToStyleDocUtil {
     private static final Logger logger = LogManager.getLogger(AnsiToStyleDocUtil.class);
     
-    public void parseAnsiToStyledDocument(String text, StyledDocument doc, Font font, ITheme theme,boolean enableBlod) throws BadLocationException {
+    public void parseAnsiToStyledDocument11(String text, StyledDocument doc, Font font, ITheme theme,boolean enableBlod) throws BadLocationException {
         if (text == null || text.isEmpty()) return;
         
         SimpleAttributeSet currentAttr = new SimpleAttributeSet(); 
@@ -144,6 +144,152 @@ public class AnsiToStyleDocUtil {
             }
         }
     }
+    public void parseAnsiToStyledDocument(String text, StyledDocument doc, Font font, ITheme theme, boolean enableBlod) throws BadLocationException {
+    if (text == null || text.isEmpty()) return;
+    
+    SimpleAttributeSet currentAttr = new SimpleAttributeSet(); 
+    StyleConstants.setFontFamily(currentAttr, font.getFamily());
+    StyleConstants.setFontSize(currentAttr, font.getSize());
+    
+    Color lastRawFg = theme.getDefaultForeground();
+    Color lastRawBg = theme.getDefaultBackground();
+
+    StyleConstants.setForeground(currentAttr, lastRawFg);
+    StyleConstants.setBackground(currentAttr, lastRawBg);
+    StyleConstants.setBold(currentAttr, false);
+    StyleConstants.setUnderline(currentAttr, false);
+
+    int index = 0;
+    int len = text.length();
+
+    while (index < len) {
+        int nextAnsi = text.indexOf("\u001B[", index);
+        
+        // 1. 消费普通文本
+        if (nextAnsi == -1 || nextAnsi > index) {
+            int end = (nextAnsi == -1) ? len : nextAnsi;
+            String segment = text.substring(index, end)
+                                 .replace("\t", "    ")
+                                 .replace("\u3000", "  ");
+            if (!segment.isEmpty()) {
+                this.appendString(doc, segment, currentAttr);
+            }
+            index = end;
+            if (index >= len) break;
+        }
+
+        // 2. 精准解析 ANSI 指令边界
+        int terminatorIndex = -1;
+        char terminatorChar = 0;
+        for (int i = nextAnsi + 2; i < len; i++) {
+            char c = text.charAt(i);
+            // 匹配任何 ANSI 序列的结束标识符 (A-Z, a-z)
+            if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
+                terminatorIndex = i;
+                terminatorChar = c;
+                break;
+            }
+        }
+
+        if (terminatorIndex > nextAnsi) {
+            String codeStr = text.substring(nextAnsi + 2, terminatorIndex);
+            
+            if (terminatorChar == 'm') {
+                // 标准 'm' 结尾的颜色逻辑
+                if (codeStr.isEmpty()) { 
+                    lastRawFg = theme.getDefaultForeground();
+                    lastRawBg = theme.getDefaultBackground();
+                    resetAttributes(currentAttr, lastRawFg, lastRawBg);
+                } else {
+                    String[] codes = codeStr.split(";");
+                    for (int i = 0; i < codes.length; i++) {
+                        String code = codes[i].trim();
+                        if (code.isEmpty()) continue;
+
+                        try {
+                            switch (code) {
+                                case "0":
+                                    lastRawFg = theme.getDefaultForeground();
+                                    lastRawBg = theme.getDefaultBackground();
+                                    resetAttributes(currentAttr, lastRawFg, lastRawBg);
+                                    break;
+                                case "1":
+                                    if (enableBlod) {
+                                        StyleConstants.setBold(currentAttr, true);
+                                    } else {
+                                        Color currentFg = StyleConstants.getForeground(currentAttr);
+                                        if (currentFg == null) {
+                                            currentFg = theme.getDefaultForeground();
+                                        }
+                                        lastRawFg = theme.toBrighColor(currentFg);
+                                        StyleConstants.setForeground(currentAttr, lastRawFg);
+                                    }
+                                    break;
+                                case "2":
+                                    Color currentFg = StyleConstants.getForeground(currentAttr);
+                                    StyleConstants.setForeground(currentAttr, theme.dimColor(currentFg));
+                                    break;
+                                case "4":
+                                    StyleConstants.setUnderline(currentAttr, true);
+                                    break;
+                                case "24":
+                                    StyleConstants.setUnderline(currentAttr, false);
+                                    break;
+                                case "38": 
+                                    if (i + 2 < codes.length && "5".equals(codes[i + 1].trim())) {
+                                        int colorIndex = Integer.parseInt(codes[i + 2].trim());
+                                        lastRawFg = theme.ansi256ToColor(colorIndex);
+                                        StyleConstants.setForeground(currentAttr, theme.ensureContrast(lastRawFg, lastRawBg));
+                                        i += 2;
+                                    }
+                                    break;
+                                case "48": 
+                                    if (i + 2 < codes.length && "5".equals(codes[i + 1].trim())) {
+                                        int colorIndex = Integer.parseInt(codes[i + 2].trim());
+                                        lastRawBg = theme.ansi256ToColor(colorIndex);
+                                        StyleConstants.setBackground(currentAttr, lastRawBg);
+                                        StyleConstants.setForeground(currentAttr, theme.ensureContrast(lastRawFg, lastRawBg));
+                                        i += 2;
+                                    }
+                                    break;
+                                default:
+                                    if (theme.isForegroundCode(code)) {
+                                        lastRawFg = theme.resolveForeground(code, lastRawBg); 
+                                        StyleConstants.setForeground(currentAttr, theme.ensureContrast(lastRawFg, lastRawBg));
+                                    } else if (theme.isBackground(code)) {
+                                        lastRawBg = theme.getBackground(code);
+                                        StyleConstants.setBackground(currentAttr, lastRawBg);
+                                        StyleConstants.setForeground(currentAttr, theme.ensureContrast(lastRawFg, lastRawBg));
+                                    }
+                                    // 移除了未识别 code 的 warn 报错，防止 MUD 杂色污染日志
+                            }
+                        } catch (Exception e) {
+                            logger.error("Error parsing ANSI code sequence near: " + codeStr, e);
+                        }
+                    }
+                }
+            } else {
+                // 【针对 MUD UI 的核心改动】
+                // 如果是 'I' 或其他控制字符，我们不要丢弃它们后面的文本！
+                // 如果 codeStr 为空或者包含需要特殊转换的内容，可以在这里兼容。
+                // 暂时将其作为普通指令处理，如果不影响显示，我们可以将它后面跟着的符号安全输出。
+                if (terminatorChar == 'I') {
+                    // 部分 MUD 客户端中 \u001B[I 用于触发特殊高亮或图标扩展，
+                    // 如果你的 MUD 协议里 'I' 后面跟着的就是普通文本内容，我们需要原样输出它
+                    if (!codeStr.isEmpty()) {
+                        this.appendString(doc, codeStr, currentAttr);
+                    }
+                }
+            }
+            index = terminatorIndex + 1;
+        } else {
+            // 防御性跳过
+            this.appendString(doc, text.substring(index, index + 2), currentAttr);
+            index += 2;
+        }
+    }
+}
+
 
     private void resetAttributes(SimpleAttributeSet attr, Color defaultFg, Color defaultBg) {
         StyleConstants.setBold(attr, false);
