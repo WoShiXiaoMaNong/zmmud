@@ -18,7 +18,9 @@ mud:
       height: 600
     font:
       name: 宋体
-      # name: Consolas
+
+      # mac 和 linux 可以使用 “Sarasa Mono SC Nerd for pkuxkx” 这个字体
+      # name: Sarasa Mono SC Nerd for pkuxkx
       size: 12
     # theme: LIGHT
     theme: DARK
