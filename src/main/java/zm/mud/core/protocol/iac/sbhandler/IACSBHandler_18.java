@@ -1,5 +1,8 @@
 package zm.mud.core.protocol.iac.sbhandler;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +24,7 @@ public class IACSBHandler_18 implements IIACSBCommandHandler{
      * @return 客户端必须回应的 9 字节终端名报文
      */
     @Override
-    public byte[] handle(byte[] iacSubCommand) {
+    public List<byte[]> handle(byte[] iacSubCommand) {
          if (iacSubCommand == null || iacSubCommand.length < 3) {
             return null;
         }
@@ -57,7 +60,7 @@ public class IACSBHandler_18 implements IIACSBCommandHandler{
             response[response.length - 2] = (byte) IACConsts.IAC; // IAC
             response[response.length - 1] = (byte) IACConsts.CMD_SE; // SE (子协商结束)
             
-            return response; 
+            return Arrays.asList(response); 
         }
         
         return null;

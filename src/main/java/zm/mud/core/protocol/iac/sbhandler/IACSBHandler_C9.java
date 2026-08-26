@@ -5,9 +5,13 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import zm.mud.core.cfg.ApplicationConfig;
+import zm.mud.core.protocol.gmcp.IGMCPOnMessage;
 import zm.mud.core.protocol.iac.consts.IACConsts;
 
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * IAC GMCP (服务器发来的 GMCP 数据包)
@@ -24,6 +28,9 @@ public class IACSBHandler_C9 implements IIACSBCommandHandler {
     @Autowired
     private ApplicationConfig appCfg;
 
+    @Autowired
+    private List<IGMCPOnMessage> gmcpMessageHandlers;
+
     /**
      * 处理服务器发来的 GMCP 消息
      * 
@@ -31,8 +38,12 @@ public class IACSBHandler_C9 implements IIACSBCommandHandler {
      * @return 客户端需要回应的字节，不需要回应则返回 null
      */
     @Override
-    public byte[] handle(byte[] iacSubCommand) {
-        if (iacSubCommand == null || iacSubCommand.length < 5) {
+    public List<byte[]> handle(byte[] iacSubCommand) {
+        if (!this.appCfg.isGMCPEnabled() || iacSubCommand == null || iacSubCommand.length < 5 ) {
+            return null;
+        }
+        if( this.gmcpMessageHandlers == null || this.gmcpMessageHandlers.isEmpty()){
+            logger.warn("未注册任何 GMCP 消息处理器，无法处理 GMCP 消息");
             return null;
         }
 
@@ -47,15 +58,15 @@ public class IACSBHandler_C9 implements IIACSBCommandHandler {
             String packageName = (spaceIndex == -1) ? rawMessage.trim() : rawMessage.substring(0, spaceIndex).trim();
             String jsonPayload = (spaceIndex == -1) ? "" : rawMessage.substring(spaceIndex + 1).trim();
 
-            logger.info("【GMCP 消息】模块: {} | 数据: {}", packageName, jsonPayload);
+            logger.debug("【GMCP 消息】模块: {} | 数据: {}", packageName, jsonPayload);
 
             // ================== 【核心唤醒逻辑】 ==================
             // 如果收到了系统包（代表服务器开启了 GMCP 通道）
             if ("GMCP.System".equalsIgnoreCase(packageName)) {
-                logger.info("【GMCP】检测到系统广播，发送最极简的 Core.Hello 唤醒报文...");
-
-            }else{
-                 logger.info("【GMCP】packageName: {}, jsonPayload: {}", packageName, jsonPayload);
+                logger.info("【GMCP 开启成功】检测到系统广播，发送最极简的 Core.Hello 唤醒报文...");
+            } else {
+                // 处理 GMCP 消息
+                this.handleGMCPMessage(packageName, jsonPayload);
             }
 
             // ====================================================
@@ -66,5 +77,17 @@ public class IACSBHandler_C9 implements IIACSBCommandHandler {
 
         return null;
     }
+
+
+    private void handleGMCPMessage(String packageName, String jsonPayload) {
+        for (IGMCPOnMessage handler : gmcpMessageHandlers) {
+            try {
+                handler.onMessage(packageName, jsonPayload);
+            } catch (Exception e) {
+                logger.error("处理 GMCP 消息时发生异常，模块: {}, 数据: {}", packageName, jsonPayload, e);
+            }
+        }
+    }
+
 
 }
