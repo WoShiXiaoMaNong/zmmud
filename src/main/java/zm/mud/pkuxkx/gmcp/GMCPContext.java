@@ -55,5 +55,14 @@ public class GMCPContext {
         return statusData.get(key);
     }
 
+    public Map<String, Object> getStatus() {
+        try {
+            statusLock.lock();
+            return new HashMap<>(statusData);
+        } finally {
+            statusLock.unlock();
+        }
+    }
+
 
 }

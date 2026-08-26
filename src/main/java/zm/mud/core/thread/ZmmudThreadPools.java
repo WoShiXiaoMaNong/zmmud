@@ -11,6 +11,7 @@ public enum ZmmudThreadPools {
    
 
     MUD_TRRIGER("Mud Trigger",1,5),
+    MUD_UI("Mud UI",1,5),
     ;
     String name;
     int corePoolSize;
