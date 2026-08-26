@@ -1,6 +1,8 @@
 package zm.mud.core.protocol.iac.sbhandler;
 
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import zm.mud.core.protocol.iac.consts.IACConsts;
@@ -9,7 +11,7 @@ import zm.mud.core.protocol.iac.consts.IACConsts;
 public class DefaultIACSBHandler implements IIACSBCommandHandler{
 
     @Override
-    public byte[] handle(byte[] iacSubCommand) {
+    public List<byte[]> handle(byte[] iacSubCommand) {
         return null;
     }
     

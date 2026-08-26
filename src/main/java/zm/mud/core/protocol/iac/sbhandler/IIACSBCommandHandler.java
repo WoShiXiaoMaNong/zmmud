@@ -1,7 +1,9 @@
 package zm.mud.core.protocol.iac.sbhandler;
 
+import java.util.List;
+
 public interface IIACSBCommandHandler {
     
-    byte[] handle(byte[] iacSubCommand);
+     List<byte[]> handle(byte[] iacSubCommand);
 }
 

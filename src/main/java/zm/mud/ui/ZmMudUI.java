@@ -1,6 +1,8 @@
 package zm.mud.ui;
 
 import zm.mud.core.api.InbMsgService;
+import zm.mud.core.thread.ZmmudThreadPools;
+import zm.mud.pkuxkx.gmcp.GMCPContext;
 import zm.mud.ui.cfg.GlobleCfg;
 import zm.mud.ui.component.ImageInfo;
 import zm.mud.ui.component.MudMainScreen;
@@ -38,6 +40,9 @@ public class ZmMudUI {
     @Autowired
     private InbMsgService inbMsgService;
 
+    @Autowired
+    private GMCPContext gmcpContext;
+
     private static final ThreadPoolExecutor uiThreadPool = new ThreadPoolExecutor(
             1, 3, 60L, TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1024),
@@ -59,6 +64,16 @@ public class ZmMudUI {
             mudMain.setShow();
             mudMain.resetFont(this.globleCfg.getFontName(), this.globleCfg.getFontSize());
             inbMsgService.registerMsgHandler(msgPinter);
+            ZmmudThreadPools.MUD_UI.execute(() -> {
+                while(true){
+                    mudMain.refreshStatusBar(gmcpContext.getStatus(),gmcpContext.getCurrentRoom());
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        logger.error("Error while refreshing status bar: ", e);
+                    }
+                }
+            });
         });
     }
 
