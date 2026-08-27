@@ -100,6 +100,13 @@ public class ZmMudUI {
         });
     }
 
+
+     public void printImg(List<ImageInfo> imgUrls) {
+        uiThreadPool.execute(() -> {
+            mudMain.printImg(imgUrls);
+        });
+    }
+
     @Autowired
     public void setContext(ApplicationContext aContext) {
         context = aContext;

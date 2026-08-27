@@ -47,7 +47,7 @@ public class MudTextAare extends JTextPane {
         this.setParagraphAttributes(this.getParagraphAttributes(), true);
         this.doc = this.getStyledDocument();
         this.ansiToStyleDocUtil = ZmMudUI.getContext().getBean(AnsiToStyleDocUtil.class);
-        logger.info("displayBufLineNumber :" + this.displayBufLineNumber );
+        logger.info("displayBufLineNumber :" + this.displayBufLineNumber);
     }
 
     /**
@@ -94,7 +94,7 @@ public class MudTextAare extends JTextPane {
         try {
             List<ImageInfo> fetchSucceedImages = new ArrayList<>();
             for (ImageInfo imageInfo : imgUrls) {
-                logger.info("开始下载 MUD 图片: " + imageInfo);
+                logger.debug("开始下载 MUD 图片: " + imageInfo);
                 HttpUtil httpUtil = SpringBeanUtil.getBean(HttpUtil.class);
                 BufferedImage image = httpUtil.download(imageInfo.getImgUrl(),
                         new Function<InputStream, BufferedImage>() {
@@ -133,16 +133,44 @@ public class MudTextAare extends JTextPane {
                         int imageHeight = image.getBufferedImage().getHeight();
 
                         // 4. 下载成功！构建 ImageIcon
+                        if( image.getMaxWidth() > 0 && image.getBufferedImage().getWidth() > image.getMaxWidth()) {
+                            // 如果设置了最大宽度，并且图片宽度超过了这个限制，则进行等比例缩放
+                            BufferedImage scaledImage = zm.mud.ui.util.ImageUtil.scaleImage(image.getBufferedImage(), image.getMaxWidth());
+                            image.setBufferedImage(scaledImage);
+                            imageHeight = scaledImage.getHeight(); // 更新图片高度
+                        }
                         ImageIcon imageIcon = new ImageIcon(image.getBufferedImage());
+                         if( image.isNeedBeforeNewLine()) {
+                            doc.insertString(nextOffset, "\n", null);
+                            nextOffset++;
+                        }
                         nextOffset = this.doImageInsert(imageIcon, image.isInsertMode(), nextOffset, imageHeight);
 
+                        if( image.isNeedNewLine()) {
+                            // 在图片的精准屁股后面补上换行符
+                            doc.insertString(nextOffset, "\n", null);
+                            nextOffset++;
+                        }
                     }
 
                     // 4. 触发你原有的行数裁剪逻辑
                     trimLines();
 
                     // 5. 保持良好体验：滚动条自动滚动到最下方最新消息
-                    this.setCaretPosition(doc.getLength());
+                    // this.setCaretPosition(doc.getLength());
+                    int targetOffset = doc.getLength();
+                    if (targetOffset >= 0) {
+                        // 核心：让 Swing 强制将 targetOffset 所在的坐标（即最后一张图的换行符位置）滚动到可见区域
+                        java.awt.Rectangle modelToViewRect = this.modelToView2D(targetOffset).getBounds();
+                        if (modelToViewRect != null) {
+                            // 适当增加一些底部留白高度（例如加上最后一张图的大概高度或30像素），确保整张图完全露出来
+                            modelToViewRect.y += 30;
+                            this.scrollRectToVisible(modelToViewRect);
+                        } else {
+                            // 降级兜底方案
+                            this.setCaretPosition(targetOffset);
+                        }
+                    }
 
                 } catch (BadLocationException e) {
                     logger.error("Failed to process image to doc in cover mode", e);
@@ -162,11 +190,11 @@ public class MudTextAare extends JTextPane {
 
         int baseOffset = offset;
 
+        int currentDocLength = doc.getLength();
         // 兜底：如果完全没找到对应的 URL 或者超出范围，则强制降级放到最后
-        if (baseOffset == -1 || baseOffset > doc.getLength()) {
-            baseOffset = doc.getLength();
+        if (baseOffset == -1 || baseOffset > currentDocLength) {
+            baseOffset = currentDocLength;
         }
-
 
         if (insertMode) {
             // ====================================================
@@ -174,66 +202,46 @@ public class MudTextAare extends JTextPane {
             // ====================================================
             this.setCaretPosition(baseOffset);
             this.insertIcon(imageIcon);
-            doc.insertString(this.getCaretPosition(), "\n", null);
+        
+            // 明确计算：插入一个 Icon 占用 1 个字符长度
+            return baseOffset + 1;
 
         } else {
             // ====================================================
             // 【2. 覆盖模式】：动态计算图片占用的行数，并将其全部覆盖（删除）
             // ====================================================
             
-            // --- 【定位当前行和下一行】 ---
-            javax.swing.text.Element root = doc.getDefaultRootElement();
-            int currentLineIndex = root.getElementIndex(baseOffset);
-            javax.swing.text.Element currentLineElem = root.getElement(currentLineIndex);
+            // 假设你原本计算出的需要删除的长度是某个值，这里用你的变量替代，此处假设为 lengthToRemove
+            int lengthToRemove = 1; // 【请将此处替换为您原代码里计算出来的删除长度变量】
 
-            // 当前行的结束位置（即后一行的开始位置）
-            int nextLineStartOffset = currentLineElem.getEndOffset();
-
-            if (nextLineStartOffset > doc.getLength()) {
-                nextLineStartOffset = doc.getLength();
+            // 核心防御 2：严格边界检查，防止 trimLines 裁剪后引发的 BadLocationException
+            if (baseOffset + lengthToRemove > currentDocLength) {
+                // 如果要删除的区间越界了，动态截断，只删除到文档末尾
+                lengthToRemove = currentDocLength - baseOffset;
             }
 
-            int nextLineIndex = currentLineIndex + 1;
-
-            // 1. 根据当前字体动态计算单行文本的像素高度
-            java.awt.FontMetrics metrics = this.getFontMetrics(this.getFont());
-            int lineHeight = metrics.getHeight();
-            if (lineHeight <= 0) {
-                lineHeight = 16; // 容错兜底高度
-            }
-
-            // 2. 计算图片实际会撑开的文本行数（向上取整，例如 5.3 行算作 6 行）
-            int linesToCover = (int) Math.ceil((double) imageHeight / lineHeight);
-            logger.debug("图片高度: " + imageHeight + "px, 单行高: " + lineHeight + "px, 预计覆盖行数: " + linesToCover);
-
-            // 3. 确定被覆盖区域的终点行
-            int endLineIndex = nextLineIndex + linesToCover - 1;
-            int totalLines = root.getElementCount();
-            if (endLineIndex >= totalLines) {
-                endLineIndex = totalLines - 1; // 确保不越界
-            }
-
-            // 4. 如果确实有需要覆盖的行，计算它们的总字符长度并执行删除
-            if (nextLineIndex < totalLines && endLineIndex >= nextLineIndex) {
-                javax.swing.text.Element endLineElem = root.getElement(endLineIndex);
-                int coverEndOffset = endLineElem.getEndOffset();
-                int lengthToRemove = coverEndOffset - nextLineStartOffset;
-
-                if (lengthToRemove > 0) {
-                    // 一口气删掉接下来的多行文本
-                    doc.remove(nextLineStartOffset, lengthToRemove);
+            // 只有当有内容可删，且起点合法时才执行 remove
+            if (baseOffset >= 0 && lengthToRemove > 0) {
+                try {
+                    doc.remove(baseOffset, lengthToRemove);
+                } catch (BadLocationException e) {
+                    logger.error("Failed to remove text for image cover. Offset: " + baseOffset + ", Length: " + lengthToRemove + ", DocLength: " + currentDocLength, e);
+                    // 降级处理：既然删除失败，把写入点直接修正到当前末尾，避免后续 insert 跟着连带崩溃
+                    baseOffset = doc.getLength();
                 }
+            } else if (baseOffset < 0) {
+                baseOffset = 0;
             }
 
-            // 5. 在清除出来的干净区域插入图片
-            this.setCaretPosition(nextLineStartOffset);
+            // 重新获取 remove 之后的最新安全长度
+            baseOffset = Math.min(baseOffset, doc.getLength());
+
+            // 在安全位置插入图片
+            this.setCaretPosition(baseOffset);
             this.insertIcon(imageIcon);
 
-            // 补回一个换行符，确保后续未被覆盖的文本能正常排在图片下方
-            doc.insertString(this.getCaretPosition(), "\n", null);
+            return baseOffset + 1;
         }
-
-        return this.getCaretPosition(); // 返回插入image后最新位置
     }
 
     /**

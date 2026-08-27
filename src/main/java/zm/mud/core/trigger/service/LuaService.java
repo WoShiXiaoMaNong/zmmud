@@ -6,6 +6,7 @@ import org.luaj.vm2.Globals;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.jse.CoerceJavaToLua;
 import org.luaj.vm2.lib.jse.JsePlatform;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,18 +41,26 @@ public class LuaService {
         chunk.call(luaTrigger, luaRet);
     }
 
-    private void registerLuaApi(){
-        if( this.luaApi == null){
-            return;
-        }
+   private void registerLuaApi(){
+    if(this.luaApi == null){
+        return;
+    }
 
-        for(ILuaApi api: this.luaApi){
-            String apiClassName = api.getClass().getSimpleName();
+    for(ILuaApi api : this.luaApi){
+        // 1. 使用 AopProxyUtils 获取真实的原始类，避免获取到代理类的名字（如 LuaApi$$EnhancerBySpring...）
+        Class<?> targetClass = AopProxyUtils.ultimateTargetClass(api);
+        String apiClassName = targetClass.getSimpleName();
 
-            if(  globals.get(apiClassName).isnil()){
-                LuaValue luaService = CoerceJavaToLua.coerce(api);
-                globals.set(apiClassName, luaService);
+        if(globals.get(apiClassName).isnil()){
+            // 2. 获取真实的原始对象，确保 Luaj 反射时能找到正确的方法和注入的 Service
+            Object singletonTarget = AopProxyUtils.getSingletonTarget(api);
+            if (singletonTarget == null) {
+                singletonTarget = api; // 如果不是单例代理，降级使用原对象
             }
+            
+            LuaValue luaService = CoerceJavaToLua.coerce(singletonTarget);
+            globals.set(apiClassName, luaService);
         }
     }
+}
 }

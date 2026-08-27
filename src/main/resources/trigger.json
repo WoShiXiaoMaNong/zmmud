@@ -62,7 +62,7 @@
                     },
                     "action":{
                         "type":"LuaScriptAction",
-                        "expression":"C:\\Users\\zhong\\Desktop\\dev\\zmmud\\Lua-Scirpts\\hp_handler.lua",
+                        "expression":"C:\\Users\\zhong\\Desktop\\dev\\zmmud2\\Lua-Scirpts\\hp_handler.lua",
                         "params":{
                             "baseUrl":"test"
                         }

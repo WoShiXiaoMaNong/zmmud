@@ -21,8 +21,9 @@ for i = 0, size - 1 do
     -- print(i .. " : " .. tostring(value))
     ssinfo = ssinfo .. tostring(value) .. ","
 end
-LuaApi:sendMsg(ssinfo)
-
+LuaApi:sendMsg(ssinfo .. "aaa")
+local cmd = "id"
+LuaApi:sendCommand(cmd .. " ")
 -- 你可以在这里写你核心的 MUD 机器人逻辑（比如血量过低自动吃药等）
 -- if tonumber(num1) < 100 then
 --     print("血量过低，执行吃药！")

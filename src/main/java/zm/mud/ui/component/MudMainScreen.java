@@ -101,6 +101,10 @@ public class MudMainScreen extends JFrame {
         this.mudTextAare.printImg(imgUrls,offset);
     }
 
+     public void printImg(List<ImageInfo> imgUrls) {
+        this.mudTextAare.printImg(imgUrls);
+    }
+
     public void setShow() {
         this.mudTextAare.setVisible(true);
         this.mudInputField.setVisible(true);

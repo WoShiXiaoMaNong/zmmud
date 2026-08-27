@@ -17,10 +17,10 @@ mud:
       width: 800
       height: 600
     font:
-      name: 宋体
+      # name: 宋体
       # mac 和 linux 可以使用 “Sarasa Mono SC Nerd for pkuxkx” 这个字体
       # name: Sarasa Mono SC Nerd for pkuxkx
-      # name: 更纱黑体 Mono SC Nerd 北侠专用
+      name: 更纱黑体 Mono SC Nerd 北侠专用
       size: 12
     # theme: LIGHT
     theme: DARK

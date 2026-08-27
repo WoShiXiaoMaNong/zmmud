@@ -61,7 +61,7 @@ public class IACSBHandler_C9 implements IIACSBCommandHandler {
             // ================== 【核心唤醒逻辑】 ==================
             // 如果收到了系统包（代表服务器开启了 GMCP 通道）
             if ("GMCP.System".equalsIgnoreCase(packageName)) {
-                logger.info("【GMCP 开启成功】检测到系统广播，发送最极简的 Core.Hello 唤醒报文...");
+                logger.info("【GMCP 开启成功");
             } else {
                 // 处理 GMCP 消息
                 this.handleGMCPMessage(packageName, jsonPayload);

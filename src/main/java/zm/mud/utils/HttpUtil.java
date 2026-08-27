@@ -16,7 +16,7 @@ public class HttpUtil {
         java.net.HttpURLConnection connection = null;
         java.io.InputStream inputStream = null;
         try {
-            logger.info("开始下载 " + urlStr);
+            logger.debug("开始下载 " + urlStr);
 
             // 2. 伪装浏览器请求
             java.net.URL url = new java.net.URL(urlStr);

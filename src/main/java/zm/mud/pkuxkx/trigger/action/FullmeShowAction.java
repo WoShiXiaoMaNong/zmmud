@@ -1,6 +1,6 @@
 package zm.mud.pkuxkx.trigger.action;
 
-import java.net.HttpURLConnection;
+
 
 
 import org.apache.logging.log4j.LogManager;
@@ -56,9 +56,16 @@ public class FullmeShowAction implements IAction {
 
         int fetchTimes = 4;
         for(int i = 0 ; i < fetchTimes; i ++){
-            boolean insertMode = (i == 0 ? false: true );  //第一张图片不使用insert模式，用来覆盖北侠默认预留的空行；
+            boolean insertMode = false;
+            boolean needBeforeNewLine = false;
+            if( i == 0){
+                insertMode = false;  //第一张图片不使用insert模式，用来覆盖北侠默认预留的空行；
+                needBeforeNewLine = true; //第一张图片显示前换行
+            }
+           
             String imgUrl = this.fetchImgUrl(fullmeUrl);
             ImageInfo imageInfo = new ImageInfo(imgUrl, insertMode);
+            imageInfo.setNeedBeforeNewLine(needBeforeNewLine);
             imgUrls.add(imageInfo);
         }
         int fullmeUrlOffset = ui.getMsgOffset(fullmeUrl);
