@@ -37,6 +37,8 @@ public class MudTextAare extends JTextPane {
 
     private int displayBufLineNumber;
 
+    private boolean isAutoScrollEnabled = true; // 默认启用自动滚动
+
     public MudTextAare(GlobleCfg cfg) {
         this.printLock = new ReentrantLock();
         this.globleCfg = cfg;
@@ -56,6 +58,43 @@ public class MudTextAare extends JTextPane {
      */
     public void printlnToScreen(String text) {
         this.printlnToScreen(text, false);
+    }
+
+    public void setAutoScrollEnabled(boolean enabled) {
+        this.isAutoScrollEnabled = enabled;
+    }
+
+   @Override
+    public void setCaretPosition(int position) {
+        if (isAutoScrollEnabled) {
+            // 正常状态：允许默认的滚动置底行为
+            super.setCaretPosition(position);
+        } else {
+            // 锁定状态：通过修改光标策略，实现【只挪光标，不触发滚动】
+            javax.swing.text.Caret caret = this.getCaret();
+            if (caret instanceof javax.swing.text.DefaultCaret) {
+                javax.swing.text.DefaultCaret defaultCaret = (javax.swing.text.DefaultCaret) caret;
+                int oldPolicy = defaultCaret.getUpdatePolicy();
+                try {
+                    // 核心：强制策略为 NEVER_UPDATE，禁止引发滚动
+                    defaultCaret.setUpdatePolicy(javax.swing.text.DefaultCaret.NEVER_UPDATE);
+                    super.setCaretPosition(position);
+                } finally {
+                    // 恢复原有策略，确保不破坏系统的其他生命周期
+                    defaultCaret.setUpdatePolicy(oldPolicy);
+                }
+            } else {
+                // 兜底：如果不是 DefaultCaret，则维持原样
+                super.setCaretPosition(position);
+            }
+        }
+    }
+
+    @Override
+    public void scrollRectToVisible(java.awt.Rectangle aRect) {
+        if (isAutoScrollEnabled) {
+            super.scrollRectToVisible(aRect);
+        } 
     }
 
     /**
@@ -157,7 +196,6 @@ public class MudTextAare extends JTextPane {
                     trimLines();
 
                     // 5. 保持良好体验：滚动条自动滚动到最下方最新消息
-                    // this.setCaretPosition(doc.getLength());
                     int targetOffset = doc.getLength();
                     if (targetOffset >= 0) {
                         // 核心：让 Swing 强制将 targetOffset 所在的坐标（即最后一张图的换行符位置）滚动到可见区域

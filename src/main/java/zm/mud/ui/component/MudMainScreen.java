@@ -72,7 +72,10 @@ public class MudMainScreen extends JFrame {
         // 设置文本区固定高度
         this.mudTextAare = new MudTextAare(this.globleCfg);
         mudTextAare.setPreferredSize(new Dimension(this.getSize().width, this.getSize().height - 30));
-        JScrollPane scrollPane = new JScrollPane(mudTextAare);
+        JScrollPane scrollPane = new MudScrollPane(mudTextAare, (isBottom) -> {
+            mudTextAare.setAutoScrollEnabled(isBottom); // 设置 MudTextAare 的自动滚动状态
+            return mudTextAare;
+        });
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scrollPane.setPreferredSize(mudTextAare.getPreferredSize()); // 高度固定150px
 
