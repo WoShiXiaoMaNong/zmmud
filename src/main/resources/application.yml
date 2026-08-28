@@ -15,7 +15,7 @@ mud:
   ui:
     size:
       width: 800
-      height: 600
+      height: 800
     font:
       # name: 宋体
       # mac 和 linux 可以使用 “Sarasa Mono SC Nerd for pkuxkx” 这个字体
