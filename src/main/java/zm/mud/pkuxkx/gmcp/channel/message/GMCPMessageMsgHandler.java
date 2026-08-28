@@ -30,7 +30,7 @@ public class GMCPMessageMsgHandler implements IGMCPMsgHandler {
 
         if( MESSAGE_TYPE_PIC.equalsIgnoreCase(message.getType()) && message.getUrl() != null && !message.getUrl().isEmpty()) {
             ImageInfo imageInfo = new ImageInfo(message.getUrl(), true,false);
-            imageInfo.setMaxWidth(200);
+            imageInfo.setMaxWidth(400);
             ui.printImg(java.util.Collections.singletonList(imageInfo));
 
         }
