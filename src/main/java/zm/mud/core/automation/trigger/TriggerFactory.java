@@ -12,19 +12,20 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson2.TypeReference;
+
 import zm.mud.core.automation.action.IAction;
+import zm.mud.core.automation.alias.Alias;
 import zm.mud.core.automation.trigger.cfg.MatcherAndActionConfigEntry;
 import zm.mud.core.automation.trigger.cfg.TriggerConfigEntry;
 import zm.mud.core.automation.trigger.cfg.TriggerType;
 import zm.mud.core.automation.trigger.matcher.IMatcher;
+import zm.mud.core.cfg.CustomCfgLoader;
 
 @Service
 public class TriggerFactory {
     private static final Logger logger = LogManager.getLogger(TriggerFactory.class);
     
-    @Autowired
-    private TriggerLoader triggerLoader;
-
     @Autowired
     private TriggerRegister triggerRegister;
 
@@ -81,7 +82,8 @@ public class TriggerFactory {
     @EventListener(ContextRefreshedEvent.class)
     public void onApplicationReady() {
         logger.info("Trigger init start....");
-        this.triggers = this.triggerLoader.loadTriggers();
+        this.triggers = (List<TriggerConfigEntry> ) CustomCfgLoader.loadUIConfig("pkuxkx", "cfg.triggers",
+                    new TypeReference<List<TriggerConfigEntry>>(){});
         this.triggerMap = new HashMap<>();
         for(TriggerConfigEntry cfgEntry : this.triggers){
             this.triggerMap.put(cfgEntry.getName(),cfgEntry);

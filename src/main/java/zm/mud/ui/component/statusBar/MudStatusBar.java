@@ -9,8 +9,9 @@ import java.awt.*;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
+
+import zm.mud.core.cfg.CustomCfgLoader;
 import zm.mud.pkuxkx.gmcp.channel.move.PkuxkxRoom;
-import zm.mud.ui.UiConfigLoader;
 
 @SuppressWarnings("unchecked")
 public class MudStatusBar extends JPanel {
@@ -18,7 +19,7 @@ public class MudStatusBar extends JPanel {
     // 状态栏属性标签的多行集合（可随时在里面增删行、增删列元素）
     private static final List<List<StatusBarLabel>> statusBarLabels = new ArrayList<>();
     static {
-        List<List<StatusBarLabelInfo>> config = (List<List<StatusBarLabelInfo>>) UiConfigLoader.loadUIConfig("pkuxkx", "pkuxkx.status_bar",new TypeReference<List<List<StatusBarLabelInfo>>>(){});
+        List<List<StatusBarLabelInfo>> config = (List<List<StatusBarLabelInfo>>) CustomCfgLoader.loadUIConfig("pkuxkx", "cfg.status_bar",new TypeReference<List<List<StatusBarLabelInfo>>>(){});
         
         for(List<StatusBarLabelInfo> infos : config ){
             List<StatusBarLabel> row = new ArrayList<>();

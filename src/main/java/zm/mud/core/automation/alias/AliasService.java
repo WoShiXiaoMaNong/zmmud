@@ -4,19 +4,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson2.TypeReference;
+
 import jakarta.annotation.PostConstruct;
 import zm.mud.core.api.OubMsgService;
+import zm.mud.core.cfg.CustomCfgLoader;
+
 
 @Lazy
 @Service
 public class AliasService {
 
-    @Autowired
-    private AliasLoader aliasLoader;
+
 
     private Map<String,Alias> aliasMap = new HashMap<>();
 
@@ -43,7 +45,9 @@ public class AliasService {
 
     @PostConstruct
     public void reload() {
-        List<Alias> aliasList = aliasLoader.loadAlias();
+        List<Alias> aliasList = (List<Alias>) CustomCfgLoader.loadUIConfig("pkuxkx", "cfg.alias",
+                    new TypeReference<List<Alias>>(){});
+        
         if(aliasList == null || aliasList.isEmpty()){
             return;
         }
