@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GlobleCfg {
+public class GlobalCfg {
 
 
     @Value("${mud.ui.size.width:800}")

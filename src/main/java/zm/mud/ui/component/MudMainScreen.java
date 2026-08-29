@@ -12,7 +12,7 @@ import javax.swing.JScrollPane;
 import zm.mud.core.api.ClientService;
 import zm.mud.pkuxkx.gmcp.channel.move.PkuxkxRoom;
 import zm.mud.ui.ZmMudUI;
-import zm.mud.ui.cfg.GlobleCfg;
+import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.ui.component.statusBar.MudStatusBar;
 import zm.mud.utils.SpringBeanUtil;
 
@@ -20,17 +20,17 @@ public class MudMainScreen extends JFrame {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(MudMainScreen.class);
 
-    private MudTextAare mudTextAare;
+    private MudTextArea mudTextAare;
 
     private MudInputField mudInputField;
 
     private MudStatusBar mudStatusBar;
 
-    private GlobleCfg globleCfg;
+    private GlobalCfg globleCfg;
 
     private ZmMudUI ui;
 
-    public MudMainScreen(GlobleCfg cfg,ZmMudUI ui) {
+    public MudMainScreen(GlobalCfg cfg,ZmMudUI ui) {
         this.globleCfg = cfg;
         this.ui = ui;
         setTitle(this.globleCfg.getTitle());
@@ -71,7 +71,7 @@ public class MudMainScreen extends JFrame {
         // =============================================================
 
         // 设置文本区固定高度
-        this.mudTextAare = new MudTextAare(this.globleCfg);
+        this.mudTextAare = new MudTextArea(this.globleCfg);
         mudTextAare.setPreferredSize(new Dimension(this.getSize().width, this.getSize().height - 30));
         JScrollPane scrollPane = new MudScrollPane(mudTextAare, (isBottom) -> {
             mudTextAare.setAutoScrollEnabled(isBottom); // 设置 MudTextAare 的自动滚动状态
@@ -97,7 +97,7 @@ public class MudMainScreen extends JFrame {
     }
 
     /**
-     * @see MudTextAare#printImg(String, int)
+     * @see MudTextArea#printImg(String, int)
      * @param imgUrl
      * @param offset
      */

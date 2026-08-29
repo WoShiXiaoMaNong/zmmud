@@ -16,14 +16,14 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
 
 import zm.mud.ui.ZmMudUI;
-import zm.mud.ui.cfg.GlobleCfg;
+import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.ui.util.AnsiToStyleDocUtil;
 import zm.mud.utils.HttpUtil;
 import zm.mud.utils.SpringBeanUtil;
 
-public class MudTextAare extends JTextPane {
+public class MudTextArea extends JTextPane {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
-            .getLogger(MudTextAare.class);
+            .getLogger(MudTextArea.class);
 
     // 新增：引入 50 行的缓冲区，避免每来一行就执行删除导致的界面抖动
     private static final int BUFFER_LINES = 200;
@@ -31,7 +31,7 @@ public class MudTextAare extends JTextPane {
     private StyledDocument doc;
     private AnsiToStyleDocUtil ansiToStyleDocUtil;
 
-    private GlobleCfg globleCfg;
+    private GlobalCfg globleCfg;
 
     private Lock printLock;
 
@@ -39,7 +39,7 @@ public class MudTextAare extends JTextPane {
 
     private boolean isAutoScrollEnabled = true; // 默认启用自动滚动
 
-    public MudTextAare(GlobleCfg cfg) {
+    public MudTextArea(GlobalCfg cfg) {
         this.printLock = new ReentrantLock();
         this.globleCfg = cfg;
         this.displayBufLineNumber = cfg.getDisplayBufLineNumber();

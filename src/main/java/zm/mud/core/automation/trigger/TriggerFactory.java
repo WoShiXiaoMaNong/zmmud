@@ -82,7 +82,7 @@ public class TriggerFactory {
     @EventListener(ContextRefreshedEvent.class)
     public void onApplicationReady() {
         logger.info("Trigger init start....");
-        this.triggers = (List<TriggerConfigEntry> ) CustomCfgLoader.loadUIConfig("pkuxkx", "cfg.triggers",
+        this.triggers = (List<TriggerConfigEntry> ) CustomCfgLoader.loadUIConfig("pkuxkx", "triggers",
                     new TypeReference<List<TriggerConfigEntry>>(){});
         this.triggerMap = new HashMap<>();
         for(TriggerConfigEntry cfgEntry : this.triggers){

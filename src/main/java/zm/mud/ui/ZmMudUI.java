@@ -3,10 +3,10 @@ package zm.mud.ui;
 import zm.mud.core.api.InbMsgService;
 import zm.mud.core.thread.ZmmudThreadPools;
 import zm.mud.pkuxkx.gmcp.GMCPContext;
-import zm.mud.ui.cfg.GlobleCfg;
+import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.ui.component.ImageInfo;
 import zm.mud.ui.component.MudMainScreen;
-import zm.mud.ui.component.MudTextAare;
+import zm.mud.ui.component.MudTextArea;
 import zm.mud.ui.processor.MsgPrintProcessor;
 import zm.mud.utils.FontUtil;
 
@@ -28,7 +28,7 @@ public class ZmMudUI {
             .getLogger(ZmMudUI.class);
 
     @Autowired
-    private GlobleCfg globleCfg;
+    private GlobalCfg globleCfg;
 
     @Autowired
     private MsgPrintProcessor msgPinter;
@@ -99,7 +99,7 @@ public class ZmMudUI {
     }
 
     /**
-     * @see MudTextAare#printImg(String, int)
+     * @see MudTextArea#printImg(String, int)
      * @param imgUrl
      * @param offset
      */

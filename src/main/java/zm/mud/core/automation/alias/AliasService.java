@@ -45,7 +45,7 @@ public class AliasService {
 
     @PostConstruct
     public void reload() {
-        List<Alias> aliasList = (List<Alias>) CustomCfgLoader.loadUIConfig("pkuxkx", "cfg.alias",
+        List<Alias> aliasList = (List<Alias>) CustomCfgLoader.loadUIConfig("pkuxkx", "alias",
                     new TypeReference<List<Alias>>(){});
         
         if(aliasList == null || aliasList.isEmpty()){

@@ -16,8 +16,8 @@ import zm.mud.pkuxkx.gmcp.channel.IGMCPMsgHandler;
 
 
 @Component
-public class GMCPMsglisener implements IGMCPOnMessage {
-    private static final Logger logger = LogManager.getLogger(GMCPMsglisener.class);
+public class GMCPMsgListener implements IGMCPOnMessage {
+    private static final Logger logger = LogManager.getLogger(GMCPMsgListener.class);
 
     @Autowired
     private GMCPContext gmcpContext;
