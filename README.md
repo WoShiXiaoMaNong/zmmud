@@ -21,12 +21,16 @@ zhongming139@126.com
 ## 北大侠客行相关说明
 * [点击查看 北大侠客行相关说明](Pkuxkx.md)
 
+
 ## 触发器说明
 * [点击查看 触发器说明](Trigger.md)
 
 ## 界面截图
-<img width="1012" height="1256" alt="pkuxkx" src="https://github.com/user-attachments/assets/c10d49c7-4bde-466f-a6fc-06821c4b58cb" />
+<img width="966" height="877" alt="pkuxkx" src="https://github.com/user-attachments/assets/adec263c-05a3-48f0-90c7-afd2ba8718a2" />
 
+---
+
+<img width="972" height="814" alt="pkuxkx2" src="https://github.com/user-attachments/assets/73a41662-ffdc-4336-8921-6fa06f1b3e4c" />
 ## ⚙️ 配置说明
 
 项目支持 YAML 配置：
