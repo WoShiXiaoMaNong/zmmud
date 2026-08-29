@@ -21,7 +21,7 @@ public class OubSendProcessor implements IOubMsgProcessor,Ordered {
 
     @Override
     public int getOrder() {
-        return 2;
+        return 3;
     }
 
 }
