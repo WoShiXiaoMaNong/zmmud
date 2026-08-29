@@ -26,7 +26,7 @@ zhongming139@126.com
 * [点击查看 触发器说明](Trigger.md)
 
 ## 界面截图
-<img width="972" height="904" alt="pkuxkx" src="https://github.com/user-attachments/assets/e70976cd-759e-4bbd-b694-b58e3ddf4505" />
+<img width="966" height="877" alt="pkuxkx" src="https://github.com/user-attachments/assets/adec263c-05a3-48f0-90c7-afd2ba8718a2" />
 
 ---
 
