@@ -22,10 +22,15 @@ public class AliasService {
 
   
 
-    public void doAlias(Alias alias, OubMsgService oubMsgService) {
+    public void doAlias(Alias alias, OubMsgService oubMsgService, String ...params) {
         
         String aliasCommand = alias.getAliasCommand();
-        oubMsgService.send(aliasCommand);
+        if( params != null){
+            aliasCommand = aliasCommand + " " + String.join(" ",params);
+        }else{
+            aliasCommand = 
+        }
+        oubMsgService.send(aliasCommand );
     }
 
     /**
@@ -39,8 +44,12 @@ public class AliasService {
 
 
     @PostConstruct
-    public void init() {
+    public void reload() {
         List<Alias> aliasList = aliasLoader.loadAlias();
+        if(aliasList == null || aliasList.isEmpty()){
+            return;
+        }
+        this.aliasMap.clear();
         for(Alias a : aliasList){
             aliasMap.put(a.getAliasName(), a);
         }

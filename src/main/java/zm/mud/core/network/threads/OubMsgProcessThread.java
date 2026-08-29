@@ -32,7 +32,7 @@ public class OubMsgProcessThread extends IZmmudThread {
             return true;
         } catch (Exception e) {
             logger.error("Error occurred in OutboundMessageProcessThread", e);
-            throw e;
+            return true;
         }
     }
 
