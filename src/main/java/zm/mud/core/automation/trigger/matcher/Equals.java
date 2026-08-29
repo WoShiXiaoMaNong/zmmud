@@ -1,10 +1,10 @@
-package zm.mud.core.trigger.matcher;
+package zm.mud.core.automation.trigger.matcher;
 
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import zm.mud.core.trigger.cfg.MatchResult;
+import zm.mud.core.automation.trigger.cfg.MatchResult;
 
 @Component("MATCHER_Equals")
 @Scope("prototype")

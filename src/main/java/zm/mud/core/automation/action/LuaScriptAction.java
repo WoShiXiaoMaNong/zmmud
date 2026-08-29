@@ -1,4 +1,4 @@
-package zm.mud.core.trigger.action;
+package zm.mud.core.automation.action;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import zm.mud.core.trigger.Trigger;
-import zm.mud.core.trigger.cfg.MatchResult;
-import zm.mud.core.trigger.service.LuaService;
+import zm.mud.core.automation.script.lua.LuaService;
+import zm.mud.core.automation.trigger.Trigger;
+import zm.mud.core.automation.trigger.cfg.MatchResult;
 
 @Component("ACTION_LuaScriptAction")
 @Scope("prototype")

@@ -1,4 +1,4 @@
-package zm.mud.core.trigger.matcher;
+package zm.mud.core.automation.trigger.matcher;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import zm.mud.core.trigger.cfg.MatchResult;
+
+import zm.mud.core.automation.trigger.cfg.MatchResult;
 import zm.mud.ui.util.AnsiTextUtil;
 
 @Component("MATCHER_Regex")

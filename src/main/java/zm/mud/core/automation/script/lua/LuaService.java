@@ -1,4 +1,4 @@
-package zm.mud.core.trigger.service;
+package zm.mud.core.automation.script.lua;
 
 import java.util.List;
 
@@ -9,8 +9,6 @@ import org.luaj.vm2.lib.jse.JsePlatform;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import zm.mud.core.api.ILuaApi;
 
 @Service
 public class LuaService {

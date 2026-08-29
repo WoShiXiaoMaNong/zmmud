@@ -1,4 +1,4 @@
-package zm.mud.core.trigger;
+package zm.mud.core.automation.trigger;
 
 
 
@@ -6,10 +6,10 @@ package zm.mud.core.trigger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import zm.mud.core.trigger.action.IAction;
-import zm.mud.core.trigger.cfg.MatchResult;
-import zm.mud.core.trigger.cfg.TriggerType;
-import zm.mud.core.trigger.matcher.IMatcher;
+import zm.mud.core.automation.action.IAction;
+import zm.mud.core.automation.trigger.cfg.MatchResult;
+import zm.mud.core.automation.trigger.cfg.TriggerType;
+import zm.mud.core.automation.trigger.matcher.IMatcher;
 
 public class Trigger {
     private static final Logger logger = LogManager.getLogger(Trigger.class);

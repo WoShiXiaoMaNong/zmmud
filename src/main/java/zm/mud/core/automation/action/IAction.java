@@ -1,9 +1,9 @@
-package zm.mud.core.trigger.action;
+package zm.mud.core.automation.action;
 
 import java.util.Map;
 
-import zm.mud.core.trigger.Trigger;
-import zm.mud.core.trigger.cfg.MatchResult;
+import zm.mud.core.automation.trigger.Trigger;
+import zm.mud.core.automation.trigger.cfg.MatchResult;
 
 public interface IAction {
     

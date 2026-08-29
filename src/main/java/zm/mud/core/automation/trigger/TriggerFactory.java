@@ -1,4 +1,4 @@
-package zm.mud.core.trigger;
+package zm.mud.core.automation.trigger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -12,11 +12,11 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import zm.mud.core.trigger.action.IAction;
-import zm.mud.core.trigger.cfg.MatcherAndActionConfigEntry;
-import zm.mud.core.trigger.cfg.TriggerConfigEntry;
-import zm.mud.core.trigger.cfg.TriggerType;
-import zm.mud.core.trigger.matcher.IMatcher;
+import zm.mud.core.automation.action.IAction;
+import zm.mud.core.automation.trigger.cfg.MatcherAndActionConfigEntry;
+import zm.mud.core.automation.trigger.cfg.TriggerConfigEntry;
+import zm.mud.core.automation.trigger.cfg.TriggerType;
+import zm.mud.core.automation.trigger.matcher.IMatcher;
 
 @Service
 public class TriggerFactory {

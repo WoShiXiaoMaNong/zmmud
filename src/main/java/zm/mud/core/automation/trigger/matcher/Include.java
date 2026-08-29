@@ -1,13 +1,14 @@
-package zm.mud.core.trigger.matcher;
+package zm.mud.core.automation.trigger.matcher;
+
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import zm.mud.core.trigger.cfg.MatchResult;
+import zm.mud.core.automation.trigger.cfg.MatchResult;
 
-@Component("MATCHER_StartWith")
+@Component("MATCHER_Include")
 @Scope("prototype")
-public class StartWith implements IMatcher{
+public class Include implements IMatcher{
 
     private String expression;
 
@@ -15,7 +16,7 @@ public class StartWith implements IMatcher{
     @Override
     public MatchResult match(String msg) {
    
-        boolean isMatched = msg != null && msg.startsWith(this.getExpression());
+        boolean isMatched = msg != null && msg.contains(this.getExpression());
 
         if(isMatched){
             return MatchResult.MATCHED(msg, null);

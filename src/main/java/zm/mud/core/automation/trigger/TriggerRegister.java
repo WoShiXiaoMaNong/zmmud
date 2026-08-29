@@ -1,4 +1,4 @@
-package zm.mud.core.trigger;
+package zm.mud.core.automation.trigger;
 
 
 import org.apache.logging.log4j.LogManager;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import zm.mud.core.api.InbMsgService;
 import zm.mud.core.api.OubMsgService;
-import zm.mud.core.trigger.cfg.TriggerType;
+import zm.mud.core.automation.trigger.cfg.TriggerType;
 
 @Service
 public class TriggerRegister {

@@ -1,4 +1,4 @@
-package zm.mud.core.trigger.cfg;
+package zm.mud.core.automation.trigger.cfg;
 
 public class TriggerConfigEntry {
     private String name;

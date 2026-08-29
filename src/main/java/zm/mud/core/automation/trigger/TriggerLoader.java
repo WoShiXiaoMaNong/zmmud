@@ -1,4 +1,4 @@
-package zm.mud.core.trigger;
+package zm.mud.core.automation.trigger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson2.JSON;
 
-import zm.mud.core.trigger.cfg.TriggerConfig;
-import zm.mud.core.trigger.cfg.TriggerConfigEntry;
+import zm.mud.core.automation.trigger.cfg.TriggerConfig;
+import zm.mud.core.automation.trigger.cfg.TriggerConfigEntry;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

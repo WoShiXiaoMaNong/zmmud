@@ -7,10 +7,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import zm.mud.core.automation.trigger.Trigger;
 import zm.mud.core.network.inbound.message.InbMsg;
 import zm.mud.core.network.inbound.processor.MsgHandlerProcessor;
 import zm.mud.core.network.inbound.processor.InbTriggerProcessor;
-import zm.mud.core.trigger.Trigger;
 
 @Service
 public class InbMsgService {

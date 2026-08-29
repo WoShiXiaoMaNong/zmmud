@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import zm.mud.core.trigger.Trigger;
-import zm.mud.core.trigger.action.IAction;
-import zm.mud.core.trigger.cfg.MatchResult;
+import zm.mud.core.automation.action.IAction;
+import zm.mud.core.automation.trigger.Trigger;
+import zm.mud.core.automation.trigger.cfg.MatchResult;
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.component.ImageInfo;
 import zm.mud.utils.HttpUtil;

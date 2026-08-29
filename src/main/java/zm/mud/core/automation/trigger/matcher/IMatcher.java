@@ -1,6 +1,6 @@
-package zm.mud.core.trigger.matcher;
+package zm.mud.core.automation.trigger.matcher;
 
-import zm.mud.core.trigger.cfg.MatchResult;
+import zm.mud.core.automation.trigger.cfg.MatchResult;
 
 public interface IMatcher {
     MatchResult match(String msg);

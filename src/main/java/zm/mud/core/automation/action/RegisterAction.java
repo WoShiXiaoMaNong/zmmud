@@ -1,4 +1,4 @@
-package zm.mud.core.trigger.action;
+package zm.mud.core.automation.action;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 
 import zm.mud.core.api.InbMsgService;
 import zm.mud.core.api.OubMsgService;
-import zm.mud.core.trigger.Trigger;
-import zm.mud.core.trigger.TriggerFactory;
-import zm.mud.core.trigger.cfg.MatchResult;
-import zm.mud.core.trigger.cfg.TriggerType;
+import zm.mud.core.automation.trigger.Trigger;
+import zm.mud.core.automation.trigger.TriggerFactory;
+import zm.mud.core.automation.trigger.cfg.MatchResult;
+import zm.mud.core.automation.trigger.cfg.TriggerType;
 import zm.mud.utils.SpringBeanUtil;
 
 @Component("ACTION_RegisterAction")

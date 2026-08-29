@@ -1,4 +1,4 @@
-package zm.mud.core.trigger.cfg;
+package zm.mud.core.automation.trigger.cfg;
 
 import java.util.Map;
 
