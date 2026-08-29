@@ -68,6 +68,7 @@ java -jar zm-mud.jar
 
 ## 当前进度
 
+* [x] 多标签，即，多session多开（进行中）
 * [x] 基础项目结构搭建
 * [x] 网络连接能力
 * [x] 入站/出站分层
@@ -76,8 +77,8 @@ java -jar zm-mud.jar
 * [x] 线程模型优化
 * [x] 消息模型优化以及收敛
 * [x] Trigger
-* [x] Alias 系统（进行中）
-* [x] Timer 系统（进行中）
+* [x] Alias 系统（进行中,暂停中）
+* [x] Timer 系统（进行中，暂停中）
 * [ ] 地图房间绘制
 * [x] UI 支持
 * [x] UI 人物信息（基于GMCP）
