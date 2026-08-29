@@ -43,6 +43,7 @@ public class ZmMudUI {
     @Autowired
     private GMCPContext gmcpContext;
 
+
     private static final ThreadPoolExecutor uiThreadPool = new ThreadPoolExecutor(
             1, 3, 60L, TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1024),
@@ -57,6 +58,14 @@ public class ZmMudUI {
     public void init() {
         mudMain = new MudMainScreen(globleCfg, this);
         FontUtil.registerFont();
+    }
+
+    public void setTitle(String title){
+        this.mudMain.setTitle(title);
+    }
+
+    public String getTitle(){
+        return this.mudMain.getTitle();
     }
 
     public void start() {

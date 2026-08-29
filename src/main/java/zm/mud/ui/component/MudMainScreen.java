@@ -13,6 +13,7 @@ import zm.mud.core.api.ClientService;
 import zm.mud.pkuxkx.gmcp.channel.move.PkuxkxRoom;
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.cfg.GlobleCfg;
+import zm.mud.ui.component.statusBar.MudStatusBar;
 import zm.mud.utils.SpringBeanUtil;
 
 public class MudMainScreen extends JFrame {
@@ -65,7 +66,7 @@ public class MudMainScreen extends JFrame {
 
         // ================== 【状态栏放在最上方】 ==================
         this.mudStatusBar = new MudStatusBar();
-        this.mudStatusBar.setPreferredSize(new Dimension(this.getSize().width, 40)); // 状态栏固定高度40px
+        //this.mudStatusBar.setPreferredSize(new Dimension(this.getSize().width, 40)); // 状态栏固定高度40px
         add(this.mudStatusBar, BorderLayout.NORTH);
         // =============================================================
 

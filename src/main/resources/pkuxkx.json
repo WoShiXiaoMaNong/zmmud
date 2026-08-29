@@ -1,0 +1,97 @@
+{
+    "pkuxkx": {
+        "status_bar": [
+            [
+                {
+                    "prefix": "ID",
+                    "color": "#F92672",
+                    "keys": [
+                        "id"
+                    ],
+                    "fixedWidth": 12
+                },
+                {
+                    "prefix": "姓名",
+                    "color": "#A6E22E",
+                    "keys": [
+                        "name"
+                    ],
+                    "fixedWidth": 12
+                },
+                {
+                    "prefix": "头衔",
+                    "color": "#FD971F",
+                    "keys": [
+                        "title"
+                    ],
+                    "fixedWidth": 25
+                },
+                {
+                    "prefix": "等级",
+                    "color": "#50FA7B",
+                    "keys": [
+                        "level"
+                    ],
+                    "fixedWidth": 22
+                }
+            ],
+            [
+                {
+                    "prefix": "气血/有效/最大",
+                    "color": "#FF5F5F",
+                    "keys": [
+                        "qi",
+                        "eff_qi",
+                        "max_qi"
+                    ],
+                    "fixedWidth": 18
+                },
+                {
+                    "prefix": "精神/有效/最大",
+                    "color": "#8BE9FD",
+                    "keys": [
+                        "jing",
+                        "eff_jing",
+                        "max_jing"
+                    ],
+                    "fixedWidth": 18
+                },
+                {
+                    "prefix": "精力",
+                    "color": "#BD93F9",
+                    "keys": [
+                        "jingli",
+                        "max_jingli"
+                    ],
+                    "fixedWidth": 18
+                },
+                {
+                    "prefix": "内力",
+                    "color": "#BD93F9",
+                    "keys": [
+                        "neili",
+                        "max_neili"
+                    ],
+                    "fixedWidth": 18
+                },
+                {
+                    "prefix": "饱食/饮水",
+                    "color": "#F1FA8C",
+                    "keys": [
+                        "food",
+                        "water"
+                    ],
+                    "fixedWidth": 15
+                },
+                {
+                    "prefix": "经验",
+                    "color": "#50FA7B",
+                    "keys": [
+                        "combat_exp"
+                    ],
+                    "fixedWidth": 22
+                }
+            ]
+        ]
+    }
+}
