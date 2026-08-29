@@ -1,6 +1,7 @@
 package zm.mud.core.network.inbound.processor;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
@@ -39,20 +40,22 @@ public class IACConfirmProcessor implements IInbMsgProcessor, Ordered {
 
         logger.debug("收到服务器指令：" + Arrays.toString(this.hexUtil.toHex(iacMsg.getContentBytes())));
 
-        byte[] response = null;
+        List<byte[]> responses = null;
         if (!this.isSBCommand(iacMsg.getContentBytes())) {
-            response = this.handleIAC(iacMsg.getContentBytes());
+            responses = this.handleIAC(iacMsg.getContentBytes());
         } else {
-            response = this.handleIACSub(iacMsg.getContentBytes());
+            responses = this.handleIACSub(iacMsg.getContentBytes());
         }
-        if (response == null) {
+        if (responses == null || responses.isEmpty()) {
             logger.debug("不支持当前IAC指令或者不响应：" + Arrays.toString(this.hexUtil.toHex(iacMsg.getContentBytes())));
             return true;
         }
 
-        logger.debug("发送响应指令" + Arrays.toString(this.hexUtil.toHex(response)));
-        this.mudClient.send(response);
-
+        for(byte[] response : responses) {
+            logger.debug("发送响应指令" + Arrays.toString(this.hexUtil.toHex(response)));
+            this.mudClient.send(response);
+        }
+        
         return true;
     }
 
@@ -61,7 +64,7 @@ public class IACConfirmProcessor implements IInbMsgProcessor, Ordered {
         return 2;
     }
 
-    private byte[] handleIAC(byte[] iacCommand) {
+    private List<byte[]> handleIAC(byte[] iacCommand) {
         byte optionCode = iacCommand[2];
         String beanId = IACConsts.IAC_HANDLER_BEAN_PREFIX + this.hexUtil.toHex(optionCode);
         IIACCommandHandler handler = SpringBeanUtil.getBean(beanId, IIACCommandHandler.class);
@@ -73,7 +76,7 @@ public class IACConfirmProcessor implements IInbMsgProcessor, Ordered {
         return handler.handle(iacCommand);
     }
 
-    private byte[] handleIACSub(byte[] iacCommand) {
+    private List<byte[]> handleIACSub(byte[] iacCommand) {
         byte optionCode = iacCommand[2];
         String beanId = IACConsts.IAC_SB_HANDLER_BEAN_PREFIX + this.hexUtil.toHex(optionCode);
         IIACSBCommandHandler handler = SpringBeanUtil.getBean(beanId, IIACSBCommandHandler.class);

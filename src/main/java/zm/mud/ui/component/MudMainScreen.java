@@ -4,11 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
 import zm.mud.core.api.ClientService;
+import zm.mud.pkuxkx.gmcp.channel.move.PkuxkxRoom;
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.cfg.GlobleCfg;
 import zm.mud.utils.SpringBeanUtil;
@@ -21,6 +23,8 @@ public class MudMainScreen extends JFrame {
 
     private MudInputField mudInputField;
 
+    private MudStatusBar mudStatusBar;
+
     private GlobleCfg globleCfg;
 
     private ZmMudUI ui;
@@ -31,7 +35,7 @@ public class MudMainScreen extends JFrame {
         setTitle(this.globleCfg.getTitle());
         setSize(new Dimension(this.globleCfg.getWidth(), this.globleCfg.getHeight())); 
 
-        // 1. ✨ 必须改成 DO_NOTHING，把红叉的控制权拿回手里
+        // 1. 改成 DO_NOTHING，把红叉的控制权拿回手里
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
         // 2. 绑定窗口关闭事件监听器
@@ -58,6 +62,12 @@ public class MudMainScreen extends JFrame {
 
     private void init() {
         setLayout(new BorderLayout());
+
+        // ================== 【状态栏放在最上方】 ==================
+        this.mudStatusBar = new MudStatusBar();
+        this.mudStatusBar.setPreferredSize(new Dimension(this.getSize().width, 40)); // 状态栏固定高度40px
+        add(this.mudStatusBar, BorderLayout.NORTH);
+        // =============================================================
 
         // 设置文本区固定高度
         this.mudTextAare = new MudTextAare(this.globleCfg);
@@ -100,5 +110,9 @@ public class MudMainScreen extends JFrame {
 
     public void resetFont(String font,int size) {
         this.mudTextAare.setFont(new Font(font, Font.PLAIN, size));
+    }
+
+    public void refreshStatusBar(Map<String, Object> statusData, PkuxkxRoom  room){
+        this.mudStatusBar.refreshStatus(statusData, room);
     }
 }

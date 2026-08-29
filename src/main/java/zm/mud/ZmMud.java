@@ -12,7 +12,7 @@ import zm.mud.core.network.threads.ThreadPoolService;
 import zm.mud.ui.ZmMudUI;
 
 /**
- * Hello world!
+ * Zm MUD 主程序入口
  */
 public class ZmMud {
     private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ZmMud.class);

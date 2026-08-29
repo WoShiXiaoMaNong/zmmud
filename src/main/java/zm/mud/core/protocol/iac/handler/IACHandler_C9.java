@@ -1,29 +1,31 @@
 package zm.mud.core.protocol.iac.handler;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import zm.mud.core.cfg.ApplicationConfig;
 import zm.mud.core.protocol.iac.consts.IACConsts;
 import zm.mud.utils.HexUtil;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-/**
- * 作为默认操作，回复拒绝
- */
-
-@Component(IACConsts.IAC_HANDLER_COMMON)
-public class IACHandler_Common extends AbsIACHandler{
-    private static final Logger logger = LogManager.getLogger(IACHandler_Common.class);
-
+@Component(IACConsts.IAC_HANDLER_BEAN_PREFIX + "C9")
+public class IACHandler_C9 extends AbsIACHandler{
+    private static final Logger logger = LogManager.getLogger(IACHandler_C9.class);
 
     @Autowired
     private HexUtil hexUtil;
-    @Override
+
+    @Autowired
+    private ApplicationConfig appCfg;
+
+
+     @Override
     protected List<byte[]> handle_WILL(byte[] iacCommand) {
         return this.handle_DO(iacCommand);
     }
@@ -33,7 +35,7 @@ public class IACHandler_Common extends AbsIACHandler{
     protected List<byte[]> handle_DO(byte[] iacCommand) {
         int opsCode = iacCommand[2] & 0xFF;
 
-        if( IACConsts.enabledOpsSet.contains(opsCode)){
+        if( IACConsts.enabledOpsSet.contains(opsCode) && appCfg.isGMCPEnabled()){
             return this.doEnable(iacCommand);
         }else{
             return this.doReject(iacCommand);
@@ -41,19 +43,25 @@ public class IACHandler_Common extends AbsIACHandler{
     }
 
     private List<byte[]> doEnable(byte[] iacCommand){
+        List<byte[]> rets = new ArrayList<>();
         int commandCode = iacCommand[1] & 0xFF;
          if( !IACConsts.enableCmdMap.containsKey(commandCode)){
             logger.error("Unsupport cmd:" + Arrays.toString(hexUtil.toHex(iacCommand)));
             return null;  
         }
+
+        // 生成响应指令 
         byte ret[] = new byte[3];
         ret[0] = iacCommand[0];
         ret[1] = IACConsts.enableCmdMap.get(commandCode).byteValue();
         ret[2] = iacCommand[2];
+        rets.add(ret); // 
 
-        return Arrays.asList(ret);
+        logger.info("【IAC】启用: " + Arrays.toString(hexUtil.toHex(ret)));
+        return rets;
     }
 
+   
     private List<byte[]> doReject(byte[] iacCommand){
         int commandCode = iacCommand[1] & 0xFF;
         if( !IACConsts.rejectCmdMap.containsKey(commandCode)){
@@ -79,7 +87,5 @@ public class IACHandler_Common extends AbsIACHandler{
     protected List<byte[]> handle_WONT(byte[] iacCommand) {
         return null;
     }
-
-  
     
 }

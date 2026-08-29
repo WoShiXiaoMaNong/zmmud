@@ -18,11 +18,24 @@ mud:
       height: 600
     font:
       name: 宋体
-
       # mac 和 linux 可以使用 “Sarasa Mono SC Nerd for pkuxkx” 这个字体
       # name: Sarasa Mono SC Nerd for pkuxkx
+      # name: 更纱黑体 Mono SC Nerd 北侠专用
       size: 12
     # theme: LIGHT
     theme: DARK
     showTimestamp: false
     displayBufLineNumber: 500
+  
+  GMCP:
+    # 是否启用 GMCP 协议
+    enable: true
+  pkuxkx:
+      # 列出需要订阅的 GMCP 频道，如不需要订阅的频道可以注释掉
+      channel:
+        # - Buff
+        # - Message
+        - Move
+        # - Combat
+        - Status
+
