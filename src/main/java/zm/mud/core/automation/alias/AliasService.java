@@ -27,8 +27,6 @@ public class AliasService {
         String aliasCommand = alias.getAliasCommand();
         if( params != null){
             aliasCommand = aliasCommand + " " + String.join(" ",params);
-        }else{
-            aliasCommand = 
         }
         oubMsgService.send(aliasCommand );
     }
