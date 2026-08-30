@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import zm.mud.core.api.InbMsgService;
 import zm.mud.core.api.OubMsgService;
 import zm.mud.core.automation.trigger.cfg.TriggerType;
+import zm.mud.core.session.MudSession;
 
 @Service
 public class TriggerRegister {
@@ -21,16 +22,16 @@ public class TriggerRegister {
     private OubMsgService oubMsgService;
 
  
-    public void registerTrigger(Trigger trigger){
+    public void registerTrigger(MudSession session,Trigger trigger){
         if( trigger.getTriggerType() == null){
             logger.error("Register Trigger error: The trigger type is null. Trigger Name: " + trigger.getTriggerName());
             return;
         }
 
         if( trigger.getTriggerType().equals(TriggerType.INBOUNG_TRIGGER)){
-            this.inbMsgService.registerTrigger(trigger);
+            this.inbMsgService.registerTrigger(session,trigger);
         }else if( trigger.getTriggerType().equals(TriggerType.OUTBOUNG_TRIGGER)){
-            this.oubMsgService.registerTrigger(trigger);
+            this.oubMsgService.registerTrigger(session,trigger);
         }else{
             logger.error("Unsupport Trigger Type" + trigger.getTriggerType() +  ": Trigger Name: " + trigger.getTriggerName());
             return;

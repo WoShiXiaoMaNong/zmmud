@@ -41,12 +41,12 @@ public class RegisterAction implements IAction{
         }
         if(TriggerType.INBOUNG_TRIGGER.equals(newTrigger.getTriggerType())){
             InbMsgService is = SpringBeanUtil.getBean(InbMsgService.class);
-            is.registerTrigger(newTrigger);
+            is.registerTrigger(session,newTrigger);
         }
 
         if(TriggerType.OUTBOUNG_TRIGGER.equals(newTrigger.getTriggerType())){
             OubMsgService os = SpringBeanUtil.getBean(OubMsgService.class);
-            os.registerTrigger(newTrigger);
+            os.registerTrigger(session,newTrigger);
         }
 
     }

@@ -2,6 +2,7 @@ package zm.mud.ui.component;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -185,9 +186,14 @@ public class MudTabPanel {
                 int index = tabBar.indexOfComponent(contentComponent);
                 if (index != -1) {
                     tabBar.removeTabAt(index);
-
+                
                     // 优雅降级选中
                     int currentSelected = tabBar.getSelectedIndex();
+                     String selectedSessionId = contentComponent.getName();
+                    MudSession session = MudSession.getSession(selectedSessionId);
+                    if(session != null){
+                        session.close();
+                    }
                     int tabCount = tabBar.getTabCount();
 
                     if (tabCount > 1) {

@@ -26,11 +26,11 @@ public class OubMsgService {
         this.oubMsgQueue.put(session,new NrmOubMsg(session,msg));
     }
 
-    public void registerTrigger(Trigger trigger){
+    public void registerTrigger(MudSession session,Trigger trigger){
         if( trigger == null ){
             logger.warn("Trigger is null. Skip!");
             return;
         }
-        triggerProcessor.register(trigger);
+        triggerProcessor.register(session,trigger);
     }
 }

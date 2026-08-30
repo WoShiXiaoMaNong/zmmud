@@ -15,6 +15,7 @@ import zm.mud.core.automation.trigger.Trigger;
 import zm.mud.core.automation.trigger.cfg.MatchResult;
 import zm.mud.core.network.inbound.message.IACConfirmInbMsg;
 import zm.mud.core.network.inbound.message.InbMsg;
+import zm.mud.core.session.MudSession;
 import zm.mud.core.thread.ZmmudThreadPools;
 
 @Service
@@ -23,11 +24,11 @@ public class InbTriggerProcessor implements IInbMsgProcessor, Ordered {
             .getLogger(InbTriggerProcessor.class);
 
     private Lock lock;
-    private List<Trigger> triggers;
-    private Map<String,Trigger> triggerMap;
+    private Map<String /*SessionId*/,List<Trigger>> triggers;
+    private Map<String /*SessionId*/,Map<String,Trigger>> triggerMap;
 
     public InbTriggerProcessor() {
-        this.triggers = new ArrayList<>();
+        this.triggers = new HashMap<>();
         this.triggerMap = new HashMap<>();
         this.lock = new ReentrantLock();
     }
@@ -39,7 +40,13 @@ public class InbTriggerProcessor implements IInbMsgProcessor, Ordered {
         }
         this.lock.lock();
         try {
-            Iterator<Trigger> iterator = this.triggers.iterator();
+            MudSession session = msg.getSession();
+            String sessionId = session.getSessionId();
+            List<Trigger> triggerForCurrentSession = this.triggers.get(sessionId);
+            if( triggerForCurrentSession == null){
+                return true;
+            }
+            Iterator<Trigger> iterator = triggerForCurrentSession.iterator();
             while (iterator.hasNext()) {
                 Trigger trigger = iterator.next();
                 // 1. 检查调用前是否已死亡（例如被其他线程或之前的逻辑改变了状态）
@@ -74,19 +81,31 @@ public class InbTriggerProcessor implements IInbMsgProcessor, Ordered {
 
     }
 
-    public void register(Trigger trigger) {
+    public void register(MudSession session,Trigger trigger) {
         
         this.lock.lock();
         try {
-            Trigger originalTrigger = this.triggerMap.get(trigger.getUniqueKey());
+            String sessionId = session.getSessionId();
+            Map<String,Trigger> triggerMapForCurrentSession = this.triggerMap.get(sessionId);
+            if(triggerMapForCurrentSession == null){
+                triggerMapForCurrentSession = new HashMap<>();
+                this.triggerMap.put(sessionId,triggerMapForCurrentSession);
+            }
+            Trigger originalTrigger = triggerMapForCurrentSession.get(trigger.getUniqueKey());
             
             boolean triggerExisting = originalTrigger!=null && !originalTrigger.died();
             if(trigger.isUnique() && triggerExisting){
                 logger.debug("[Skip] Unique trigger already existed:" + trigger.getUniqueKey());
                 return;
             }
-            this.triggers.add(trigger);
-            this.triggerMap.put(trigger.getUniqueKey(), trigger);
+
+            List<Trigger> triggerForCurrentSession = this.triggers.get(sessionId);
+            if( triggerForCurrentSession == null){
+                triggerForCurrentSession = new ArrayList<>();
+                this.triggers.put(sessionId,triggerForCurrentSession);
+            }
+            triggerForCurrentSession.add(trigger);
+            triggerMapForCurrentSession.put(trigger.getUniqueKey(), trigger);
         } finally {
             this.lock.unlock();
         }

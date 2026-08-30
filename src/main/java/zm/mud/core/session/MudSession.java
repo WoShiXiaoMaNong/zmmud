@@ -29,6 +29,8 @@ public class MudSession {
 
     private TriggerFactory triggerFactory;
 
+    private ThreadPoolService threadPoolService;
+
     private static final Map<String, MudSession> allSessionMap = new HashMap<>();
     private static final Lock sessionMapLock = new ReentrantLock();
 
@@ -54,6 +56,7 @@ public class MudSession {
         this.sessionId = sessionId;
         this.oubMsgService = SpringBeanUtil.getBean(OubMsgService.class);
         this.triggerFactory = SpringBeanUtil.getBean(TriggerFactory.class);
+        this.threadPoolService = SpringBeanUtil.getBean(ThreadPoolService.class);
         this.gmcpContext = new GMCPContext();
     }
 
@@ -99,13 +102,13 @@ public class MudSession {
         try {
             sessionMapLock.tryLock();
             allSessionMap.remove(this.getSessionId());
+            threadPoolService.shutdown(this);
+            this.client.close();
         } catch (Exception e) {
             logger.error("Session start error!", e);
         } finally {
             sessionMapLock.unlock();
         }
-
-        throw new RuntimeException("tbd");
     }
 
     public static MudSession getSession(String sessionId) {

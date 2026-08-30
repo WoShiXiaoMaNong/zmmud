@@ -102,7 +102,7 @@ public class TriggerFactory {
                 continue;
             }
             Trigger trgger = this.build(session,cfgEntry);
-            triggerRegister.registerTrigger(trgger);
+            triggerRegister.registerTrigger(session,trgger);
         }
     }
 
