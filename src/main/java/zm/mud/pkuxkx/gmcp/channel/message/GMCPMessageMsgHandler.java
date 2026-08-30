@@ -29,13 +29,23 @@ public class GMCPMessageMsgHandler implements IGMCPMsgHandler {
         PkuxkxMessage message = JSON.parseObject(jsonPayload, PkuxkxMessage.class);
 
         if( MESSAGE_TYPE_PIC.equalsIgnoreCase(message.getType()) && message.getUrl() != null && !message.getUrl().isEmpty()) {
-            ImageInfo imageInfo = new ImageInfo(message.getUrl(), true,false);
+            
+            ImageInfo imageInfo = new ImageInfo(this.getUrl(session,message.getUrl()), true,false);
             imageInfo.setMaxWidth(400);
             
             ui.printImg(session,java.util.Collections.singletonList(imageInfo));
 
         }
     
+    }
+
+    private String getUrl(MudSession session,String url){
+        String[] urlInfos = url.split(",");
+        if(urlInfos.length > 1){
+            logger.info("Url 看起来太对劲:" + url);
+            this.ui.printlnToScreen(session, "【客户端消息】Url 看起来太对劲:" + url);
+        }
+        return urlInfos[0];
     }
 
 }
