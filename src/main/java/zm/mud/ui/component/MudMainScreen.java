@@ -1,6 +1,7 @@
 package zm.mud.ui.component;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -9,11 +10,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+
+
 import zm.mud.core.api.ClientService;
 import zm.mud.core.api.InbMsgService;
 import zm.mud.core.session.MudSession;
@@ -143,6 +150,9 @@ public class MudMainScreen extends JFrame {
             }
         };
 
+        this.tabbedPane.addChangeListener(new TabbedPanelChangeListener());
+
+
         // 【核心修复】彻底消除 TabbedPane 的外边框和不必要的空白断层
         tabbedPane.setBorder(javax.swing.BorderFactory.createEmptyBorder());
         // 如果使用的LookAndFeel支持，还可以进一步强制其内部页边距为0
@@ -163,6 +173,8 @@ public class MudMainScreen extends JFrame {
 
         this.add(tabbedPane, BorderLayout.CENTER);
     }
+
+    
 
     /**
      * 创建专用于新增 Tab 的 "+" 号按钮组件
@@ -216,18 +228,6 @@ public class MudMainScreen extends JFrame {
 
         // 3. 调用 addMe，它会将黑色的 tabPanelArea 完美嵌入顶部的 tabbedPane 中
         newTab.addMe(this.tabbedPane, this);
-
-        this.tabbedPane.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                // 获取当前选中的组件或索引
-                Component selectedComponent = tabbedPane.getSelectedComponent();
-                if (selectedComponent != null) {
-                    selectedSession = selectedComponent.getName();
-                    foucesInputLine();
-                }
-            }
-        });
 
         return newTab;
     }
@@ -290,6 +290,67 @@ public class MudMainScreen extends JFrame {
         String sessionId = session.getSessionId();
         MudTabPanel mudTabPanel = this.tabPanels.get(sessionId);
         mudTabPanel.setTitle(title);
+    }
+
+
+    private class TabbedPanelChangeListener implements ChangeListener {
+
+        @Override
+        public void stateChanged(ChangeEvent e) {
+            // 1. 保留你原有的业务逻辑
+            Component selectedComponent = tabbedPane.getSelectedComponent();
+            if (selectedComponent != null) {
+                selectedSession = selectedComponent.getName();
+                foucesInputLine();
+            }
+
+            // 2. 刷新所有标签的视觉状态
+            int selectedIndex = tabbedPane.getSelectedIndex();
+            int tabCount = tabbedPane.getTabCount();
+
+            // 主题色配置
+            Color selectedColor = new Color(0, 102, 51);
+            Color unselectedColor = Color.BLACK; // 未选中时暗灰
+
+            for (int i = 0; i < tabCount; i++) {
+                Component header = tabbedPane.getTabComponentAt(i);
+
+                if (header instanceof JPanel) {
+                    JPanel pnlHeader = (JPanel) header;
+                    
+                    // 【新增：边框控制】根据是否选中，为面板设置虚线边框或清空边框
+                    if (i == selectedIndex) {
+                        // 参数依次为：颜色、线宽、虚线长度、间距、是否圆角
+                        pnlHeader.setBorder(BorderFactory.createDashedBorder(selectedColor, 1.0f, 2.0f, 2.0f, false));
+                    } else {
+                        pnlHeader.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1)); // 清空边框，保持 1 像素占位防止界面抖动
+                    }
+
+                    for (Component child : pnlHeader.getComponents()) {
+                        if (child instanceof JLabel) {
+                            // 关键点：强转为 JLabel 对象
+                            JLabel lblTitle = (JLabel) child;
+
+                            if (i == selectedIndex) {
+                                // 【选中】设置字体加粗，单独调用 setForeground 设置颜色
+                                lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD));
+                                lblTitle.setForeground(selectedColor);
+                            } else {
+                                // 【未选中】设置字体常规，单独调用 setForeground 设置颜色
+                                lblTitle.setFont(lblTitle.getFont().deriveFont(Font.PLAIN));
+                                lblTitle.setForeground(unselectedColor);
+                            }
+                            break; // 找到了标签文本，跳出当前 Panel 的循环
+                        }
+                    }
+                    
+                    // 确保边框修改后立即重绘
+                    pnlHeader.revalidate();
+                    pnlHeader.repaint();
+                }
+            }
+        }
+
     }
 
 }
