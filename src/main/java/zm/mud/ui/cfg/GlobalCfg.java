@@ -33,6 +33,27 @@ public class GlobalCfg {
     @Value("${mud.ui.displayBufLineNumber:100}")
     private int displayBufLineNumber;
 
+
+    
+    @Value("${mud.server.name}")
+    private String defaultServerName;
+
+    @Value("${mud.server.host}")
+    private String defaultHost;
+
+    @Value("${mud.server.port}")
+    private int defaultPost;
+
+
+    
+    public String getDefaultHost() {
+        return defaultHost;
+    }
+
+    public int getDefaultPost() {
+        return defaultPost;
+    }
+
     public int getWidth() {
         return width;
     }
@@ -100,6 +121,10 @@ public class GlobalCfg {
 
     public void setDisplayBufLineNumber(int displayBufLineNumber) {
         this.displayBufLineNumber = displayBufLineNumber;
+    }
+
+    public String getDefaultServerName() {
+        return defaultServerName;
     }
 
     

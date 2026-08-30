@@ -19,6 +19,9 @@ import zm.mud.utils.SpringBeanUtil;
 public class MudSession {
     private static final Logger logger = LogManager.getLogger(MudSession.class);
 
+    private String host;
+    private int port;
+
     private String sessionId;
     private String sessionName;
 
@@ -34,10 +37,10 @@ public class MudSession {
     private static final Map<String, MudSession> allSessionMap = new HashMap<>();
     private static final Lock sessionMapLock = new ReentrantLock();
 
-    public static MudSession newSession() {
+    public static MudSession newSession(String host,int port) {
         try {
             sessionMapLock.tryLock();
-            MudSession session = new MudSession(UuidUtil.getTimeBasedUuid().toString());
+            MudSession session = new MudSession(UuidUtil.getTimeBasedUuid().toString(),host,port);
             allSessionMap.put(session.getSessionId(), session);
             return session;
         } catch (Exception e) {
@@ -52,18 +55,30 @@ public class MudSession {
         return allSessionMap;
     }
 
-    private MudSession(String sessionId) {
+    private MudSession(String sessionId,String host,int port) {
         this.sessionId = sessionId;
         this.oubMsgService = SpringBeanUtil.getBean(OubMsgService.class);
         this.triggerFactory = SpringBeanUtil.getBean(TriggerFactory.class);
         this.threadPoolService = SpringBeanUtil.getBean(ThreadPoolService.class);
         this.gmcpContext = new GMCPContext();
+        this.host = host;
+        this.port = port;
+    }
+
+    
+
+    public String getHost() {
+        return host;
+    }
+
+    public int getPort() {
+        return port;
     }
 
     public void start() {
         this.client = ZmMud.context.getBean(MudClient.class);
         this.triggerFactory.load(this);
-        boolean isConnected = client.connect(this);
+        boolean isConnected = client.connect(this,this.getHost(),this.getPort(),client.getCharset());
         if (!isConnected) {
             logger.error("Failed to connect to server");
             return;

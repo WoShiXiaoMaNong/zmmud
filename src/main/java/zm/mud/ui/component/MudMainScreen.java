@@ -107,8 +107,8 @@ public class MudMainScreen extends JFrame {
         });
     }
 
-    private void createNewSession(String title) {
-        MudSession session = MudSession.newSession();
+    private void createNewSession(String title,String host,int port) {
+        MudSession session = MudSession.newSession(host,port);
         session.setSessionName(title);
         addNewTab(session);
         session.start();
@@ -198,21 +198,73 @@ public class MudMainScreen extends JFrame {
 
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                // 点击 "+" 号直接弹出输入框并创建新 Tab
-                String tabName = javax.swing.JOptionPane.showInputDialog(
-                        MudMainScreen.this,
-                        "请输入新会话名称:",
-                        "新建 Tab",
-                        javax.swing.JOptionPane.PLAIN_MESSAGE);
-
-                if (tabName != null && !tabName.trim().isEmpty()) {
-                    createNewSession(tabName.trim());
-                }
+                showConnectDialog();
             }
         });
 
         return lblAdd;
     }
+
+
+/**
+ * 弹出连接MUD世界的对话框
+ */
+private void showConnectDialog() {
+    // 1. 创建包含三个输入框的面板
+    javax.swing.JPanel panel = new javax.swing.JPanel(new java.awt.GridLayout(3, 2, 5, 5));
+
+    javax.swing.JTextField nameField = new javax.swing.JTextField();
+    javax.swing.JTextField hostField = new javax.swing.JTextField();
+    javax.swing.JTextField portField = new javax.swing.JTextField();
+
+    panel.add(new javax.swing.JLabel("MUD世界名称:"));
+    nameField.setText(globleCfg.getDefaultServerName());
+    panel.add(nameField);
+    panel.add(new javax.swing.JLabel("Host (主机):"));
+    panel.add(hostField);
+    hostField.setText(globleCfg.getDefaultHost());
+    panel.add(new javax.swing.JLabel("Port (端口):"));
+    portField.setText(String.valueOf(globleCfg.getDefaultPost()));
+    panel.add(portField);
+
+    // 2. 弹出确认对话框
+    int result = javax.swing.JOptionPane.showConfirmDialog(
+            MudMainScreen.this,
+            panel,
+            "连接MUD世界",
+            javax.swing.JOptionPane.OK_CANCEL_OPTION,
+            javax.swing.JOptionPane.PLAIN_MESSAGE);
+
+    // 3. 点击确定后，提取并校验数据
+    if (result == javax.swing.JOptionPane.OK_OPTION) {
+        String tabName = nameField.getText().trim();
+        String host = hostField.getText().trim();
+        String portStr = portField.getText().trim();
+
+        // 基础非空校验
+        if (!tabName.isEmpty() && !host.isEmpty() && !portStr.isEmpty()) {
+            try {
+                int port = Integer.parseInt(portStr);
+                // 成功获取所有数据，创建新会话
+                createNewSession(tabName, host, port);
+            } catch (NumberFormatException ex) {
+                // 端口不是数字时的提示
+                javax.swing.JOptionPane.showMessageDialog(
+                        MudMainScreen.this,
+                        "端口号必须为数字！",
+                        "输入错误",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            // 字段未填满时的提示
+            javax.swing.JOptionPane.showMessageDialog(
+                    MudMainScreen.this,
+                    "所有字段均不能为空！",
+                    "输入错误",
+                    javax.swing.JOptionPane.WARNING_MESSAGE);
+        }
+    }
+}
 
     /**
      * 辅助方法：始终把新 Tab 插入到最后那个 "+" 号组件的左侧
@@ -245,6 +297,12 @@ public class MudMainScreen extends JFrame {
 
     public void setShow() {
         this.setVisible(true);
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                showConnectDialog();
+            }
+        });
     }
 
     public void resetFont(MudSession session, String font, int size) {
