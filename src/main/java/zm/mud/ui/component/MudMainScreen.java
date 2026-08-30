@@ -1,6 +1,7 @@
 package zm.mud.ui.component;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.util.List;
@@ -11,6 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import zm.mud.core.api.ClientService;
 import zm.mud.core.session.MudSession;
@@ -31,9 +34,9 @@ public class MudMainScreen extends JFrame {
 
     private JTabbedPane tabbedPane;
 
-    private String selectedSession;
+    private volatile String selectedSession;
 
-    private volatile Map<String/*Session ID */, MudTabPanel> tabPanels;
+    private volatile Map<String/* Session ID */, MudTabPanel> tabPanels;
 
     public MudMainScreen(GlobalCfg cfg, ZmMudUI ui) {
         this.globleCfg = cfg;
@@ -73,6 +76,9 @@ public class MudMainScreen extends JFrame {
                 for (Entry<String, MudTabPanel> entry : tabPanels.entrySet()) {
                     MudTabPanel mTabPanel = entry.getValue();
                     String sessionId = entry.getKey();
+                    if (selectedSession == null || !selectedSession.equals(sessionId)) {
+                        continue;
+                    }
                     MudSession session = MudSession.getSession(sessionId);
                     GMCPContext gmcpContext = session.getGmcpContext();
                     mTabPanel.refreshStatusBar(gmcpContext.getStatus(), gmcpContext.getCurrentRoom());
@@ -104,7 +110,7 @@ public class MudMainScreen extends JFrame {
         SwingUtilities.invokeLater(() -> {
             this.foucesInputLine();
         });
-        
+
     }
 
     private void init() {
@@ -214,12 +220,26 @@ public class MudMainScreen extends JFrame {
         // 1. 此时直接获取 tabMainPanel 预留的完整空间尺寸
 
         // 2. 实例化你的 MudTabPanel
-        MudTabPanel newTab = new MudTabPanel(session, this.globleCfg, tabbedPane.getPreferredSize());
+        MudTabPanel newTab = new MudTabPanel(session, this.globleCfg, this.tabbedPane.getPreferredSize());
         this.tabPanels.put(session.getSessionId(), newTab);
+
+  
         newTab.resetFont(this.globleCfg.getFontName(), this.globleCfg.getFontSize());
 
         // 3. 调用 addMe，它会将黑色的 tabPanelArea 完美嵌入顶部的 tabbedPane 中
-        newTab.addMe(tabbedPane, this);
+        newTab.addMe(this.tabbedPane, this);
+
+              this.tabbedPane.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                // 获取当前选中的组件或索引
+                Component selectedComponent = tabbedPane.getSelectedComponent();
+                if (selectedComponent != null) {
+                    selectedSession = selectedComponent.getName();
+                    foucesInputLine();
+                }
+            }
+        });
 
         // 4. 清理：因为组件现在都在 tabbedPane 内部了，下面这行要删掉，防止两头重复添加冲突
         // tabMainPanel.add(newTab.getTextArea()); <-- 删掉这行
@@ -227,9 +247,12 @@ public class MudMainScreen extends JFrame {
         return newTab;
     }
 
-    public void foucesInputLine(){
+    public void foucesInputLine() {
+        if(this.selectedSession == null){
+            return;
+        }
         MudTabPanel selectedTab = this.tabPanels.get(this.selectedSession);
-        if(selectedTab == null){
+        if (selectedTab == null) {
             return;
         }
         selectedTab.focusInputLine();

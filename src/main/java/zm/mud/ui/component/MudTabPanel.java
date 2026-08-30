@@ -48,6 +48,7 @@ public class MudTabPanel {
     public MudTabPanel(MudSession session, GlobalCfg cfg, Dimension dimension) {
         this.session = session;
         this.tabMainPanel = new JPanel();
+        tabMainPanel.setName(session.getSessionId());
         this.tabMainPanel.setPreferredSize(dimension);
        
         this.init(cfg);
