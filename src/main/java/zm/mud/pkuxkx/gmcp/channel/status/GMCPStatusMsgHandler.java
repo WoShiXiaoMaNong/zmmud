@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson2.JSON;
 
+import zm.mud.core.session.MudSession;
 import zm.mud.pkuxkx.gmcp.GMCPContext;
 import zm.mud.pkuxkx.gmcp.channel.IGMCPMsgHandler;
 import zm.mud.ui.ZmMudUI;
@@ -19,16 +20,17 @@ public class GMCPStatusMsgHandler implements IGMCPMsgHandler {
     private ZmMudUI ui;
 
     @Override
-    public void parse(String packageName, String jsonPayload, GMCPContext gmcpContext) {
+    public void parse(MudSession session,String packageName, String jsonPayload) {
         Map<String, Object> packageDataMap =  JSON.parseObject(jsonPayload, Map.class);
         if(packageDataMap != null){
+            GMCPContext gmcpContext = session.getGmcpContext();
             for(Map.Entry<String, Object> entry : packageDataMap.entrySet()){
                 gmcpContext.putStatus(entry.getKey(), entry.getValue());
             }
             Object name = packageDataMap.get("name");
             Object id = packageDataMap.get("id");
             if( name != null && id != null){
-                this.ui.setTitle( String.format("%s（%s）", name,id));
+                this.ui.setTitle(session, String.format("%s（%s）", name,id));
             }
 
           

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import zm.mud.core.automation.script.lua.ILuaApi;
+import zm.mud.core.session.MudSession;
 
 
 /**
@@ -23,12 +24,12 @@ public class LuaApi implements ILuaApi{
     private OubMsgService oubMsgService;
 
 
-    public void sendMsg(String msg){
+    public void sendMsg(MudSession session,String msg){
         logger.info(msg);
     }
 
-    public void sendCommand(String command){
-        oubMsgService.send(command);
+    public void sendCommand(MudSession session,String command){
+        oubMsgService.send(session,command);
            
     }
 

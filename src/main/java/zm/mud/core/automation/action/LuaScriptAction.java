@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import zm.mud.core.automation.script.lua.LuaService;
 import zm.mud.core.automation.trigger.Trigger;
 import zm.mud.core.automation.trigger.cfg.MatchResult;
+import zm.mud.core.session.MudSession;
 
 @Component("ACTION_LuaScriptAction")
 @Scope("prototype")
@@ -33,7 +34,7 @@ public class LuaScriptAction implements IAction {
     }
 
     @Override
-    public void execute(Trigger trigger, MatchResult ret) {
+    public void execute(MudSession session,Trigger trigger, MatchResult ret) {
         String script = this.getExpression();
         if (script == null || script.trim().isEmpty()) {
             logger.error("Lua 脚本路径为空，无法执行！来自触发器：" + trigger.getTriggerName());

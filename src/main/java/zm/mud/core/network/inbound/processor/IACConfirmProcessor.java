@@ -7,12 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
 
-import zm.mud.core.client.MudClient;
 import zm.mud.core.network.inbound.message.IACConfirmInbMsg;
 import zm.mud.core.network.inbound.message.InbMsg;
 import zm.mud.core.protocol.iac.consts.IACConsts;
 import zm.mud.core.protocol.iac.handler.IIACCommandHandler;
 import zm.mud.core.protocol.iac.sbhandler.IIACSBCommandHandler;
+import zm.mud.core.session.MudSession;
 import zm.mud.utils.HexUtil;
 import zm.mud.utils.SpringBeanUtil;
 
@@ -21,8 +21,6 @@ public class IACConfirmProcessor implements IInbMsgProcessor, Ordered {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(IACConfirmProcessor.class);
 
-    @Autowired
-    private MudClient mudClient;
 
     @Autowired
     private HexUtil hexUtil;
@@ -42,9 +40,9 @@ public class IACConfirmProcessor implements IInbMsgProcessor, Ordered {
 
         List<byte[]> responses = null;
         if (!this.isSBCommand(iacMsg.getContentBytes())) {
-            responses = this.handleIAC(iacMsg.getContentBytes());
+            responses = this.handleIAC(msg.getSession(), iacMsg.getContentBytes());
         } else {
-            responses = this.handleIACSub(iacMsg.getContentBytes());
+            responses = this.handleIACSub(msg.getSession(), iacMsg.getContentBytes());
         }
         if (responses == null || responses.isEmpty()) {
             logger.debug("不支持当前IAC指令或者不响应：" + Arrays.toString(this.hexUtil.toHex(iacMsg.getContentBytes())));
@@ -53,7 +51,7 @@ public class IACConfirmProcessor implements IInbMsgProcessor, Ordered {
 
         for(byte[] response : responses) {
             logger.debug("发送响应指令" + Arrays.toString(this.hexUtil.toHex(response)));
-            this.mudClient.send(response);
+            msg.getSession().getClient().send(response);
         }
         
         return true;
@@ -64,7 +62,7 @@ public class IACConfirmProcessor implements IInbMsgProcessor, Ordered {
         return 2;
     }
 
-    private List<byte[]> handleIAC(byte[] iacCommand) {
+    private List<byte[]> handleIAC(MudSession session, byte[] iacCommand) {
         byte optionCode = iacCommand[2];
         String beanId = IACConsts.IAC_HANDLER_BEAN_PREFIX + this.hexUtil.toHex(optionCode);
         IIACCommandHandler handler = SpringBeanUtil.getBean(beanId, IIACCommandHandler.class);
@@ -73,10 +71,10 @@ public class IACConfirmProcessor implements IInbMsgProcessor, Ordered {
             handler = SpringBeanUtil.getBean(IACConsts.IAC_HANDLER_COMMON, IIACCommandHandler.class);
         }
 
-        return handler.handle(iacCommand);
+        return handler.handle(session, iacCommand);
     }
 
-    private List<byte[]> handleIACSub(byte[] iacCommand) {
+    private List<byte[]> handleIACSub(MudSession session,byte[] iacCommand) {
         byte optionCode = iacCommand[2];
         String beanId = IACConsts.IAC_SB_HANDLER_BEAN_PREFIX + this.hexUtil.toHex(optionCode);
         IIACSBCommandHandler handler = SpringBeanUtil.getBean(beanId, IIACSBCommandHandler.class);
@@ -85,7 +83,7 @@ public class IACConfirmProcessor implements IInbMsgProcessor, Ordered {
             handler = SpringBeanUtil.getBean(IACConsts.IAC_SB_HANDLER_DEFAULT, IIACSBCommandHandler.class);
         }
 
-        return handler.handle(iacCommand);
+        return handler.handle(session,iacCommand);
     }
 
     // SB format: [FF, FA, xx,xx,..., FF, SE]

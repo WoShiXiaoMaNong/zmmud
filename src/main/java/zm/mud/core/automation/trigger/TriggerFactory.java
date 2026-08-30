@@ -3,49 +3,48 @@ package zm.mud.core.automation.trigger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson2.TypeReference;
 
 import zm.mud.core.automation.action.IAction;
-import zm.mud.core.automation.alias.Alias;
 import zm.mud.core.automation.trigger.cfg.MatcherAndActionConfigEntry;
 import zm.mud.core.automation.trigger.cfg.TriggerConfigEntry;
 import zm.mud.core.automation.trigger.cfg.TriggerType;
 import zm.mud.core.automation.trigger.matcher.IMatcher;
 import zm.mud.core.cfg.CustomCfgLoader;
+import zm.mud.core.session.MudSession;
+import zm.mud.utils.SpringBeanUtil;
+
 
 @Service
 public class TriggerFactory {
     private static final Logger logger = LogManager.getLogger(TriggerFactory.class);
     
-    @Autowired
-    private TriggerRegister triggerRegister;
+    private Map<String/* Session ID */,List<TriggerConfigEntry>> triggers;
+    private Map<String/* Session ID */,Map<String,TriggerConfigEntry>> triggerMap;
 
-    @Autowired
-    private ApplicationContext ctx;
-
-    private List<TriggerConfigEntry> triggers;
-    private Map<String,TriggerConfigEntry> triggerMap;
 
 
     public TriggerFactory(){
-
+        this.triggers = new ConcurrentHashMap<>();
+        this.triggerMap = new ConcurrentHashMap<>();
     }
 
-    public Trigger buildByeName(String triggerName){
-        return this.build(this.triggerMap.get(triggerName));
+    public Trigger buildByeName(MudSession session, String triggerName){
+        Map<String,TriggerConfigEntry> trggerMapForCurrentSession = this.triggerMap.get(session.getSessionId());
+        if(trggerMapForCurrentSession == null){
+            return null;
+        }
+        return this.build(session,trggerMapForCurrentSession.get(triggerName));
     }
    
 
-    public Trigger build(TriggerConfigEntry cfgEntry){
+    public Trigger build(MudSession session,TriggerConfigEntry cfgEntry){
         String trggerName = cfgEntry.getName();
         String triggerTypeStr = cfgEntry.getType();
         MatcherAndActionConfigEntry actionEntry = cfgEntry.getAction();
@@ -53,10 +52,10 @@ public class TriggerFactory {
         Integer remainningCount = cfgEntry.getRemainningCount();
 
 
-        IMatcher matcher = (IMatcher) this.ctx.getBean("MATCHER_" + matcherEntry.getType());
+        IMatcher matcher =  SpringBeanUtil.getBean("MATCHER_" + matcherEntry.getType(),IMatcher.class);
         matcher.setExpression(matcherEntry.getExpression());
 
-        IAction action = (IAction) this.ctx.getBean("ACTION_" + actionEntry.getType());
+        IAction action = SpringBeanUtil.getBean("ACTION_" + actionEntry.getType(),IAction.class);
         action.setExpression(actionEntry.getExpression());
         action.setParams(cfgEntry.getAction().getParams());
 
@@ -71,7 +70,7 @@ public class TriggerFactory {
        }
 
 
-        Trigger trigger = new Trigger(triggerType,trggerName,matcher, action,remainningCount);
+        Trigger trigger = new Trigger(session,triggerType,trggerName,matcher, action,remainningCount);
         trigger.setSync(cfgEntry.isSync());
         trigger.setUnique(cfgEntry.isUnique());
         trigger.setAutoRegister(cfgEntry.isAutoRegister());
@@ -79,32 +78,36 @@ public class TriggerFactory {
 
     }
 
-    @EventListener(ContextRefreshedEvent.class)
-    public void onApplicationReady() {
+    public void load(MudSession session) {
         logger.info("Trigger init start....");
-        this.triggers = (List<TriggerConfigEntry> ) CustomCfgLoader.loadUIConfig("pkuxkx", "triggers",
+        TriggerRegister triggerRegister = SpringBeanUtil.getBean(TriggerRegister.class);
+        List<TriggerConfigEntry> triggersForCurrentSession = (List<TriggerConfigEntry> ) CustomCfgLoader.loadUIConfig("pkuxkx", "triggers",
                     new TypeReference<List<TriggerConfigEntry>>(){});
-        this.triggerMap = new HashMap<>();
-        for(TriggerConfigEntry cfgEntry : this.triggers){
-            this.triggerMap.put(cfgEntry.getName(),cfgEntry);
+        this.triggers.put(session.getSessionId(),triggersForCurrentSession);
+     
+        for(TriggerConfigEntry cfgEntry : triggersForCurrentSession){
+            Map<String,TriggerConfigEntry> triggerMapForCurentSession = this.triggerMap.get(session.getSessionId());
+            if( triggerMapForCurentSession == null){
+                triggerMapForCurentSession = new HashMap<>();
+                this.triggerMap.put(session.getSessionId(),triggerMapForCurentSession);
+            }
+            triggerMapForCurentSession.put(cfgEntry.getName(),cfgEntry);
         }
         logger.info("Trigger init finished");
 
         logger.info("Register triggers");
-        for(TriggerConfigEntry cfgEntry : this.triggers){
+        for(TriggerConfigEntry cfgEntry : triggersForCurrentSession){
             if( !cfgEntry.isAutoRegister()){
                 logger.debug("[Skip]Not an Auto-Register Trigger :" + cfgEntry.getName());
                 continue;
             }
-            Trigger trgger = this.build(cfgEntry);
-            this.triggerRegister.registerTrigger(trgger);
+            Trigger trgger = this.build(session,cfgEntry);
+            triggerRegister.registerTrigger(trgger);
         }
     }
 
-
-
-    public List<TriggerConfigEntry> getTriggers() {
-        return triggers;
+    public List<TriggerConfigEntry> getTriggers(MudSession session) {
+        return triggers.get(session.getSessionId());
     }
 
     

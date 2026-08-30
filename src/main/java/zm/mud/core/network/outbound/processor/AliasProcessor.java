@@ -36,7 +36,7 @@ public class AliasProcessor implements IOubMsgProcessor ,Ordered{
         boolean includeAlias = false;
 
         for(String aliasStr : aliasStrs){
-            boolean isAlias = this.process(aliasStr);
+            boolean isAlias = this.process(msg,aliasStr);
             if(!includeAlias){
                 includeAlias = isAlias;
             }
@@ -49,7 +49,7 @@ public class AliasProcessor implements IOubMsgProcessor ,Ordered{
        
     }
 
-    private boolean process(String aliasStr){
+    private boolean process(OubMsg msg,String aliasStr){
         // Alias: Alia + params
         String[] msgs = aliasStr.split(" ");
         String [] args = null;
@@ -62,7 +62,7 @@ public class AliasProcessor implements IOubMsgProcessor ,Ordered{
         Alias a = this.aliasService.getAlias(msgs[0]);
         boolean isAlias = a != null;
         if(isAlias){
-            this.aliasService.doAlias(a, this.oubMsgService,args);
+            this.aliasService.doAlias(msg.getSession(),a, this.oubMsgService,args);
             return true;
         }else{
             return false;

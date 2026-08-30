@@ -8,13 +8,20 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import zm.mud.core.network.ConnectionManager;
 import zm.mud.core.network.outbound.message.OubMsg;
+import zm.mud.core.session.MudSession;
 import zm.mud.utils.CloseUtil;
 
+/**
+ * 设置为多例，每次注入都会创建一个新的实例
+ * MudClient
+ */
 @Service
+@Scope("prototype") 
 public class MudClient implements AutoCloseable,DisposableBean {
     private static final Logger logger = LogManager.getLogger(MudClient.class);
 
@@ -28,6 +35,8 @@ public class MudClient implements AutoCloseable,DisposableBean {
     @Autowired
     private ConnectionManager connectionManager;
 
+    private MudSession session;
+
     public MudClient() {
     }
 
@@ -38,11 +47,11 @@ public class MudClient implements AutoCloseable,DisposableBean {
      * 这对于在 Spring 中通过配置文件注入参数后直接连接非常有用。
      * </pre>
      */
-    public boolean connect() {
-        return this.connect(this.host, this.port, this.charset);
+    public boolean connect(MudSession session) {
+        return this.connect(session,this.host, this.port, this.charset);
     }
 
-    public boolean connect(String host, int port, Charset charset) {
+    public boolean connect(MudSession session,String host, int port, Charset charset) {
         try {
             if (this.connectionManager == null) {
                 this.connectionManager = new ConnectionManager();
@@ -86,6 +95,12 @@ public class MudClient implements AutoCloseable,DisposableBean {
         } catch (IOException e) {
             logger.error("Failed to send data to server", e);
         }
+    }
+
+    
+
+    public MudSession getSession() {
+        return session;
     }
 
     public Charset getCharset() {

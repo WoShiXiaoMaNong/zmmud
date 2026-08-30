@@ -11,6 +11,7 @@ import zm.mud.core.automation.trigger.Trigger;
 import zm.mud.core.automation.trigger.TriggerFactory;
 import zm.mud.core.automation.trigger.cfg.MatchResult;
 import zm.mud.core.automation.trigger.cfg.TriggerType;
+import zm.mud.core.session.MudSession;
 import zm.mud.utils.SpringBeanUtil;
 
 @Component("ACTION_RegisterAction")
@@ -31,9 +32,9 @@ public class RegisterAction implements IAction{
     }
 
     @Override
-    public void execute(Trigger trigger, MatchResult ret) {
+    public void execute(MudSession session,Trigger trigger, MatchResult ret) {
         TriggerFactory tf = SpringBeanUtil.getBean(TriggerFactory.class);
-        Trigger newTrigger = tf.buildByeName(this.getExpression());
+        Trigger newTrigger = tf.buildByeName(session,this.getExpression());
         if( newTrigger == null){
             logger.debug("new tirgger is null : " + trigger.getTriggerName());
             return;

@@ -38,9 +38,9 @@ public class MsgPrintProcessor implements Function<InbMsg,Boolean>{
             return true;
         }
         if(isChatMsg(t)){
-            ui.printlnToScreen(this.getMsgStr(t),true);
+            ui.printlnToScreen(t.getSession(),this.getMsgStr(t),true);
         }else{
-            ui.printlnToScreen(this.getMsgStr(t));
+            ui.printlnToScreen(t.getSession(),this.getMsgStr(t));
         }
         
         return true;

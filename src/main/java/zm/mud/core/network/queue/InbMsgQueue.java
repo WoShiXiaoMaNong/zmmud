@@ -5,6 +5,7 @@ import java.util.concurrent.BlockingQueue;
 import org.springframework.stereotype.Service;
 
 import zm.mud.core.network.inbound.message.InbMsg;
+import zm.mud.core.session.MudSession;
 
 @Service
 public class InbMsgQueue implements IZmmudQueue<InbMsg> {
@@ -18,8 +19,9 @@ public class InbMsgQueue implements IZmmudQueue<InbMsg> {
     }
 
     @Override
-    public void put(InbMsg msg) {
+    public void put(MudSession session,InbMsg msg) {
         try {
+            msg.setSession(session);
             msgQueue.put(msg);
         } catch (InterruptedException e) {
             logger.error("Failed to put message into queue", e);
@@ -27,7 +29,7 @@ public class InbMsgQueue implements IZmmudQueue<InbMsg> {
     }
 
     @Override
-    public InbMsg take() {
+    public InbMsg take(MudSession session) {
         try {
             return msgQueue.take();
         } catch (InterruptedException e) {

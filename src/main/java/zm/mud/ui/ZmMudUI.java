@@ -1,6 +1,7 @@
 package zm.mud.ui;
 
 import zm.mud.core.api.InbMsgService;
+import zm.mud.core.session.MudSession;
 import zm.mud.core.thread.ZmmudThreadPools;
 import zm.mud.pkuxkx.gmcp.GMCPContext;
 import zm.mud.ui.cfg.GlobalCfg;
@@ -40,10 +41,6 @@ public class ZmMudUI {
     @Autowired
     private InbMsgService inbMsgService;
 
-    @Autowired
-    private GMCPContext gmcpContext;
-
-
     private static final ThreadPoolExecutor uiThreadPool = new ThreadPoolExecutor(
             1, 3, 60L, TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(1024),
@@ -60,42 +57,27 @@ public class ZmMudUI {
         FontUtil.registerFont();
     }
 
-    public void setTitle(String title){
-        this.mudMain.setTitle(title);
-    }
-
-    public String getTitle(){
-        return this.mudMain.getTitle();
+    public void setTitle(MudSession session,String title){
+        this.mudMain.setTitle(session,title);
     }
 
     public void start() {
         SwingUtilities.invokeLater(() -> {
             mudMain.setShow();
-            mudMain.resetFont(this.globleCfg.getFontName(), this.globleCfg.getFontSize());
             inbMsgService.registerMsgHandler(msgPinter);
-            ZmmudThreadPools.MUD_UI.execute(() -> {
-                while(true){
-                    mudMain.refreshStatusBar(gmcpContext.getStatus(),gmcpContext.getCurrentRoom());
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        logger.error("Error while refreshing status bar: ", e);
-                    }
-                }
-            });
         });
     }
 
-    public int getMsgOffset(String msg) {
-        return this.mudMain.getMsgOffset(msg);
+    public int getMsgOffset(MudSession session,String msg) {
+        return this.mudMain.getMsgOffset(session,msg);
     }
 
-    public void printlnToScreen(String text) {
-        this.mudMain.printlnToScreen(text, false);
+    public void printlnToScreen(MudSession session,String text) {
+        this.mudMain.printlnToScreen(session,text, false);
     }
 
-    public void printlnToScreen(String text, boolean enableBlod) {
-        this.mudMain.printlnToScreen(text, enableBlod);
+    public void printlnToScreen(MudSession session,String text, boolean enableBlod) {
+        this.mudMain.printlnToScreen(session,text, enableBlod);
     }
 
     /**
@@ -103,16 +85,16 @@ public class ZmMudUI {
      * @param imgUrl
      * @param offset
      */
-    public void printImg(List<ImageInfo> imgUrls, int offset) {
+    public void printImg(MudSession session,List<ImageInfo> imgUrls, int offset) {
         uiThreadPool.execute(() -> {
-            mudMain.printImg(imgUrls, offset);
+            mudMain.printImg(session,imgUrls, offset);
         });
     }
 
 
-     public void printImg(List<ImageInfo> imgUrls) {
+     public void printImg(MudSession session,List<ImageInfo> imgUrls) {
         uiThreadPool.execute(() -> {
-            mudMain.printImg(imgUrls);
+            mudMain.printImg(session,imgUrls);
         });
     }
 

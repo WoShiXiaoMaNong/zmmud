@@ -1,6 +1,6 @@
 package zm.mud.core;
 
-import java.util.List;
+import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 import zm.mud.core.network.inbound.message.NormalInbMsg;
 import zm.mud.core.network.queue.InbMsgQueue;
+import zm.mud.core.network.threads.ThreadPoolService;
+import zm.mud.core.session.MudSession;
 
 @Service
 public class ShutdownWorld extends Thread {
@@ -17,7 +19,7 @@ public class ShutdownWorld extends Thread {
             .getLogger(ShutdownWorld.class);
 
     @Autowired
-    List<IShutdownFunc> shutdownFuncs;
+    private ThreadPoolService threadPoolService;
 
     @Autowired
     private InbMsgQueue inbMsgQueue;
@@ -35,18 +37,22 @@ public class ShutdownWorld extends Thread {
     @Override
     public void run() {
         logger.info("ShutdownWorld is running. Performing cleanup tasks...");
-        this.inbMsgQueue.put(new NormalInbMsg("按任意键后退出。。。"));
+        for(Entry<String,MudSession> entry : MudSession.allSession().entrySet()){
+            MudSession session = entry.getValue();
+            this.inbMsgQueue.put(session,new NormalInbMsg(session,"按任意键后退出。。。"));
+        }
+        
             if (context instanceof AbstractApplicationContext) {
                 ((AbstractApplicationContext) context).close();
             }
 
-        for (IShutdownFunc func : shutdownFuncs) {
+      
             try {
-                func.shutdown();
+                threadPoolService.shutdownAll();
             } catch (Exception e) {
-                logger.error("Error occurred while executing shutdown function: " + func.getClass().getSimpleName(), e);
+                logger.error("Error occurred while executing shutdown", e);
             }
-        }
+        
         logger.info("Cleanup tasks completed. ShutdownWorld is exiting.");
     }
 

@@ -10,6 +10,7 @@ import zm.mud.core.automation.action.IAction;
 import zm.mud.core.automation.trigger.cfg.MatchResult;
 import zm.mud.core.automation.trigger.cfg.TriggerType;
 import zm.mud.core.automation.trigger.matcher.IMatcher;
+import zm.mud.core.session.MudSession;
 
 public class Trigger {
     private static final Logger logger = LogManager.getLogger(Trigger.class);
@@ -48,6 +49,7 @@ public class Trigger {
      */
     private volatile int remainingTriggerCount; 
 
+    private MudSession session;
  
     /**
      * 
@@ -57,12 +59,13 @@ public class Trigger {
      * @param action
      * @param maxTriggerCount 
      */
-    public Trigger(TriggerType triggerType, String triggerName, IMatcher matcher, IAction action,int maxTriggerCount) {
+    public Trigger(MudSession session,TriggerType triggerType, String triggerName, IMatcher matcher, IAction action,int maxTriggerCount) {
         this.triggerType = triggerType;
         this.triggerName = triggerName;
         this.matcher = matcher;
         this.action = action;
         this.remainingTriggerCount = maxTriggerCount;
+        this.session = session;
     }
 
 
@@ -88,7 +91,7 @@ public class Trigger {
             return;
         }
         try{
-            this.action.execute(this, ret);
+            this.action.execute(this.session,this, ret);
         }catch(Exception e){
             logger.error(this.getTriggerName() + " error!",e);
         }

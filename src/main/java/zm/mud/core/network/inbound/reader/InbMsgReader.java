@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import zm.mud.core.client.MudClient;
 import zm.mud.core.network.inbound.message.InbMsg;
 import zm.mud.core.network.queue.InbMsgQueue;
 import zm.mud.core.protocol.iac.consts.IACConsts;
+import zm.mud.core.session.MudSession;
 
 @Service
 public class InbMsgReader {
@@ -51,15 +53,15 @@ public class InbMsgReader {
           this.buf = new int[maxLength];
      }
 
-     public synchronized void handleByte(int currentByte, Charset c) {
+     public synchronized void handleByte(MudSession session,int currentByte, Charset c) {
           OversizeCallback oversizeCallback = () -> {
                logger.warn("Message exceeds max length of " + maxLength + " bytes. Processing current buffer as a message.");
-               this.procesEnd(c);
+               this.procesEnd(session,c);
           };
           if (currentByte == IACConsts.IAC) {
                if(state == InbReaderState.NORMAL_READING){
                     state = InbReaderState.NORMAL_END;
-                    this.procesEnd(c);
+                    this.procesEnd(session,c);
                }
                state = InbReaderState.IAC_READING;
                this.add(currentByte, oversizeCallback);
@@ -124,11 +126,11 @@ public class InbMsgReader {
           }
 
           if (state == InbReaderState.NORMAL_END || state == InbReaderState.IAC_END) {
-               this.procesEnd(c);
+               this.procesEnd(session, c);
           }
      }
 
-     private void procesEnd(Charset c) {
+     private void procesEnd(MudSession session,Charset c) {
           // convert buf to byte array and then to string
           byte[] bytes = new byte[this.currentIndex];
           for (int i = 0; i < this.currentIndex; i++) {
@@ -137,11 +139,11 @@ public class InbMsgReader {
           String msgContent = new String(bytes, c);
           InbMsg msg = null;
           if (state == InbReaderState.IAC_END) {
-               msg = InbMsg.buildIACConfirmMsg(bytes);
+               msg = InbMsg.buildIACConfirmMsg(session,bytes);
           } else {
-               msg = InbMsg.build(msgContent);
+               msg = InbMsg.build(session,msgContent);
           }
-          inbMsgQueue.put(msg);
+          inbMsgQueue.put(session,msg);
           this.clear();
           state = InbReaderState.NOT_STARTED;
      }

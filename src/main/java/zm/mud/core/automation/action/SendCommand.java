@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import zm.mud.core.api.OubMsgService;
 import zm.mud.core.automation.trigger.Trigger;
 import zm.mud.core.automation.trigger.cfg.MatchResult;
+import zm.mud.core.session.MudSession;
 import zm.mud.utils.SpringBeanUtil;
 
 @Component("ACTION_SendCommand")
@@ -18,9 +19,9 @@ public class SendCommand implements IAction{
     private String expression;
 
     @Override
-    public void execute(Trigger tirgger, MatchResult ret) {
+    public void execute(MudSession session,Trigger tirgger, MatchResult ret) {
         OubMsgService oubMsgService = SpringBeanUtil.getBean(OubMsgService.class);
-        oubMsgService.send(this.getExpression());
+        oubMsgService.send(session,this.getExpression());
     }
     @Override
     public void setExpression(String expression) {

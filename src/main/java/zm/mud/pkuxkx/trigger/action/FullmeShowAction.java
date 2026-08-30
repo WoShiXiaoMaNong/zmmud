@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import zm.mud.core.automation.action.IAction;
 import zm.mud.core.automation.trigger.Trigger;
 import zm.mud.core.automation.trigger.cfg.MatchResult;
+import zm.mud.core.session.MudSession;
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.component.ImageInfo;
 import zm.mud.utils.HttpUtil;
@@ -47,7 +48,7 @@ public class FullmeShowAction implements IAction {
     }
 
     @Override
-    public void execute(Trigger trigger, MatchResult ret) {
+    public void execute(MudSession session,Trigger trigger, MatchResult ret) {
         String fullmeUrl = ret.getOriginMsg();
        
         
@@ -68,9 +69,9 @@ public class FullmeShowAction implements IAction {
             imageInfo.setNeedBeforeNewLine(needBeforeNewLine);
             imgUrls.add(imageInfo);
         }
-        int fullmeUrlOffset = ui.getMsgOffset(fullmeUrl);
+        int fullmeUrlOffset = ui.getMsgOffset(session,fullmeUrl);
         logger.debug("Fullme URL offset:" + fullmeUrlOffset);
-        ui.printImg(imgUrls,fullmeUrlOffset);
+        ui.printImg(session,imgUrls,fullmeUrlOffset);
         logger.info(">>>>>>>>>> url:" + imgUrls);
     }
 

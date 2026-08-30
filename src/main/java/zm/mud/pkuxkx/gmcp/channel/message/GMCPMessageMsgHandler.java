@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson2.JSON;
 
-import zm.mud.pkuxkx.gmcp.GMCPContext;
+import zm.mud.core.session.MudSession;
 import zm.mud.pkuxkx.gmcp.channel.IGMCPMsgHandler;
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.component.ImageInfo;
@@ -24,14 +24,15 @@ public class GMCPMessageMsgHandler implements IGMCPMsgHandler {
 
    
     @Override
-    public void parse(String packageName, String jsonPayload, GMCPContext gmcpContext) {
+    public void parse(MudSession session,String packageName, String jsonPayload) {
         // 解析 GMCP 消息
         PkuxkxMessage message = JSON.parseObject(jsonPayload, PkuxkxMessage.class);
 
         if( MESSAGE_TYPE_PIC.equalsIgnoreCase(message.getType()) && message.getUrl() != null && !message.getUrl().isEmpty()) {
             ImageInfo imageInfo = new ImageInfo(message.getUrl(), true,false);
             imageInfo.setMaxWidth(400);
-            ui.printImg(java.util.Collections.singletonList(imageInfo));
+            
+            ui.printImg(session,java.util.Collections.singletonList(imageInfo));
 
         }
     

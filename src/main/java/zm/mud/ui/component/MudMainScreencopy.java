@@ -1,0 +1,126 @@
+// package zm.mud.ui.component;
+
+// import java.awt.BorderLayout;
+// import java.awt.Dimension;
+// import java.awt.Font;
+// import java.util.List;
+// import java.util.Map;
+
+// import javax.swing.JFrame;
+// import javax.swing.JScrollPane;
+
+// import zm.mud.core.api.ClientService;
+// import zm.mud.pkuxkx.gmcp.channel.move.PkuxkxRoom;
+// import zm.mud.ui.ZmMudUI;
+// import zm.mud.ui.cfg.GlobalCfg;
+// import zm.mud.ui.component.statusBar.MudStatusBar;
+// import zm.mud.utils.SpringBeanUtil;
+
+// public class MudMainScreencopy extends JFrame {
+//     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
+//             .getLogger(MudMainScreen.class);
+
+//     private MudTextArea mudTextAare;
+
+//     private MudInputField mudInputField;
+
+//     private MudStatusBar mudStatusBar;
+
+//     private GlobalCfg globleCfg;
+
+//     private ZmMudUI ui;
+
+//     public MudMainScreencopy(GlobalCfg cfg,ZmMudUI ui) {
+//         this.globleCfg = cfg;
+//         this.ui = ui;
+//         setTitle(this.globleCfg.getTitle());
+//         setSize(new Dimension(this.globleCfg.getWidth(), this.globleCfg.getHeight())); 
+
+//         // 1. 改成 DO_NOTHING，把红叉的控制权拿回手里
+//         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+//         // 2. 绑定窗口关闭事件监听器
+//         this.addWindowListener(new java.awt.event.WindowAdapter() {
+//             @Override
+//             public void windowClosing(java.awt.event.WindowEvent e) {
+//                 // 在后台或当前线程中优雅发送 quit，并层层关闭本地网络句柄
+//                 logger.info("用户点击关闭窗口，开始执行安全断开流程...");
+//                 try {
+//                     SpringBeanUtil.getBean(ClientService.class).quit(); 
+//                 } catch (Exception ex) {
+//                     logger.error("安全断开期间发生异常: ", ex);
+//                 } finally {
+//                     logger.info("网络资源已安全释放，进程即将安全退出。");
+//                     System.exit(0); 
+//                 }
+//             }
+//         });
+//         setLocationRelativeTo(null);
+//         this.init();
+//         pack(); // 根据组件首选大小调整窗口
+//         setLocationRelativeTo(null); 
+//     }
+
+//     private void init() {
+//         setLayout(new BorderLayout());
+
+//         // ================== 【状态栏放在最上方】 ==================
+//         this.mudStatusBar = new MudStatusBar();
+//         //this.mudStatusBar.setPreferredSize(new Dimension(this.getSize().width, 40)); // 状态栏固定高度40px
+//         add(this.mudStatusBar, BorderLayout.NORTH);
+//         // =============================================================
+
+//         // 设置文本区固定高度
+//         this.mudTextAare = new MudTextArea(this.globleCfg);
+//         mudTextAare.setPreferredSize(new Dimension(this.getSize().width, this.getSize().height - 30));
+//         JScrollPane scrollPane = new MudScrollPane(mudTextAare, (isBottom) -> {
+//             mudTextAare.setAutoScrollEnabled(isBottom); // 设置 MudTextAare 的自动滚动状态
+//             return mudTextAare;
+//         });
+//         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+//         scrollPane.setPreferredSize(mudTextAare.getPreferredSize()); // 高度固定150px
+
+//         add(scrollPane, BorderLayout.CENTER);
+
+//         // 输入框在底部
+//         this.mudInputField = new MudInputField(this.ui);
+//         add(this.mudInputField, BorderLayout.SOUTH);
+
+//     }
+
+//     public void printlnToScreen(String text,boolean enableBlod) {
+//         this.mudTextAare.printlnToScreen(text,enableBlod);
+        
+//     }
+//     public int getMsgOffset(String msg){
+//         return this.mudTextAare.getMsgOffset(msg);
+//     }
+
+//     /**
+//      * @see MudTextArea#printImg(String, int)
+//      * @param imgUrl
+//      * @param offset
+//      */
+//     public void printImg(List<ImageInfo> imgUrls,int offset) {
+//         this.mudTextAare.printImg(imgUrls,offset);
+//     }
+
+//      public void printImg(List<ImageInfo> imgUrls) {
+//         this.mudTextAare.printImg(imgUrls);
+//     }
+
+//     public void setShow() {
+//         this.mudTextAare.setVisible(true);
+//         this.mudInputField.setVisible(true);
+//         this.setVisible(true);
+//         this.mudInputField.requestFocusInWindow();
+//     }
+
+//     public void resetFont(String font,int size) {
+//         this.mudTextAare.setFont(new Font(font, Font.PLAIN, size));
+//     }
+
+//     public void refreshStatusBar(Map<String, Object> statusData, PkuxkxRoom  room){
+//         this.mudStatusBar.refreshStatus(statusData, room);
+//     }
+// }
