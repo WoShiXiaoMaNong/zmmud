@@ -8,8 +8,9 @@ import javax.swing.AbstractAction;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
-import zm.mud.core.api.OubMsgService;
-import zm.mud.ui.ZmMudUI;
+
+import zm.mud.core.session.MudSession;
+
 
 public class MudInputField extends javax.swing.JTextField {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
@@ -20,13 +21,14 @@ public class MudInputField extends javax.swing.JTextField {
     private List<String> history;
     private int maxHistoryCnt;
     private int currentHistoryIndex;
-    private OubMsgService oms;
-    private ZmMudUI ui;
+    private MudSession session;
+    private MudTabPanel currentTabPanel;
 
-    public MudInputField(ZmMudUI ui) {
-        this.ui = ui;
-        oms = ZmMudUI.getContext().getBean(OubMsgService.class);
+    public MudInputField(MudSession session, MudTabPanel currentTabPanel) {
+        this.session = session;
 
+        this.currentTabPanel = currentTabPanel;
+   
         this.initHistoryRelated();
 
         this.initEnterAction();
@@ -37,7 +39,7 @@ public class MudInputField extends javax.swing.JTextField {
 
     // 可自定义处理输入
     private void handleInput(String input) {
-        oms.send(input);
+        this.session.send(input);
     }
 
     private void initHistoryRelated() {
@@ -64,7 +66,7 @@ public class MudInputField extends javax.swing.JTextField {
      * @param input
      */
     private void showCurrentInput(String input){
-        this.ui.printlnToScreen("> " + input);
+        this.currentTabPanel.printlnToScreen("> " + input);
     }
 
     private void pushToHistory(String input) {

@@ -2,11 +2,15 @@ package zm.mud.core.network.inbound.message;
 
 import java.time.LocalDateTime;
 
+import zm.mud.core.session.MudSession;
+
 public class IACConfirmInbMsg implements InbMsg  {
     private byte[] content;
     private LocalDateTime timestamp;
 
-    public IACConfirmInbMsg(byte[] content) {
+    private MudSession session;
+
+    public IACConfirmInbMsg(MudSession session,byte[] content) {
         this.content = content;
         this.timestamp = LocalDateTime.now();
     }
@@ -27,6 +31,15 @@ public class IACConfirmInbMsg implements InbMsg  {
 
     public String toString() {
         return "IACConfirmMessage {content=" + java.util.Arrays.toString(this.content) + ", timestamp=" + this.timestamp + "}";
+    }
+    @Override
+    public MudSession getSession() {
+        return session;
+    }
+
+    @Override
+    public void setSession(MudSession session) {
+        this.session = session;
     }
 
     

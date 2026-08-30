@@ -17,19 +17,7 @@ import zm.mud.pkuxkx.gmcp.channel.move.PkuxkxRoom;
 public class MudStatusBar extends JPanel {
     
     // 状态栏属性标签的多行集合（可随时在里面增删行、增删列元素）
-    private static final List<List<StatusBarLabel>> statusBarLabels = new ArrayList<>();
-    static {
-        List<List<StatusBarLabelInfo>> config = (List<List<StatusBarLabelInfo>>) CustomCfgLoader.loadUIConfig("pkuxkx", "status_bar",new TypeReference<List<List<StatusBarLabelInfo>>>(){});
-        
-        for(List<StatusBarLabelInfo> infos : config ){
-            List<StatusBarLabel> row = new ArrayList<>();
-            for( StatusBarLabelInfo info : infos){
-                row.add(new StatusBarLabel(info.getPrefix(), Color.decode(info.getColor()), info.getKeys(), info.getFixedWidth()));
-            }
-            statusBarLabels.add(row);
-        }
-    
-    }
+    private List<List<StatusBarLabel>> statusBarLabels = new ArrayList<>();
 
     private final Color backgroundColor = new Color(30, 34, 42); 
     private final MatteBorder border = BorderFactory.createMatteBorder(1, 0, 0, 0, Color.DARK_GRAY); 
@@ -40,6 +28,7 @@ public class MudStatusBar extends JPanel {
     public MudStatusBar() {
         setBackground(backgroundColor);
         setBorder(border);
+        this.load();
 
         // 统一使用一个全局 GridBagLayout
         setLayout(new GridBagLayout());
@@ -143,6 +132,19 @@ public class MudStatusBar extends JPanel {
 
         revalidate();
         repaint();
+    }
+
+    private void load() {
+        List<List<StatusBarLabelInfo>> config = (List<List<StatusBarLabelInfo>>) CustomCfgLoader.loadUIConfig("pkuxkx", "status_bar",new TypeReference<List<List<StatusBarLabelInfo>>>(){});
+        
+        for(List<StatusBarLabelInfo> infos : config ){
+            List<StatusBarLabel> row = new ArrayList<>();
+            for( StatusBarLabelInfo info : infos){
+                row.add(new StatusBarLabel(info.getPrefix(), Color.decode(info.getColor()), info.getKeys(), info.getFixedWidth()));
+            }
+            statusBarLabels.add(row);
+        }
+    
     }
 
     /**

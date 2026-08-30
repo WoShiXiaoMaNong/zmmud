@@ -1,5 +1,6 @@
 package zm.mud.pkuxkx.gmcp.channel;
 
+import zm.mud.core.session.MudSession;
 import zm.mud.pkuxkx.gmcp.GMCPContext;
 
 public interface IGMCPMsgHandler {
@@ -8,5 +9,5 @@ public interface IGMCPMsgHandler {
      * @param packageName GMCP 包名
      * @param jsonPayload JSON 数据
      */
-    void parse(String packageName, String jsonPayload, GMCPContext gmcpContext);
+    void parse(MudSession session,String packageName, String jsonPayload);
 }

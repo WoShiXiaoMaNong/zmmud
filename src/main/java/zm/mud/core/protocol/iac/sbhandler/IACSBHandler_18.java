@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import zm.mud.core.cfg.ApplicationConfig;
 import zm.mud.core.protocol.iac.consts.IACConsts;
+import zm.mud.core.session.MudSession;
 /**
  * IAC TERMINAL-TYPE (服务器要求你通报终端类型)
  */
@@ -24,7 +25,7 @@ public class IACSBHandler_18 implements IIACSBCommandHandler{
      * @return 客户端必须回应的 9 字节终端名报文
      */
     @Override
-    public List<byte[]> handle(byte[] iacSubCommand) {
+    public List<byte[]> handle(MudSession session,byte[] iacSubCommand) {
          if (iacSubCommand == null || iacSubCommand.length < 3) {
             return null;
         }

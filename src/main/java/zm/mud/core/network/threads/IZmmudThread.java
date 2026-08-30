@@ -4,12 +4,19 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import zm.mud.core.IShutdownFunc;
+import zm.mud.core.session.MudSession;
 
 public abstract class IZmmudThread implements Runnable ,IShutdownFunc{
     private static final Logger logger = LogManager.getLogger(IZmmudThread.class);
     private volatile boolean running = true;
 
     private Thread workerThread;
+
+    private MudSession session;
+
+    public IZmmudThread(MudSession session){
+        this.session = session;
+    }
 
      @Override
     public final void run() {
@@ -35,6 +42,12 @@ public abstract class IZmmudThread implements Runnable ,IShutdownFunc{
             workerThread.interrupt();
         }
     }
+
+
+    
+    public MudSession getSession() {
+    return session;
+}
 
     protected abstract boolean doRun();
 

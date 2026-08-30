@@ -1,6 +1,10 @@
 package zm.mud.utils;
 
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +45,12 @@ public class SpringBeanUtil {
     @Autowired
     public void setApplicationContext(ApplicationContext applicationContext) {
         SpringBeanUtil.ctx = applicationContext;
+    }
+
+    public static <T> List<T> getAllBeansByType(Class<T> type) {
+        Map<String, T> beanMap = ctx.getBeansOfType(type);
+        
+        return new ArrayList<>(beanMap.values());
     }
 
 }

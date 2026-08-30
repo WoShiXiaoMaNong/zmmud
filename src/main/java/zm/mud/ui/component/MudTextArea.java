@@ -1,5 +1,6 @@
 package zm.mud.ui.component;
 
+
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -167,6 +168,15 @@ public class MudTextArea extends JTextPane {
                 printLock.lock(); // 加锁：保证图文严格的时序
                 try {
                     int nextOffset = offset;
+                    int docLength = doc.getLength();
+
+                    // 确保 offset 在当前文档的合法范围内
+                    if (nextOffset < 0) {
+                        nextOffset = 0;
+                    } else if (nextOffset > docLength) {
+                        nextOffset = docLength; // 或者选择直接 return，不执行非法插入
+                    }
+
                     for (ImageInfo image : fetchSucceedImages) {
                         // 获取图片原始高度（像素）
                         int imageHeight = image.getBufferedImage().getHeight();
@@ -211,7 +221,7 @@ public class MudTextArea extends JTextPane {
                     }
 
                 } catch (BadLocationException e) {
-                    logger.error("Failed to process image to doc in cover mode", e);
+                    logger.error("Failed to process image to doc in cover mode,Offset:" + offset, e);
                 } finally {
                     printLock.unlock(); // 释放锁
                 }

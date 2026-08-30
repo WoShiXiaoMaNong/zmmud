@@ -9,6 +9,7 @@ import zm.mud.core.automation.trigger.Trigger;
 import zm.mud.core.network.outbound.message.NrmOubMsg;
 import zm.mud.core.network.outbound.processor.OubTriggerProcessor;
 import zm.mud.core.network.queue.OubMsgQueue;
+import zm.mud.core.session.MudSession;
 
 @Service
 public class OubMsgService {
@@ -20,16 +21,16 @@ public class OubMsgService {
     @Autowired
     private OubTriggerProcessor triggerProcessor;
 
-    public void send(String msg){
+    public void send(MudSession session,String msg){
 
-        this.oubMsgQueue.put(new NrmOubMsg(msg));
+        this.oubMsgQueue.put(session,new NrmOubMsg(session,msg));
     }
 
-    public void registerTrigger(Trigger trigger){
+    public void registerTrigger(MudSession session,Trigger trigger){
         if( trigger == null ){
             logger.warn("Trigger is null. Skip!");
             return;
         }
-        triggerProcessor.register(trigger);
+        triggerProcessor.register(session,trigger);
     }
 }

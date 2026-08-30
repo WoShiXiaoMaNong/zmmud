@@ -7,11 +7,10 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Component;
 
 import zm.mud.pkuxkx.gmcp.channel.move.PkuxkxRoom;
 
-@Component
+
 public class GMCPContext {
      private static final Logger logger = LogManager.getLogger(GMCPContext.class);
     

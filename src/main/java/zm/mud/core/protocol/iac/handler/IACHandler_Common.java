@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import zm.mud.core.protocol.iac.consts.IACConsts;
+import zm.mud.core.session.MudSession;
 import zm.mud.utils.HexUtil;
 
 
@@ -24,13 +25,13 @@ public class IACHandler_Common extends AbsIACHandler{
     @Autowired
     private HexUtil hexUtil;
     @Override
-    protected List<byte[]> handle_WILL(byte[] iacCommand) {
-        return this.handle_DO(iacCommand);
+    protected List<byte[]> handle_WILL(MudSession session,byte[] iacCommand) {
+        return this.handle_DO(session,iacCommand);
     }
 
 
     @Override
-    protected List<byte[]> handle_DO(byte[] iacCommand) {
+    protected List<byte[]> handle_DO(MudSession session,byte[] iacCommand) {
         int opsCode = iacCommand[2] & 0xFF;
 
         if( IACConsts.enabledOpsSet.contains(opsCode)){
@@ -71,12 +72,12 @@ public class IACHandler_Common extends AbsIACHandler{
 
 
     @Override
-    protected List<byte[]> handle_DONT(byte[] iacCommand) {
+    protected List<byte[]> handle_DONT(MudSession session,byte[] iacCommand) {
         return null;
     }
 
         @Override
-    protected List<byte[]> handle_WONT(byte[] iacCommand) {
+    protected List<byte[]> handle_WONT(MudSession session,byte[] iacCommand) {
         return null;
     }
 

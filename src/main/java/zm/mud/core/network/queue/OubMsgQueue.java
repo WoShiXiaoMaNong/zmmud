@@ -5,6 +5,7 @@ import java.util.concurrent.BlockingQueue;
 import org.springframework.stereotype.Service;
 
 import zm.mud.core.network.outbound.message.OubMsg;
+import zm.mud.core.session.MudSession;
 
 @Service
 public class OubMsgQueue implements IZmmudQueue<OubMsg> {
@@ -17,7 +18,7 @@ public class OubMsgQueue implements IZmmudQueue<OubMsg> {
     }
 
     @Override
-    public void put(OubMsg msg) {
+    public void put(MudSession session,OubMsg msg) {
         try {
             msgQueue.put(msg);
         } catch (InterruptedException e) {
@@ -27,7 +28,7 @@ public class OubMsgQueue implements IZmmudQueue<OubMsg> {
     }
 
     @Override
-    public OubMsg take() {
+    public OubMsg take(MudSession session) {
         try {
             return msgQueue.take();
         } catch (InterruptedException e) {

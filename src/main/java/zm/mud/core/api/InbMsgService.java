@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import zm.mud.core.automation.trigger.Trigger;
 import zm.mud.core.network.inbound.message.InbMsg;
 import zm.mud.core.network.inbound.processor.MsgHandlerProcessor;
+import zm.mud.core.session.MudSession;
 import zm.mud.core.network.inbound.processor.InbTriggerProcessor;
 
 @Service
@@ -22,15 +23,15 @@ public class InbMsgService {
     @Autowired
     private InbTriggerProcessor triggerProcessor;
 
-    public void registerMsgHandler(Function<InbMsg,Boolean> handler){
-        this.msgHandlerProcessor.register(handler);
+    public void registerMsgHandler(MudSession session,Function<InbMsg,Boolean> handler){
+        this.msgHandlerProcessor.register(session,handler);
     }
 
-    public void registerTrigger(Trigger trigger){
+    public void registerTrigger(MudSession session,Trigger trigger){
         if( trigger == null ){
             logger.warn("Trigger is null. Skip!");
             return;
         }
-        triggerProcessor.register(trigger);
+        triggerProcessor.register(session, trigger);
     }
 }

@@ -12,6 +12,7 @@ import com.alibaba.fastjson2.TypeReference;
 import jakarta.annotation.PostConstruct;
 import zm.mud.core.api.OubMsgService;
 import zm.mud.core.cfg.CustomCfgLoader;
+import zm.mud.core.session.MudSession;
 
 
 @Lazy
@@ -24,13 +25,13 @@ public class AliasService {
 
   
 
-    public void doAlias(Alias alias, OubMsgService oubMsgService, String ...params) {
+    public void doAlias(MudSession session,Alias alias, OubMsgService oubMsgService, String ...params) {
         
         String aliasCommand = alias.getAliasCommand();
         if( params != null){
             aliasCommand = aliasCommand + " " + String.join(" ",params);
         }
-        oubMsgService.send(aliasCommand );
+        oubMsgService.send(session,aliasCommand );
     }
 
     /**
