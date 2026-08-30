@@ -26,11 +26,12 @@ zhongming139@126.com
 * [点击查看 触发器说明](Trigger.md)
 
 ## 界面截图
-<img width="966" height="877" alt="pkuxkx" src="https://github.com/user-attachments/assets/adec263c-05a3-48f0-90c7-afd2ba8718a2" />
+<img width="1045" height="1002" alt="pkuxkx" src="https://github.com/user-attachments/assets/1c2d74bc-c027-4a43-b5e7-93bebe97ab7e" />
 
 ---
 
-<img width="972" height="814" alt="pkuxkx2" src="https://github.com/user-attachments/assets/73a41662-ffdc-4336-8921-6fa06f1b3e4c" />
+<img width="1039" height="997" alt="pkuxkx2" src="https://github.com/user-attachments/assets/3ed07b42-191c-4ce3-a2a0-4a19e729ec79" />
+
 ## ⚙️ 配置说明
 
 项目支持 YAML 配置：
