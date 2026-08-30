@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "TimerManager",
+            "request": "launch",
+            "mainClass": "zm.mud.core.automation.timer.TimerManager",
+            "projectName": "zmmud"
+        },
+        {
+            "type": "java",
             "name": "MainScreen",
             "request": "launch",
             "mainClass": "zm.mud.ui.MainScreen",

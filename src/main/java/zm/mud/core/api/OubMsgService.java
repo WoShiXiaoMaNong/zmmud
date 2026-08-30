@@ -5,10 +5,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import zm.mud.core.automation.trigger.Trigger;
 import zm.mud.core.network.outbound.message.NrmOubMsg;
 import zm.mud.core.network.outbound.processor.OubTriggerProcessor;
 import zm.mud.core.network.queue.OubMsgQueue;
-import zm.mud.core.trigger.Trigger;
 
 @Service
 public class OubMsgService {

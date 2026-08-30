@@ -11,11 +11,11 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
 
+import zm.mud.core.automation.trigger.Trigger;
+import zm.mud.core.automation.trigger.cfg.MatchResult;
 import zm.mud.core.network.inbound.message.IACConfirmInbMsg;
 import zm.mud.core.network.inbound.message.InbMsg;
 import zm.mud.core.thread.ZmmudThreadPools;
-import zm.mud.core.trigger.Trigger;
-import zm.mud.core.trigger.cfg.MatchResult;
 
 @Service
 public class InbTriggerProcessor implements IInbMsgProcessor, Ordered {

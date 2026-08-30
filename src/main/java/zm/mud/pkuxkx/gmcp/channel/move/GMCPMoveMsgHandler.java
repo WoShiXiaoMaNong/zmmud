@@ -18,7 +18,9 @@ public class GMCPMoveMsgHandler implements IGMCPMsgHandler {
 
         if(room != null && !room.isEmpty()) {
             for(PkuxkxRoom r : room) {
-                gmcpContext.setRoom(r);
+                if(r.getResult()) {
+                    gmcpContext.setRoom(r);
+                }
             }
             
         }

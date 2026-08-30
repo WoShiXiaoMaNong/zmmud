@@ -3,10 +3,10 @@ package zm.mud.ui;
 import zm.mud.core.api.InbMsgService;
 import zm.mud.core.thread.ZmmudThreadPools;
 import zm.mud.pkuxkx.gmcp.GMCPContext;
-import zm.mud.ui.cfg.GlobleCfg;
+import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.ui.component.ImageInfo;
 import zm.mud.ui.component.MudMainScreen;
-import zm.mud.ui.component.MudTextAare;
+import zm.mud.ui.component.MudTextArea;
 import zm.mud.ui.processor.MsgPrintProcessor;
 import zm.mud.utils.FontUtil;
 
@@ -28,7 +28,7 @@ public class ZmMudUI {
             .getLogger(ZmMudUI.class);
 
     @Autowired
-    private GlobleCfg globleCfg;
+    private GlobalCfg globleCfg;
 
     @Autowired
     private MsgPrintProcessor msgPinter;
@@ -42,6 +42,7 @@ public class ZmMudUI {
 
     @Autowired
     private GMCPContext gmcpContext;
+
 
     private static final ThreadPoolExecutor uiThreadPool = new ThreadPoolExecutor(
             1, 3, 60L, TimeUnit.SECONDS,
@@ -57,6 +58,14 @@ public class ZmMudUI {
     public void init() {
         mudMain = new MudMainScreen(globleCfg, this);
         FontUtil.registerFont();
+    }
+
+    public void setTitle(String title){
+        this.mudMain.setTitle(title);
+    }
+
+    public String getTitle(){
+        return this.mudMain.getTitle();
     }
 
     public void start() {
@@ -90,13 +99,20 @@ public class ZmMudUI {
     }
 
     /**
-     * @see MudTextAare#printImg(String, int)
+     * @see MudTextArea#printImg(String, int)
      * @param imgUrl
      * @param offset
      */
     public void printImg(List<ImageInfo> imgUrls, int offset) {
         uiThreadPool.execute(() -> {
             mudMain.printImg(imgUrls, offset);
+        });
+    }
+
+
+     public void printImg(List<ImageInfo> imgUrls) {
+        uiThreadPool.execute(() -> {
+            mudMain.printImg(imgUrls);
         });
     }
 

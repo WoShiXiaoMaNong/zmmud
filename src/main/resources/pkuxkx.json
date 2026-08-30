@@ -1,0 +1,171 @@
+{
+        "timer": [],
+        "alias": [
+            {
+                "aliasName": "alm",
+                "aliasCommand": "localmaps"
+            },
+            {
+                "aliasName": "ahelp",
+                "aliasCommand": "help"
+            }
+        ],
+        "triggers": [
+            {
+                "name": "fullme",
+                "sync": true,
+                "unique": true,
+                "autoRegister": true,
+                "matcher": {
+                    "type": "Equals",
+                    "expression": "fullme"
+                },
+                "action": {
+                    "type": "RegisterAction",
+                    "expression": "fullme-url"
+                },
+                "type": "outbound",
+                "remainningCount": -1
+            },
+            {
+                "name": "fullme-url",
+                "sync": false,
+                "unique": true,
+                "autoRegister": false,
+                "matcher": {
+                    "type": "StartWith",
+                    "expression": "http://fullme.pkuxkx.net/"
+                },
+                "action": {
+                    "type": "FullmeShowAction",
+                    "expression": "l",
+                    "params": {
+                        "baseUrl": "http://fullme.pkuxkx.net/"
+                    }
+                },
+                "type": "inbound",
+                "remainningCount": 1
+            },
+            {
+                "name": "hpbrief-oub-trigger",
+                "sync": true,
+                "unique": true,
+                "autoRegister": true,
+                "matcher": {
+                    "type": "Equals",
+                    "expression": "hpbrief"
+                },
+                "action": {
+                    "type": "RegisterAction",
+                    "expression": "hpbrief-inb-trigger"
+                },
+                "type": "outbound",
+                "remainningCount": -1
+            },
+            {
+                "name": "hpbrief-inb-trigger",
+                "sync": false,
+                "unique": true,
+                "autoRegister": false,
+                "matcher": {
+                    "type": "Regex",
+                    "expression": "^#(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)$"
+                },
+                "action": {
+                    "type": "LuaScriptAction",
+                    "expression": "C:\\Users\\zhong\\Desktop\\dev\\zmmud2\\Lua-Scirpts\\hp_handler.lua",
+                    "params": {
+                        "baseUrl": "test"
+                    }
+                },
+                "type": "inbound",
+                "remainningCount": 3
+            }
+        ],
+        "status_bar": [
+            [
+                {
+                    "prefix": "姓名",
+                    "color": "#A6E22E",
+                    "keys": [
+                        "name"
+                    ],
+                    "fixedWidth": 12
+                },
+                {
+                    "prefix": "头衔",
+                    "color": "#FD971F",
+                    "keys": [
+                        "title"
+                    ],
+                    "fixedWidth": 25
+                },
+                {
+                    "prefix": "等级",
+                    "color": "#50FA7B",
+                    "keys": [
+                        "level"
+                    ],
+                    "fixedWidth": 22
+                },
+                {
+                    "prefix": "经验",
+                    "color": "#50FA7B",
+                    "keys": [
+                        "combat_exp"
+                    ],
+                    "fixedWidth": 22
+                }
+            ],
+            [
+                {
+                    "prefix": "气血/有效/最大",
+                    "color": "#FF5F5F",
+                    "keys": [
+                        "qi",
+                        "eff_qi",
+                        "max_qi"
+                    ],
+                    "fixedWidth": 18
+                },
+                {
+                    "prefix": "精神/有效/最大",
+                    "color": "#3B82F6",
+                    "keys": [
+                        "jing",
+                        "eff_jing",
+                        "max_jing"
+                    ],
+                    "fixedWidth": 18
+                },
+                {
+                    "prefix": "精力",
+                    "color": "#BD93F9",
+                    "keys": [
+                        "jingli",
+                        "max_jingli"
+                    ],
+                    "fixedWidth": 18
+                },
+                {
+                    "prefix": "内力",
+                    "color": "#BD93F9",
+                    "keys": [
+                        "neili",
+                        "max_neili"
+                    ],
+                    "fixedWidth": 18
+                },
+                {
+                    "prefix": "饱食/饮水",
+                    "color": "#F1FA8C",
+                    "keys": [
+                        "food",
+                        "water"
+                    ],
+                    "fixedWidth": 15
+                }
+            ]
+        ]
+    
+}

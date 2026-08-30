@@ -29,11 +29,7 @@ public class ZmMud {
         ZmMudUI zmMudUI = context.getBean(ZmMudUI.class);
         zmMudUI.start();
         MudClient client = context.getBean(MudClient.class);
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            logger.error("Slowdown error",e);
-        }
+
         boolean isConnected = client.connect();
 
         if(!isConnected) {

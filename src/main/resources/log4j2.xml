@@ -1,21 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
 
+    <!-- 定义全局变量，方便后续修改日志路径和格式 -->
+    <Properties>
+        <!-- 日志文件存储的主目录，默认在项目根目录下的 logs 文件夹 -->
+        <Property name="LOG_HOME">logs</Property>
+        <!-- 当前正在写入的日志文件名 -->
+        <Property name="LOG_FILE_NAME">zmmud.log</Property>
+        <!-- 统一的日志输出格式 -->
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %c{1} - %msg%n</Property>
+    </Properties>
+
     <Appenders>
 
-        <!-- 控制台输出 -->
+        <!-- 1. 控制台输出 -->
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss} [%t] %-5level %c{1} - %msg%n"/>
-
+            <PatternLayout pattern="${LOG_PATTERN}"/>
         </Console>
+
+        <!-- 2. 本地本地文件输出 (带自动滚动/归档功能) -->
+        <RollingFile name="RollingFile" 
+                     fileName="${LOG_HOME}/${LOG_FILE_NAME}"
+                     filePattern="${LOG_HOME}/archive/zmmud-%d{yyyy-MM-dd}-%i.log.gz">
+            
+            <!-- 日志输出格式 -->
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            
+            <Policies>
+                <!-- 策略 A：按时间滚动（每到午夜 00:00 自动切分并创建新一天的日志文件） -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <!-- 策略 B：按文件大小滚动（当单个日志文件超过 10MB 时自动切分，防止文件过大打不开） -->
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            
+            <!-- 默认的文件夹内日志保留策略（最多保留 30 个历史日志文件，超出的会自动删除旧文件） -->
+            <DefaultRolloverStrategy max="30">
+                <Delete basePath="${LOG_HOME}/archive" maxDepth="1">
+                    <IfFileName glob="zmmud-*.log.gz" />
+                    <!-- 保留最近 14 天的日志 -->
+                    <IfLastModified age="14d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
 
     </Appenders>
 
     <Loggers>
 
-        <!-- 业务日志 -->
+        <!-- 全局根日志配置，将日志同时注入控制台（Console）和文件（RollingFile） -->
         <Root level="info">
             <AppenderRef ref="Console"/>
+            <AppenderRef ref="RollingFile"/>
         </Root>
 
     </Loggers>
