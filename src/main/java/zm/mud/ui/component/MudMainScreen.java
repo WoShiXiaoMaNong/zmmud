@@ -14,14 +14,14 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
 import zm.mud.core.api.ClientService;
+import zm.mud.core.api.InbMsgService;
 import zm.mud.core.session.MudSession;
 import zm.mud.core.thread.ZmmudThreadPools;
 import zm.mud.pkuxkx.gmcp.GMCPContext;
-import zm.mud.pkuxkx.gmcp.channel.move.PkuxkxRoom;
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.cfg.GlobalCfg;
+import zm.mud.ui.processor.MsgPrintProcessor;
 import zm.mud.utils.SpringBeanUtil;
 
 public class MudMainScreen extends JFrame {
@@ -73,6 +73,13 @@ public class MudMainScreen extends JFrame {
         ZmmudThreadPools.MUD_UI.execute(() -> {
             logger.info("Status bar refresh loop start");
             while (true) {
+                if (tabPanels == null || tabPanels.isEmpty()) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        logger.error("Error while refreshing status bar: ", e);
+                    }
+                }
                 for (Entry<String, MudTabPanel> entry : tabPanels.entrySet()) {
                     MudTabPanel mTabPanel = entry.getValue();
                     String sessionId = entry.getKey();
@@ -83,15 +90,10 @@ public class MudMainScreen extends JFrame {
                     GMCPContext gmcpContext = session.getGmcpContext();
                     mTabPanel.refreshStatusBar(gmcpContext.getStatus(), gmcpContext.getCurrentRoom());
                     try {
-                        Thread.sleep(200);
+                        Thread.sleep(100);
                     } catch (InterruptedException e) {
                         logger.error("Error while refreshing status bar: ", e);
                     }
-                }
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    logger.error("Error while refreshing status bar: ", e);
                 }
 
             }
@@ -110,7 +112,13 @@ public class MudMainScreen extends JFrame {
         SwingUtilities.invokeLater(() -> {
             this.foucesInputLine();
         });
+        
+   
+        MsgPrintProcessor msgPinter = SpringBeanUtil.getBean(MsgPrintProcessor.class);
+  
+        InbMsgService inbMsgService = SpringBeanUtil.getBean(InbMsgService.class);
 
+        inbMsgService.registerMsgHandler(session,msgPinter);
     }
 
     private void init() {
@@ -128,7 +136,7 @@ public class MudMainScreen extends JFrame {
                     setUI(new javax.swing.plaf.basic.BasicTabbedPaneUI() {
                         @Override
                         protected void paintContentBorder(java.awt.Graphics g, int tabPlacement, int selectedIndex) {
-                            // 留空：绝对不绘制任何下方和四周的内容边框线
+                            // 留空：不绘制任何下方和四周的内容边框线
                         }
                     });
                 }
@@ -154,25 +162,6 @@ public class MudMainScreen extends JFrame {
         tabbedPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
 
         this.add(tabbedPane, BorderLayout.CENTER);
-
-        // ==========================================
-        // 3. 最下方：初始化时的空占位面板（撑开主界面）
-        // ==========================================
-        // tabMainPanel = new javax.swing.JPanel();
-
-        // // 精准计算高度
-        // int tabBarHeight = 20; // 紧凑的 TabBar 高度
-        // int availableHeight = Math.max(0, this.globleCfg.getHeight() - tabBarHeight);
-
-        // tabMainPanel.setPreferredSize(new Dimension(this.globleCfg.getWidth(),
-        // availableHeight));
-        // tabMainPanel.setBackground(java.awt.Color.LIGHT_GRAY); // 你的大面积灰色背景
-
-        // // 消除面板自身可能带有微小间距的隐患
-        // tabMainPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder());
-
-        // 放入 CENTER，由于移除了所有 Border，它会与 NORTH 的 Tab 栏像素级无缝拼接
-        // this.add(tabMainPanel, BorderLayout.SOUTH);
     }
 
     /**
@@ -223,13 +212,12 @@ public class MudMainScreen extends JFrame {
         MudTabPanel newTab = new MudTabPanel(session, this.globleCfg, this.tabbedPane.getPreferredSize());
         this.tabPanels.put(session.getSessionId(), newTab);
 
-  
         newTab.resetFont(this.globleCfg.getFontName(), this.globleCfg.getFontSize());
 
         // 3. 调用 addMe，它会将黑色的 tabPanelArea 完美嵌入顶部的 tabbedPane 中
         newTab.addMe(this.tabbedPane, this);
 
-              this.tabbedPane.addChangeListener(new ChangeListener() {
+        this.tabbedPane.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
                 // 获取当前选中的组件或索引
@@ -241,14 +229,11 @@ public class MudMainScreen extends JFrame {
             }
         });
 
-        // 4. 清理：因为组件现在都在 tabbedPane 内部了，下面这行要删掉，防止两头重复添加冲突
-        // tabMainPanel.add(newTab.getTextArea()); <-- 删掉这行
-
         return newTab;
     }
 
     public void foucesInputLine() {
-        if(this.selectedSession == null){
+        if (this.selectedSession == null) {
             return;
         }
         MudTabPanel selectedTab = this.tabPanels.get(this.selectedSession);
@@ -266,12 +251,6 @@ public class MudMainScreen extends JFrame {
         String sessionId = session.getSessionId();
         MudTabPanel mudTabPanel = this.tabPanels.get(sessionId);
         mudTabPanel.resetFont(font, size);
-    }
-
-    public void refreshStatusBar(MudSession session, Map<String, Object> statusData, PkuxkxRoom room) {
-        String sessionId = session.getSessionId();
-        MudTabPanel mudTabPanel = this.tabPanels.get(sessionId);
-        mudTabPanel.refreshStatusBar(statusData, room);
     }
 
     public void printlnToScreen(MudSession session, String msg, boolean enableBlod) {

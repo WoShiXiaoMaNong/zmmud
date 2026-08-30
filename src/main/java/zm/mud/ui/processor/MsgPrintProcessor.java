@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import zm.mud.core.network.inbound.message.InbMsg;
@@ -15,6 +16,7 @@ import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.util.AnsiTextUtil;
 
 @Component
+@Scope("prototype")
 public class MsgPrintProcessor implements Function<InbMsg,Boolean>{
 
     @Autowired

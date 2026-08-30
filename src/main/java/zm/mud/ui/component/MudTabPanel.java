@@ -34,7 +34,7 @@ public class MudTabPanel {
 
   
     private MudTextArea textArea;
-    //private JScrollPane tabPanelArea;
+  
     private MudSession session;
 
     private JPanel tabMainPanel;

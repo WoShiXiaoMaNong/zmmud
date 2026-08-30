@@ -23,8 +23,8 @@ public class InbMsgService {
     @Autowired
     private InbTriggerProcessor triggerProcessor;
 
-    public void registerMsgHandler(Function<InbMsg,Boolean> handler){
-        this.msgHandlerProcessor.register(handler);
+    public void registerMsgHandler(MudSession session,Function<InbMsg,Boolean> handler){
+        this.msgHandlerProcessor.register(session,handler);
     }
 
     public void registerTrigger(MudSession session,Trigger trigger){
