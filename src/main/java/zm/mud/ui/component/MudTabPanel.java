@@ -43,6 +43,7 @@ public class MudTabPanel {
     private MudInputField mudInputField;
 
     private JLabel lblTitle;
+    private String initTitle;
 
     public MudTabPanel(MudSession session, GlobalCfg cfg, Dimension dimension) {
         this.session = session;
@@ -76,7 +77,10 @@ public class MudTabPanel {
         // 输入框在底部
         this.mudInputField = new MudInputField(this.session,this);
         this.tabMainPanel.add(this.mudInputField, BorderLayout.SOUTH);
+    }
 
+    public void focusInputLine(){
+        this.mudInputField.requestFocusInWindow();
     }
 
 
@@ -135,6 +139,7 @@ public class MudTabPanel {
 
         // 标题文本
         this.lblTitle = new JLabel(title);
+        this.initTitle = title;
         pnlHeader.add(lblTitle);
 
         // 关闭按钮 "x"
@@ -228,8 +233,7 @@ public class MudTabPanel {
     }
 
     public void setTitle(String title) {
-        String currentTitle = this.lblTitle.getText();
-        this.lblTitle.setText(currentTitle + title);
+        this.lblTitle.setText( this.initTitle + title);
     }
 
 }

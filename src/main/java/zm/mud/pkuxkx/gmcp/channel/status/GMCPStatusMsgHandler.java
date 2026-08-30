@@ -30,7 +30,7 @@ public class GMCPStatusMsgHandler implements IGMCPMsgHandler {
             Object name = packageDataMap.get("name");
             Object id = packageDataMap.get("id");
             if( name != null && id != null){
-                this.ui.setTitle(session, String.format("%s（%s）", name,id));
+                this.ui.setTitle(session, String.format(" >%s(%s)<", name,id));
             }
 
           

@@ -3,15 +3,14 @@ package zm.mud.ui.component;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.JFrame;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 
 import zm.mud.core.api.ClientService;
 import zm.mud.core.session.MudSession;
@@ -30,9 +29,11 @@ public class MudMainScreen extends JFrame {
 
     private ZmMudUI ui;
 
-    private javax.swing.JTabbedPane tabbedPane;
+    private JTabbedPane tabbedPane;
 
-    private volatile Map<String, MudTabPanel> tabPanels;
+    private String selectedSession;
+
+    private volatile Map<String/*Session ID */, MudTabPanel> tabPanels;
 
     public MudMainScreen(GlobalCfg cfg, ZmMudUI ui) {
         this.globleCfg = cfg;
@@ -96,6 +97,14 @@ public class MudMainScreen extends JFrame {
         session.setSessionName(title);
         addNewTab(session);
         session.start();
+        this.selectedSession = session.getSessionId();
+        // 刷新容器布局和重绘，保证新布局立刻生效
+        this.revalidate();
+        this.repaint();
+        SwingUtilities.invokeLater(() -> {
+            this.foucesInputLine();
+        });
+        
     }
 
     private void init() {
@@ -215,10 +224,15 @@ public class MudMainScreen extends JFrame {
         // 4. 清理：因为组件现在都在 tabbedPane 内部了，下面这行要删掉，防止两头重复添加冲突
         // tabMainPanel.add(newTab.getTextArea()); <-- 删掉这行
 
-        // 刷新容器布局和重绘，保证新布局立刻生效
-        this.revalidate();
-        this.repaint();
         return newTab;
+    }
+
+    public void foucesInputLine(){
+        MudTabPanel selectedTab = this.tabPanels.get(this.selectedSession);
+        if(selectedTab == null){
+            return;
+        }
+        selectedTab.focusInputLine();
     }
 
     public void setShow() {
