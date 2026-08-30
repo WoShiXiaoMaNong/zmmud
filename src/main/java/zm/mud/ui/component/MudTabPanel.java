@@ -26,7 +26,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import zm.mud.core.session.MudSession;
-import zm.mud.pkuxkx.gmcp.channel.move.PkuxkxRoom;
 import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.ui.component.statusBar.MudStatusBar;
 
@@ -242,8 +241,8 @@ public class MudTabPanel {
         this.textArea.printImg(imgUrls);
     }
 
-    public void refreshStatusBar(Map<String, Object> statusData, PkuxkxRoom room) {
-        this.mudStatusBar.refreshStatus(statusData, room);
+    public void refreshStatusBar( Map<String/* Channel Name */,Map<String,Object>> gmcpData) {
+        this.mudStatusBar.refreshStatus(gmcpData);
     }
 
     public void resetFont(String font, int size) {

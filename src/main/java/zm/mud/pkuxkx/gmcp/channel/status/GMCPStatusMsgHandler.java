@@ -25,7 +25,8 @@ public class GMCPStatusMsgHandler implements IGMCPMsgHandler {
         if(packageDataMap != null){
             GMCPContext gmcpContext = session.getGmcpContext();
             for(Map.Entry<String, Object> entry : packageDataMap.entrySet()){
-                gmcpContext.putStatus(entry.getKey(), entry.getValue());
+                gmcpContext.put(packageName,entry.getKey(), entry.getValue());
+                
             }
             Object name = packageDataMap.get("name");
             Object id = packageDataMap.get("id");

@@ -95,7 +95,7 @@ public class MudMainScreen extends JFrame {
                     }
                     MudSession session = MudSession.getSession(sessionId);
                     GMCPContext gmcpContext = session.getGmcpContext();
-                    mTabPanel.refreshStatusBar(gmcpContext.getStatus(), gmcpContext.getCurrentRoom());
+                    mTabPanel.refreshStatusBar(gmcpContext.getGmcpData());
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
