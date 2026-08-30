@@ -35,6 +35,24 @@ public class MudInputField extends javax.swing.JTextField {
 
         //用于实现输入框的历史记录上下翻阅
         this.initKeyBindings();
+
+         // ================== 新增：UI 视觉优化 ==================
+        // 1. 设置专属的背景色与前景色（确保暗黑主题下的高对比度）
+        this.setBackground(new java.awt.Color(30, 30, 30)); // 略深于主屏幕的纯黑，提升层次感
+        this.setForeground(java.awt.Color.WHITE);          // 纯白文字
+        this.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 14)); // 强制等宽，与MUD对齐
+        
+        // 2. 强化光标（Caret）：改为刺眼的绿色或亮白色，并且变粗，极易捕捉
+        this.setCaretColor(java.awt.Color.GREEN); 
+        this.putClientProperty("caretWidth", 2); // 部分 LookAndFeel 支持加粗光标
+
+        // 3. 核心：增加边框和顶部悬空分割线（让它与主文本区彻底分离）
+        // LineBorder(Color.GRAY, 1) 提供一个浅灰色外圈
+        // EmptyBorder(6, 10, 6, 10) 给输入框内部文字四周留出空白，不再紧贴边框
+        this.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+            javax.swing.BorderFactory.createMatteBorder(1, 0, 0, 0, new java.awt.Color(70, 70, 70)), // 顶部有一条精致的灰色分割线
+            javax.swing.BorderFactory.createEmptyBorder(6, 10, 6, 10) // 上下内边距 6 像素，左右 10 像素
+        ));
     }
 
     // 可自定义处理输入
