@@ -5,15 +5,20 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import zm.mud.core.client.MudClient;
 import zm.mud.core.network.inbound.message.InbMsg;
 import zm.mud.core.network.queue.InbMsgQueue;
 import zm.mud.core.protocol.iac.consts.IACConsts;
 import zm.mud.core.session.MudSession;
 
+/**
+ * 单例模式
+ * InbMsgReader
+ */
 @Service
+@Scope("prototype") 
 public class InbMsgReader {
      private static final Logger logger = LogManager.getLogger(InbMsgReader.class);
     
