@@ -21,6 +21,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.border.Border;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -157,6 +158,15 @@ public class MudTabPanel {
         btnClose.setContentAreaFilled(false); 
         btnClose.setBorderPainted(false); 
         btnClose.setFocusable(false);
+
+        // 关键改动 1：默认就开启边框绘制，但设置一个完全透明的空边框占位，防止尺寸变化
+        btnClose.setBorderPainted(true);
+        final Border emptyBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
+        final Border hoverBorder = BorderFactory.createLineBorder(new Color(200, 80, 80, 100), 1);
+        btnClose.setBorder(emptyBorder);
+        
+        // 关键改动 2：显式固定按钮的最高/最新大小，防止 Unicode 字符在不同生命周期被计算出不同尺寸
+        btnClose.setPreferredSize(new java.awt.Dimension(20, 20)); 
         
         // 2. 设置一个显眼的默认颜色（例如浅灰色，暗黑主题下更可见）
         final Color defaultBtnColor = Color.BLACK;
@@ -169,13 +179,15 @@ public class MudTabPanel {
                 btnClose.setForeground(Color.RED);
                 // 悬停时显示一个小边框，增强“显眼”度
                 btnClose.setBorderPainted(true);
-                btnClose.setBorder(BorderFactory.createLineBorder(new Color(200, 80, 80, 100), 1));
+                 btnClose.setBorder(hoverBorder);
+                //btnClose.setBorder(BorderFactory.createLineBorder(new Color(200, 80, 80, 100), 1));
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
                 btnClose.setForeground(defaultBtnColor);
-                btnClose.setBorderPainted(false); // 移出时隐藏边框
+                 btnClose.setBorder(emptyBorder);
+                //btnClose.setBorderPainted(false); // 移出时隐藏边框
             }
         });
 

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
 
 import zm.mud.core.network.inbound.message.IACConfirmInbMsg;
@@ -14,7 +13,7 @@ import zm.mud.core.network.inbound.message.InbMsg;
 import zm.mud.core.session.MudSession;
 
 @Service
-public class MsgHandlerProcessor implements IInbMsgProcessor, Ordered {
+public class MsgHandlerProcessor extends AbsSessionValidatingInbMsgProcessor {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(MsgHandlerProcessor.class);
 
@@ -26,7 +25,7 @@ public class MsgHandlerProcessor implements IInbMsgProcessor, Ordered {
     }
     
     @Override
-    public boolean processMessage(InbMsg msg) {
+    protected boolean doProcess(InbMsg msg) {
         if (msg instanceof IACConfirmInbMsg) {
             return true;
         }

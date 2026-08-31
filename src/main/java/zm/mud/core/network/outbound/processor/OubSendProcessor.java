@@ -1,20 +1,19 @@
 package zm.mud.core.network.outbound.processor;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
 
 import zm.mud.core.network.outbound.message.OubMsg;
 import zm.mud.core.network.outbound.sender.OubMsgSender;
 
 @Service
-public class OubSendProcessor implements IOubMsgProcessor,Ordered {
+public class OubSendProcessor extends AbSessionValidatingOubMsgProcessor {
 
     @Autowired
     private OubMsgSender oubMessageSender;
 
     @Override
-    public boolean processMessage(OubMsg msg) {
+    protected boolean doProcess(OubMsg msg) {
         oubMessageSender.send(msg);
         return false;
     }

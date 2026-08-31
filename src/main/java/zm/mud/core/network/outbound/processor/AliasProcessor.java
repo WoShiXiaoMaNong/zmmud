@@ -1,10 +1,7 @@
 package zm.mud.core.network.outbound.processor;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
 
 import zm.mud.core.api.OubMsgService;
@@ -13,7 +10,7 @@ import zm.mud.core.automation.alias.AliasService;
 import zm.mud.core.network.outbound.message.OubMsg;
 
 @Service
-public class AliasProcessor implements IOubMsgProcessor ,Ordered{
+public class AliasProcessor extends AbSessionValidatingOubMsgProcessor {
 
     @Autowired
     private AliasService aliasService;
@@ -22,7 +19,7 @@ public class AliasProcessor implements IOubMsgProcessor ,Ordered{
     private OubMsgService oubMsgService;
 
     @Override
-    public boolean processMessage(OubMsg msg) {
+    protected boolean doProcess(OubMsg msg) {
         if(msg == null){
             return false;
         }
@@ -73,4 +70,5 @@ public class AliasProcessor implements IOubMsgProcessor ,Ordered{
     public int getOrder() {
         return 1;
     }
+
 }

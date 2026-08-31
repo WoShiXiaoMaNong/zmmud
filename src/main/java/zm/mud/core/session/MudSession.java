@@ -34,6 +34,8 @@ public class MudSession {
 
     private ThreadPoolService threadPoolService;
 
+    private volatile SessionStatus status;
+
     private static final Map<String, MudSession> allSessionMap = new HashMap<>();
     private static final Lock sessionMapLock = new ReentrantLock();
 
@@ -63,9 +65,18 @@ public class MudSession {
         this.gmcpContext = new GMCPContext();
         this.host = host;
         this.port = port;
+        this.status = SessionStatus.CREATED;
     }
 
     
+
+    public SessionStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(SessionStatus status) {
+        this.status = status;
+    }
 
     public String getHost() {
         return host;
@@ -76,9 +87,9 @@ public class MudSession {
     }
 
     public void start() {
-        this.client = ZmMud.context.getBean(MudClient.class);
+        this.client = ZmMud.context.getBean(MudClient.class,this);
         this.triggerFactory.load(this);
-        boolean isConnected = client.connect(this,this.getHost(),this.getPort(),client.getCharset());
+        boolean isConnected = client.connect(this.getHost(),this.getPort());
         if (!isConnected) {
             logger.error("Failed to connect to server");
             return;
@@ -87,6 +98,7 @@ public class MudSession {
 
         ThreadPoolService threadStarter = ZmMud.context.getBean(ThreadPoolService.class);
         threadStarter.startAllThreads(this);
+        this.setStatus(SessionStatus.ACTIVE);
 
     }
 
@@ -119,6 +131,7 @@ public class MudSession {
             allSessionMap.remove(this.getSessionId());
             threadPoolService.shutdown(this);
             this.client.close();
+            this.setStatus(SessionStatus.CLOSED);
         } catch (Exception e) {
             logger.error("Session start error!", e);
         } finally {
@@ -143,4 +156,7 @@ public class MudSession {
         this.oubMsgService.send(this, input);
     }
 
+    public boolean isAvailable() {
+        return SessionStatus.isAvailable(this.status);
+    }
 }

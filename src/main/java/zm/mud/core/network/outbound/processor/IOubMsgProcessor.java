@@ -1,8 +1,10 @@
 package zm.mud.core.network.outbound.processor;
 
+import org.springframework.core.Ordered;
+
 import zm.mud.core.network.outbound.message.OubMsg;
 
-public interface IOubMsgProcessor {
+public interface IOubMsgProcessor extends Ordered{
 
     /**
      * <pre>

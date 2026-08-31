@@ -211,60 +211,87 @@ public class MudMainScreen extends JFrame {
  */
 private void showConnectDialog() {
     // 1. 创建包含三个输入框的面板
-    javax.swing.JPanel panel = new javax.swing.JPanel(new java.awt.GridLayout(3, 2, 5, 5));
+    javax.swing.JPanel inputPanel = new javax.swing.JPanel(new java.awt.GridLayout(3, 2, 5, 5));
 
     javax.swing.JTextField nameField = new javax.swing.JTextField();
     javax.swing.JTextField hostField = new javax.swing.JTextField();
     javax.swing.JTextField portField = new javax.swing.JTextField();
 
-    panel.add(new javax.swing.JLabel("MUD世界名称:"));
+    inputPanel.add(new javax.swing.JLabel("MUD世界名称:"));
     nameField.setText(globleCfg.getDefaultServerName());
-    panel.add(nameField);
-    panel.add(new javax.swing.JLabel("Host (主机):"));
-    panel.add(hostField);
+    inputPanel.add(nameField);
+    inputPanel.add(new javax.swing.JLabel("Host (主机):"));
+    inputPanel.add(hostField);
     hostField.setText(globleCfg.getDefaultHost());
-    panel.add(new javax.swing.JLabel("Port (端口):"));
+    inputPanel.add(new javax.swing.JLabel("Port (端口):"));
     portField.setText(String.valueOf(globleCfg.getDefaultPost()));
-    panel.add(portField);
+    inputPanel.add(portField);
 
-    // 2. 弹出确认对话框
-    int result = javax.swing.JOptionPane.showConfirmDialog(
-            MudMainScreen.this,
-            panel,
-            "连接MUD世界",
-            javax.swing.JOptionPane.OK_CANCEL_OPTION,
-            javax.swing.JOptionPane.PLAIN_MESSAGE);
+    // 2. 创建主面板，把输入面板和自定义的按钮放进去
+    javax.swing.JPanel mainPanel = new javax.swing.JPanel(new java.awt.BorderLayout(10, 10));
+    mainPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    mainPanel.add(inputPanel, java.awt.BorderLayout.CENTER);
 
-    // 3. 点击确定后，提取并校验数据
-    if (result == javax.swing.JOptionPane.OK_OPTION) {
-        String tabName = nameField.getText().trim();
-        String host = hostField.getText().trim();
-        String portStr = portField.getText().trim();
+    // 3. 创建底部的 确定/取消 按钮
+    javax.swing.JPanel buttonPanel = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+    javax.swing.JButton okButton = new javax.swing.JButton("确定");
+    javax.swing.JButton cancelButton = new javax.swing.JButton("取消");
+    buttonPanel.add(okButton);
+    buttonPanel.add(cancelButton);
+    mainPanel.add(buttonPanel, java.awt.BorderLayout.SOUTH);
 
-        // 基础非空校验
-        if (!tabName.isEmpty() && !host.isEmpty() && !portStr.isEmpty()) {
-            try {
-                int port = Integer.parseInt(portStr);
-                // 成功获取所有数据，创建新会话
-                createNewSession(tabName, host, port);
-            } catch (NumberFormatException ex) {
-                // 端口不是数字时的提示
+    // 4. 使用 JDialog 承载这个面板
+    final javax.swing.JDialog dialog = new javax.swing.JDialog(MudMainScreen.this, "连接MUD世界", true); // true 表示模态窗口
+    dialog.setContentPane(mainPanel);
+
+    // 5. 绑定“确定”按钮的点击事件（核心逻辑）
+    okButton.addActionListener(new java.awt.event.ActionListener() {
+        @Override
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tabName = nameField.getText().trim();
+            String host = hostField.getText().trim();
+            String portStr = portField.getText().trim();
+
+            // 基础非空校验
+            if (!tabName.isEmpty() && !host.isEmpty() && !portStr.isEmpty()) {
+                try {
+                    int port = Integer.parseInt(portStr);
+                    // 校验成功：创建新会话并关闭弹框
+                    createNewSession(tabName, host, port);
+                    dialog.dispose(); 
+                } catch (NumberFormatException ex) {
+                    // 端口错误提示：挂载在当前 dialog 之上，不会导致 dialog 消失
+                    javax.swing.JOptionPane.showMessageDialog(
+                            dialog,
+                            "端口号必须为数字！",
+                            "输入错误",
+                            javax.swing.JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                // 空字段提示
                 javax.swing.JOptionPane.showMessageDialog(
-                        MudMainScreen.this,
-                        "端口号必须为数字！",
+                        dialog,
+                        "所有字段均不能为空！",
                         "输入错误",
-                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                        javax.swing.JOptionPane.WARNING_MESSAGE);
             }
-        } else {
-            // 字段未填满时的提示
-            javax.swing.JOptionPane.showMessageDialog(
-                    MudMainScreen.this,
-                    "所有字段均不能为空！",
-                    "输入错误",
-                    javax.swing.JOptionPane.WARNING_MESSAGE);
         }
-    }
+    });
+
+    // 6. 绑定“取消”按钮事件
+    cancelButton.addActionListener(new java.awt.event.ActionListener() {
+        @Override
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+            dialog.dispose();
+        }
+    });
+
+    // 7. 渲染并显示弹框
+    dialog.pack();
+    dialog.setLocationRelativeTo(MudMainScreen.this); // 居中显示在主窗口
+    dialog.setVisible(true);
 }
+
 
     /**
      * 辅助方法：始终把新 Tab 插入到最后那个 "+" 号组件的左侧

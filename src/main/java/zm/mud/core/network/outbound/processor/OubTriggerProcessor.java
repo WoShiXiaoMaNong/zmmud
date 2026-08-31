@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
 
 import zm.mud.core.automation.trigger.Trigger;
@@ -19,7 +18,7 @@ import zm.mud.core.session.MudSession;
 import zm.mud.core.thread.ZmmudThreadPools;
 
 @Service
-public class OubTriggerProcessor implements IOubMsgProcessor, Ordered {
+public class OubTriggerProcessor extends AbSessionValidatingOubMsgProcessor {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(OubTriggerProcessor.class);
 
@@ -34,7 +33,7 @@ public class OubTriggerProcessor implements IOubMsgProcessor, Ordered {
     }
 
     @Override
-    public boolean processMessage(OubMsg msg) {
+    protected boolean doProcess(OubMsg msg) {
         if (msg instanceof IACConfirmInbMsg) {
             return false;
         }
