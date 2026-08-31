@@ -31,7 +31,7 @@ zhongming139@126.com
 
 ---
 
-<img width="1201" height="808" alt="pkuxkx2" src="https://github.com/user-attachments/assets/d86f4e98-eb06-466c-bad0-6471e5a5217d" />
+<img width="1010" height="790" alt="pkuxkx" src="https://github.com/user-attachments/assets/e654c9e3-28eb-4344-8d64-66f1d75cf35d" />
 
 ## ⚙️ 配置说明
 
