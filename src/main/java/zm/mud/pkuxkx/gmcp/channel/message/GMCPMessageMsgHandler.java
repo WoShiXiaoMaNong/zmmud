@@ -41,10 +41,6 @@ public class GMCPMessageMsgHandler implements IGMCPMsgHandler {
 
     private String getUrl(MudSession session,String url){
         String[] urlInfos = url.split(",");
-        if(urlInfos.length > 1){
-            logger.info("Url 看起来太对劲:" + url);
-            this.ui.printlnToScreen(session, "【客户端消息】Url 看起来太对劲:" + url);
-        }
         return urlInfos[0];
     }
 
