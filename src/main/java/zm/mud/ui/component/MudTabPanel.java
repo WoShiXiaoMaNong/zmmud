@@ -137,10 +137,10 @@ public class MudTabPanel {
      */
      private JPanel createTabHeader(String title, final JComponent contentComponent,
                                    JTabbedPane tabBar, MudMainScreen mainScreen) {
-        // 【优化2】增加 FlowLayout 的左右间距，并为整个头组件加上外边距，防止粘连
+        // 增加 FlowLayout 的左右间距，并为整个头组件加上外边距，防止粘连
         JPanel pnlHeader = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         pnlHeader.setOpaque(false); 
-        // 关键：给 Header 增加内边距（上, 左, 下, 右），撑开标签的整体高度和宽度
+        // 给 Header 增加内边距（上, 左, 下, 右），撑开标签的整体高度和宽度
         pnlHeader.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 2));
 
         // 标题文本
@@ -150,7 +150,7 @@ public class MudTabPanel {
         this.lblTitle.setFont(new Font("Microsoft YaHei", Font.PLAIN, 12));
         pnlHeader.add(lblTitle);
 
-        // 【优化1】重构关闭按钮 "x"
+        // 【重构关闭按钮 "x"
         // 1. 放弃纯文本 "x"，使用乘号 "×"（Unicode \u00D7），它在视觉上更丰满、更像关闭图标
         JButton btnClose = new JButton("\u00D7"); 
         btnClose.setFont(new Font("Arial", Font.BOLD, 18)); // 调大字号增强辨识度
@@ -159,20 +159,20 @@ public class MudTabPanel {
         btnClose.setBorderPainted(false); 
         btnClose.setFocusable(false);
 
-        // 关键改动 1：默认就开启边框绘制，但设置一个完全透明的空边框占位，防止尺寸变化
+        // 默认就开启边框绘制，但设置一个完全透明的空边框占位，防止尺寸变化
         btnClose.setBorderPainted(true);
         final Border emptyBorder = BorderFactory.createEmptyBorder(1, 1, 1, 1);
         final Border hoverBorder = BorderFactory.createLineBorder(new Color(200, 80, 80, 100), 1);
         btnClose.setBorder(emptyBorder);
         
-        // 关键改动 2：显式固定按钮的最高/最新大小，防止 Unicode 字符在不同生命周期被计算出不同尺寸
+        // 显式固定按钮的最高/最新大小，防止 Unicode 字符在不同生命周期被计算出不同尺寸
         btnClose.setPreferredSize(new java.awt.Dimension(20, 20)); 
         
         // 2. 设置一个显眼的默认颜色（例如浅灰色，暗黑主题下更可见）
         final Color defaultBtnColor = Color.BLACK;
         btnClose.setForeground(defaultBtnColor);
 
-        // 【优化1】鼠标悬停交互升级：变红的同时增加虚线/浅色边框，提示可点击性
+        // 鼠标悬停交互升级：变红的同时增加虚线/浅色边框，提示可点击性
         btnClose.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
