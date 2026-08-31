@@ -110,7 +110,7 @@ public class MudMainScreen extends JFrame {
     private void createNewSession(String title,String host,int port) {
         MudSession session = MudSession.newSession(host,port);
         session.setSessionName(title);
-        addNewTab(session);
+        this.addNewTab(session);
         session.start();
         this.selectedSession = session.getSessionId();
         // 刷新容器布局和重绘，保证新布局立刻生效
@@ -244,6 +244,9 @@ private void showConnectDialog() {
     final javax.swing.JDialog dialog = new javax.swing.JDialog(MudMainScreen.this, "连接MUD世界", true); // true 表示模态窗口
     dialog.setContentPane(mainPanel);
 
+    // 焦点在确定按钮上时，按回车就能直接触发点击了
+    dialog.getRootPane().setDefaultButton(okButton);
+
     // 5. 绑定“确定”按钮的点击事件（核心逻辑）
     okButton.addActionListener(new java.awt.event.ActionListener() {
         @Override
@@ -289,6 +292,13 @@ private void showConnectDialog() {
     // 7. 渲染并显示弹框
     dialog.pack();
     dialog.setLocationRelativeTo(MudMainScreen.this); // 居中显示在主窗口
+    // 异步请求焦点，确保在窗口渲染完毕后“确定”按钮拿到焦点
+    javax.swing.SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+            okButton.requestFocusInWindow();
+        }
+    });
     dialog.setVisible(true);
 }
 
@@ -302,7 +312,7 @@ private void showConnectDialog() {
         // 2. 实例化你的 MudTabPanel
         MudTabPanel newTab = new MudTabPanel(session, this.globleCfg, this.tabbedPane.getPreferredSize());
         this.tabPanels.put(session.getSessionId(), newTab);
-
+        newTab.applyTheme(this.globleCfg.getThemeType().getTheme());
         newTab.resetFont(this.globleCfg.getFontName(), this.globleCfg.getFontSize());
 
         // 3. 调用 addMe，它会将黑色的 tabPanelArea 完美嵌入顶部的 tabbedPane 中
@@ -437,5 +447,7 @@ private void showConnectDialog() {
         }
 
     }
+
+
 
 }

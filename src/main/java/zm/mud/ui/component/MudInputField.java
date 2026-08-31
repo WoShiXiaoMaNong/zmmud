@@ -1,18 +1,18 @@
 package zm.mud.ui.component;
 
+
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.AbstractAction;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-
-
 import zm.mud.core.session.MudSession;
+import zm.mud.ui.theme.Dark;
+import zm.mud.ui.theme.ITheme;
 
 
-public class MudInputField extends javax.swing.JTextField {
+public class MudInputField extends javax.swing.JTextField implements IMudUiComponent{
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(MudInputField.class);
 
@@ -36,16 +36,8 @@ public class MudInputField extends javax.swing.JTextField {
         //用于实现输入框的历史记录上下翻阅
         this.initKeyBindings();
 
-         // ================== 新增：UI 视觉优化 ==================
-        // 1. 设置专属的背景色与前景色（确保暗黑主题下的高对比度）
-        this.setBackground(new java.awt.Color(30, 30, 30)); // 略深于主屏幕的纯黑，提升层次感
-        this.setForeground(java.awt.Color.WHITE);          // 纯白文字
+        this.applyTheme(null);
         this.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 14)); // 强制等宽，与MUD对齐
-        
-        // 2. 强化光标（Caret）：改为刺眼的绿色或亮白色，并且变粗，极易捕捉
-        this.setCaretColor(java.awt.Color.GREEN); 
-        this.putClientProperty("caretWidth", 2); // 部分 LookAndFeel 支持加粗光标
-
         // 3. 核心：增加边框和顶部悬空分割线（让它与主文本区彻底分离）
         // LineBorder(Color.GRAY, 1) 提供一个浅灰色外圈
         // EmptyBorder(6, 10, 6, 10) 给输入框内部文字四周留出空白，不再紧贴边框
@@ -159,6 +151,25 @@ public class MudInputField extends javax.swing.JTextField {
         this.setText(historyStr);
 
         this.setCaretPosition(this.getText().length());
+    }
+
+    @Override
+    public void applyTheme(ITheme theme) {
+        if (theme == null || theme.equals(Dark.INSTANCE)) {
+            // ================== UI 视觉优化（默认) ==================
+            // 1. 设置专属的背景色与前景色（确保暗黑主题下的高对比度）
+            this.setBackground(new java.awt.Color(30, 30, 30)); // 略深于主屏幕的纯黑，提升层次感
+            this.setForeground(java.awt.Color.WHITE); // 纯白文字 // 2. 强化光标（Caret）：改为刺眼的绿色或亮白色，并且变粗，极易捕捉
+            this.setCaretColor(java.awt.Color.GREEN);
+        } else {
+            this.setBackground(theme.getBackground("40")); 
+            this.setForeground(theme.getForeground("97"));
+            this.setCaretColor(java.awt.Color.BLACK);
+        }
+
+       
+        this.putClientProperty("caretWidth", 2); // 部分 LookAndFeel 支持加粗光标
+
     }
 
 }

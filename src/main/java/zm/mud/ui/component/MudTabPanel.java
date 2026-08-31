@@ -2,7 +2,6 @@ package zm.mud.ui.component;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -29,8 +28,9 @@ import org.apache.logging.log4j.Logger;
 import zm.mud.core.session.MudSession;
 import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.ui.component.statusBar.MudStatusBar;
+import zm.mud.ui.theme.ITheme;
 
-public class MudTabPanel {
+public class MudTabPanel implements IMudUiComponent{
     private static final Logger logger = LogManager.getLogger(MudTabPanel.class);
 
   
@@ -263,6 +263,12 @@ public class MudTabPanel {
 
     public void setTitle(String title) {
         this.lblTitle.setText( this.initTitle + title);
+    }
+
+    @Override
+    public void applyTheme(ITheme theme) {
+        this.mudInputField.applyTheme(theme);
+        this.mudStatusBar.applyTheme(theme);
     }
 
 }

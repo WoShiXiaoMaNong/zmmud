@@ -11,9 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import zm.mud.core.cfg.CustomCfgLoader;
+import zm.mud.ui.component.IMudUiComponent;
+import zm.mud.ui.theme.ITheme;
 
 @SuppressWarnings("unchecked")
-public class MudStatusBar extends JPanel {
+public class MudStatusBar extends JPanel implements IMudUiComponent{
     
     // 状态栏属性标签的多行集合（可随时在里面增删行、增删列元素）
     private List<List<StatusBarLabel>> statusBarLabels = new ArrayList<>();
@@ -25,8 +27,7 @@ public class MudStatusBar extends JPanel {
     private final JLabel lblRoom = new JLabel("当前位置: 📍 探索中... [ 出口: -- ]");
 
     public MudStatusBar() {
-        setBackground(backgroundColor);
-        setBorder(border);
+        this.applyTheme(null);
         this.load();
 
         // 统一使用一个全局 GridBagLayout
@@ -191,5 +192,14 @@ public class MudStatusBar extends JPanel {
         public List<String> getKeys() { return keys; }
         public JLabel getLabel() { return label; }
         public int getFixedWidth() { return fixedWidth; }
+    }
+
+    /**
+     * 不使用传入的theme
+     */
+    @Override
+    public void applyTheme(ITheme theme) {
+        setBackground(backgroundColor);
+        setBorder(border);
     }
 }
