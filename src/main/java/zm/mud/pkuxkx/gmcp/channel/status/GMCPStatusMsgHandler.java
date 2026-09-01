@@ -15,7 +15,8 @@ import zm.mud.ui.ZmMudUI;
 
 @Component("GMCP.Status")
 public class GMCPStatusMsgHandler implements IGMCPMsgHandler {
-
+    private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
+            .getLogger(GMCPStatusMsgHandler.class);
     @Autowired
     private ZmMudUI ui;
 
@@ -33,6 +34,8 @@ public class GMCPStatusMsgHandler implements IGMCPMsgHandler {
             if( name != null && id != null){
                 this.ui.setTitle(session, String.format(" >%s(%s)<", name,id));
                 this.ui.setCurrentUserName(session, String.format(" [%s]: ", name));
+                this.ui.printlnToScreen(session, String.format("GMCP.Status:  %s(%s)",packageName,jsonPayload));
+                logger.info("GMCP.Status: {}: {}",packageName,jsonPayload);
             }
 
           

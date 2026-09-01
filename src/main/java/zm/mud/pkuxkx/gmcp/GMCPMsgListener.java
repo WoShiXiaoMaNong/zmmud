@@ -28,7 +28,7 @@ public class GMCPMsgListener implements IGMCPOnMessage {
             parser = (IGMCPMsgHandler) applicationContext.getBean(packageName);
             parser.parse(session,packageName, jsonPayload);
         }catch(Exception e){
-            logger.warn("No parser found for package: " + packageName);
+            logger.warn("No parser found for package: " + packageName,e);
         }
     }
 
