@@ -14,6 +14,7 @@ import zm.mud.core.automation.trigger.TriggerFactory;
 import zm.mud.core.client.MudClient;
 import zm.mud.core.network.threads.ThreadPoolService;
 import zm.mud.pkuxkx.gmcp.GMCPContext;
+import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.utils.SpringBeanUtil;
 
 public class MudSession {
@@ -35,6 +36,8 @@ public class MudSession {
     private ThreadPoolService threadPoolService;
 
     private volatile SessionStatus status;
+
+    private GlobalCfg globalCfg ;
 
     private static final Map<String, MudSession> allSessionMap = new HashMap<>();
     private static final Lock sessionMapLock = new ReentrantLock();
@@ -66,9 +69,14 @@ public class MudSession {
         this.host = host;
         this.port = port;
         this.status = SessionStatus.CREATED;
+        this.globalCfg = SpringBeanUtil.getBean(GlobalCfg.class);
     }
 
-    
+        
+
+    public GlobalCfg getGlobalCfg() {
+        return globalCfg;
+    }
 
     public SessionStatus getStatus() {
         return status;

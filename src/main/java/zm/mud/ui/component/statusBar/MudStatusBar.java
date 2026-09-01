@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import zm.mud.core.cfg.CustomCfgLoader;
+import zm.mud.core.session.MudSession;
 import zm.mud.ui.component.IMudUiComponent;
 import zm.mud.ui.theme.ITheme;
 
@@ -26,7 +27,10 @@ public class MudStatusBar extends JPanel implements IMudUiComponent{
     // 房间位置标签
     private final JLabel lblRoom = new JLabel("当前位置: 📍 探索中... [ 出口: -- ]");
 
-    public MudStatusBar() {
+    private MudSession session;
+
+    public MudStatusBar(MudSession session) {
+        this.session = session;
         this.applyTheme(null);
         this.load();
 
@@ -81,7 +85,7 @@ public class MudStatusBar extends JPanel implements IMudUiComponent{
         gbc.gridwidth = maxColumns;  // 动态横跨整个网格的最大列数
         gbc.weightx = 1.0;
         
-        lblRoom.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        lblRoom.setFont(new Font(this.session.getGlobalCfg().getFontName(), Font.PLAIN, 13));
         lblRoom.setForeground(new Color(102, 217, 239)); 
         add(lblRoom, gbc);
 

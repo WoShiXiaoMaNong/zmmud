@@ -62,7 +62,7 @@ public class MudTabPanel implements IMudUiComponent{
         this.tabMainPanel.setLayout(new BorderLayout());
 
         // ================== 【状态栏放在最上方】 ==================
-        this.mudStatusBar = new MudStatusBar();
+        this.mudStatusBar = new MudStatusBar(session);
         this.tabMainPanel.add(this.mudStatusBar, BorderLayout.NORTH);
         // =============================================================
 
