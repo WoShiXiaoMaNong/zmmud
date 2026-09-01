@@ -449,5 +449,12 @@ private void showConnectDialog() {
     }
 
 
+    public void setCurrentUserName(MudSession session, String userName) {
+        String sessionId = session.getSessionId();
+        MudTabPanel mudTabPanel = this.tabPanels.get(sessionId);
+        mudTabPanel.setUserName(userName);
+    }
+
+
 
 }

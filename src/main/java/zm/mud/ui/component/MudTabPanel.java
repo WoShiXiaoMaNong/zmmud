@@ -271,4 +271,10 @@ public class MudTabPanel implements IMudUiComponent{
         this.mudStatusBar.applyTheme(theme);
     }
 
+	public void setUserName(String userName) {
+		this.mudInputField.setName(userName);
+       
+	}
+    
+
 }

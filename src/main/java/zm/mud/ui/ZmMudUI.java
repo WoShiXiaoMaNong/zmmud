@@ -52,6 +52,10 @@ public class ZmMudUI {
         this.mudMain.setTitle(session,title);
     }
 
+    public void setCurrentUserName(MudSession session,String userName){
+        this.mudMain.setCurrentUserName(session,userName);
+    }
+
     public void start() {
         SwingUtilities.invokeLater(() -> {
             mudMain.setShow();

@@ -32,6 +32,7 @@ public class GMCPStatusMsgHandler implements IGMCPMsgHandler {
             Object id = packageDataMap.get("id");
             if( name != null && id != null){
                 this.ui.setTitle(session, String.format(" >%s(%s)<", name,id));
+                this.ui.setCurrentUserName(session, String.format(" [%s]: ", name));
             }
 
           
