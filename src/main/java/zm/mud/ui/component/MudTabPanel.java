@@ -29,6 +29,8 @@ import org.apache.logging.log4j.Logger;
 
 import zm.mud.core.session.MudSession;
 import zm.mud.ui.cfg.GlobalCfg;
+import zm.mud.ui.component.image.ImageInfo;
+import zm.mud.ui.component.image.MudImgIcon;
 import zm.mud.ui.component.statusBar.MudStatusBar;
 import zm.mud.ui.theme.ITheme;
 

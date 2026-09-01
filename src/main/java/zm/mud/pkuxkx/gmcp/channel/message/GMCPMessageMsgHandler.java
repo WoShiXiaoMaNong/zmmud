@@ -12,7 +12,7 @@ import com.alibaba.fastjson2.JSON;
 import zm.mud.core.session.MudSession;
 import zm.mud.pkuxkx.gmcp.channel.IGMCPMsgHandler;
 import zm.mud.ui.ZmMudUI;
-import zm.mud.ui.component.ImageInfo;
+import zm.mud.ui.component.image.ImageInfo;
 
 @Component("GMCP.Message")
 public class GMCPMessageMsgHandler implements IGMCPMsgHandler {

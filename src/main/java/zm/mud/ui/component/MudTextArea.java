@@ -24,6 +24,8 @@ import javax.swing.text.StyledDocument;
 
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.cfg.GlobalCfg;
+import zm.mud.ui.component.image.ImageInfo;
+import zm.mud.ui.component.image.MudImgIcon;
 import zm.mud.ui.util.AnsiToStyleDocUtil;
 import zm.mud.utils.HttpUtil;
 import zm.mud.utils.SpringBeanUtil;
