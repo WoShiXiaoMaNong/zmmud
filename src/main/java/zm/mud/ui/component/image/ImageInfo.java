@@ -1,4 +1,4 @@
-package zm.mud.ui.component;
+package zm.mud.ui.component.image;
 
 import java.awt.image.BufferedImage;
 

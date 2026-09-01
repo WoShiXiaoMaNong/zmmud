@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import zm.mud.core.cfg.CustomCfgLoader;
+import zm.mud.core.session.MudSession;
 import zm.mud.ui.component.IMudUiComponent;
 import zm.mud.ui.theme.ITheme;
 
@@ -26,7 +27,10 @@ public class MudStatusBar extends JPanel implements IMudUiComponent{
     // 房间位置标签
     private final JLabel lblRoom = new JLabel("当前位置: 📍 探索中... [ 出口: -- ]");
 
-    public MudStatusBar() {
+    private MudSession session;
+
+    public MudStatusBar(MudSession session) {
+        this.session = session;
         this.applyTheme(null);
         this.load();
 

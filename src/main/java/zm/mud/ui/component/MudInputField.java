@@ -41,11 +41,11 @@ public class MudInputField extends JPanel implements IMudUiComponent {
 
         // 初始化左侧标签（假设可以通过 session 获取到用户 name，这里暂用 session.toString() 示例，可根据实际 API 修改）
         this.nameLabel = new JLabel();
-        this.nameLabel.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 14));
+        this.nameLabel.setFont(new java.awt.Font(this.session.getGlobalCfg().getFontName(), java.awt.Font.PLAIN, 14));
         this.setName(String.format("[%s]: ", DEFAULT_USER_NAME)); 
         // 初始化真正的输入框
         this.textField = new JTextField();
-        this.textField.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 14)); // 强制等宽，与MUD对齐
+        this.textField.setFont(new java.awt.Font(this.session.getGlobalCfg().getFontName(), java.awt.Font.PLAIN, 14)); // 强制等宽，与MUD对齐
 
         // 将组件放入面板：标签在左，输入框在中间（自动撑满剩余空间）
         this.add(this.nameLabel, BorderLayout.WEST);

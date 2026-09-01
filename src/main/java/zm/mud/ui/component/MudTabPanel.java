@@ -11,6 +11,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -27,6 +29,8 @@ import org.apache.logging.log4j.Logger;
 
 import zm.mud.core.session.MudSession;
 import zm.mud.ui.cfg.GlobalCfg;
+import zm.mud.ui.component.image.ImageInfo;
+import zm.mud.ui.component.image.MudImgIcon;
 import zm.mud.ui.component.statusBar.MudStatusBar;
 import zm.mud.ui.theme.ITheme;
 
@@ -60,7 +64,7 @@ public class MudTabPanel implements IMudUiComponent{
         this.tabMainPanel.setLayout(new BorderLayout());
 
         // ================== 【状态栏放在最上方】 ==================
-        this.mudStatusBar = new MudStatusBar();
+        this.mudStatusBar = new MudStatusBar(session);
         this.tabMainPanel.add(this.mudStatusBar, BorderLayout.NORTH);
         // =============================================================
 
@@ -245,12 +249,12 @@ public class MudTabPanel implements IMudUiComponent{
         return this.textArea.getMsgOffset(msg);
     }
 
-    public void printImg(List<ImageInfo> imgUrls, int offset) {
-        this.textArea.printImg(imgUrls,offset);
+    public void printImg(List<ImageInfo> imgUrls, int offset,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
+        this.textArea.printImg(imgUrls,offset,onDoubleClick);
     }
 
-    public void printImg(List<ImageInfo> imgUrls) {
-        this.textArea.printImg(imgUrls);
+    public void printImg(List<ImageInfo> imgUrls,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
+        this.textArea.printImg(imgUrls,onDoubleClick);
     }
 
     public void refreshStatusBar( Map<String/* Channel Name */,Map<String,Object>> gmcpData) {

@@ -51,7 +51,7 @@ public class IACSBHandler_C9 implements IIACSBCommandHandler {
             if (payloadLength <= 0)
                 return null;
 
-            String rawMessage = new String(iacSubCommand, 3, payloadLength, MUD_CHARSET);
+            String rawMessage = new String(iacSubCommand, 3, payloadLength, session.getClient().getCharset() != null ? session.getClient().getCharset() : MUD_CHARSET);
             int spaceIndex = rawMessage.indexOf(' ');
 
             String packageName = (spaceIndex == -1) ? rawMessage.trim() : rawMessage.substring(0, spaceIndex).trim();
