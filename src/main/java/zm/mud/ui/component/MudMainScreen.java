@@ -5,10 +5,13 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -18,7 +21,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
 
 
 import zm.mud.core.api.ClientService;
@@ -369,16 +371,16 @@ private void showConnectDialog() {
      * @param imgUrl
      * @param offset
      */
-    public void printImg(MudSession session, List<ImageInfo> imgUrls, int offset) {
+    public void printImg(MudSession session, List<ImageInfo> imgUrls, int offset,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
         String sessionId = session.getSessionId();
         MudTabPanel mudTabPanel = this.tabPanels.get(sessionId);
-        mudTabPanel.printImg(imgUrls, offset);
+        mudTabPanel.printImg(imgUrls, offset, onDoubleClick);
     }
 
-    public void printImg(MudSession session, List<ImageInfo> imgUrls) {
+    public void printImg(MudSession session, List<ImageInfo> imgUrls,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
         String sessionId = session.getSessionId();
         MudTabPanel mudTabPanel = this.tabPanels.get(sessionId);
-        mudTabPanel.printImg(imgUrls);
+        mudTabPanel.printImg(imgUrls, onDoubleClick);
     }
 
     public void setTitle(MudSession session, String title) {
