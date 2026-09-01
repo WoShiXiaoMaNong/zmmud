@@ -85,7 +85,7 @@ public class MudStatusBar extends JPanel implements IMudUiComponent{
         gbc.gridwidth = maxColumns;  // 动态横跨整个网格的最大列数
         gbc.weightx = 1.0;
         
-        lblRoom.setFont(new Font(this.session.getGlobalCfg().getFontName(), Font.PLAIN, 13));
+        lblRoom.setFont(new Font("Monospaced", Font.PLAIN, 13));
         lblRoom.setForeground(new Color(102, 217, 239)); 
         add(lblRoom, gbc);
 

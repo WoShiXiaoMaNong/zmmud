@@ -12,7 +12,8 @@ public enum ZmmudThreadPools {
 
     MUD_TRRIGER("Mud Trigger",1,5),
     MUD_TIMER("Mud Timer Service",1,1),
-    MUD_UI("Mud UI",1,5),
+    MUD_UI("Mud UI",1,8),
+    MUD_UI_IMG_DOWNLOAD("Mud Image Download", 1, 3), 
     ;
     String name;
     int corePoolSize;
@@ -28,6 +29,9 @@ public enum ZmmudThreadPools {
 
     public void execute(Runnable task){
         this.executor.execute(task);
+    }
+    public ThreadPoolExecutor getExecutor() {
+        return this.executor;
     }
 
     private static Logger logger = LogManager.getLogger(ZmmudThreadPools.class);
