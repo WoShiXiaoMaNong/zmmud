@@ -1,4 +1,4 @@
-package zm.mud.ui.component;
+package zm.mud.ui.component.image;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;

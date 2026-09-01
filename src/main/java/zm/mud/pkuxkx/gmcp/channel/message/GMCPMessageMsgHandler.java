@@ -12,7 +12,7 @@ import com.alibaba.fastjson2.JSON;
 import zm.mud.core.session.MudSession;
 import zm.mud.pkuxkx.gmcp.channel.IGMCPMsgHandler;
 import zm.mud.ui.ZmMudUI;
-import zm.mud.ui.component.ImageInfo;
+import zm.mud.ui.component.image.ImageInfo;
 
 @Component("GMCP.Message")
 public class GMCPMessageMsgHandler implements IGMCPMsgHandler {
@@ -31,7 +31,7 @@ public class GMCPMessageMsgHandler implements IGMCPMsgHandler {
         if( MESSAGE_TYPE_PIC.equalsIgnoreCase(message.getType()) && message.getUrl() != null && !message.getUrl().isEmpty()) {
             
             ImageInfo imageInfo = new ImageInfo(this.getUrl(session,message.getUrl()), true,false);
-
+            imageInfo.setMaxWidth(100);
             //这里可以只显示缩略图，用户看不清的时候，可以通过双击图片来查看原图
             ui.printImg(session,java.util.Collections.singletonList(imageInfo));
 

@@ -30,6 +30,8 @@ import zm.mud.core.thread.ZmmudThreadPools;
 import zm.mud.pkuxkx.gmcp.GMCPContext;
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.cfg.GlobalCfg;
+import zm.mud.ui.component.image.ImageInfo;
+import zm.mud.ui.component.image.MudImgIcon;
 import zm.mud.ui.processor.MsgPrintProcessor;
 import zm.mud.utils.SpringBeanUtil;
 

@@ -1,11 +1,13 @@
 package zm.mud.ui;
 
 import zm.mud.core.session.MudSession;
+import zm.mud.core.thread.ZmmudThreadPools;
 import zm.mud.ui.cfg.GlobalCfg;
-import zm.mud.ui.component.ImageInfo;
-import zm.mud.ui.component.MudImgIcon;
 import zm.mud.ui.component.MudMainScreen;
 import zm.mud.ui.component.MudTextArea;
+import zm.mud.ui.component.image.ImageDoubleClickListener;
+import zm.mud.ui.component.image.ImageInfo;
+import zm.mud.ui.component.image.MudImgIcon;
 import zm.mud.utils.FontUtil;
 
 import java.awt.event.MouseEvent;
@@ -112,44 +114,6 @@ public class ZmMudUI {
 
     public static ApplicationContext getContext() {
         return context;
-    }
-
-}
-
-class ImageDoubleClickListener implements BiConsumer<MouseEvent, MudImgIcon> {
-
-    private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
-            .getLogger(ImageDoubleClickListener.class);
-
-    @Override
-    public void accept(MouseEvent e, MudImgIcon mudImgIcon) {
-        // 在这里处理双击事件，例如打开图片预览窗口
-        SwingUtilities.invokeLater(() -> {
-            try {
-                String url = mudImgIcon.getImgOriginUrl();
-                JFrame previewFrame = new JFrame("Image Preview");
-                previewFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-                ImageIcon imageIcon = new ImageIcon(new java.net.URL(url));
-                JLabel imageLabel = new JLabel(imageIcon);
-                previewFrame.getContentPane().add(imageLabel);
-
-                // 1. 先让组件根据图片大小进行初始布局计算
-                previewFrame.pack();
-
-                // 2. 如果 pack 后的窗口尺寸小于 200，则强制设为 200，否则保持原样
-                int finalWidth = Math.max(200, previewFrame.getWidth());
-                int finalHeight = Math.max(200, previewFrame.getHeight());
-
-                // 3. 设置最终窗口大小并居中
-                previewFrame.setSize(finalWidth, finalHeight);
-                previewFrame.setLocationRelativeTo(null);
-                previewFrame.setVisible(true);
-
-            } catch (Exception ex) {
-                logger.error("Error while previewing image: " + ex.getMessage(), ex);
-            }
-        });
     }
 
 }

@@ -14,7 +14,7 @@ import zm.mud.core.automation.trigger.Trigger;
 import zm.mud.core.automation.trigger.cfg.MatchResult;
 import zm.mud.core.session.MudSession;
 import zm.mud.ui.ZmMudUI;
-import zm.mud.ui.component.ImageInfo;
+import zm.mud.ui.component.image.ImageInfo;
 import zm.mud.utils.HttpUtil;
 import java.io.InputStream;
 import java.util.ArrayList;
