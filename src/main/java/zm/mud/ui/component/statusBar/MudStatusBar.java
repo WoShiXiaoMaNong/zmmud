@@ -11,10 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import zm.mud.core.cfg.CustomCfgLoader;
-import zm.mud.pkuxkx.gmcp.channel.move.PkuxkxRoom;
+import zm.mud.core.session.MudSession;
+import zm.mud.ui.component.IMudUiComponent;
+import zm.mud.ui.theme.ITheme;
 
 @SuppressWarnings("unchecked")
-public class MudStatusBar extends JPanel {
+public class MudStatusBar extends JPanel implements IMudUiComponent{
     
     // 状态栏属性标签的多行集合（可随时在里面增删行、增删列元素）
     private List<List<StatusBarLabel>> statusBarLabels = new ArrayList<>();
@@ -25,9 +27,11 @@ public class MudStatusBar extends JPanel {
     // 房间位置标签
     private final JLabel lblRoom = new JLabel("当前位置: 📍 探索中... [ 出口: -- ]");
 
-    public MudStatusBar() {
-        setBackground(backgroundColor);
-        setBorder(border);
+    private MudSession session;
+
+    public MudStatusBar(MudSession session) {
+        this.session = session;
+        this.applyTheme(null);
         this.load();
 
         // 统一使用一个全局 GridBagLayout
@@ -81,7 +85,7 @@ public class MudStatusBar extends JPanel {
         gbc.gridwidth = maxColumns;  // 动态横跨整个网格的最大列数
         gbc.weightx = 1.0;
         
-        lblRoom.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        lblRoom.setFont(new Font(this.session.getGlobalCfg().getFontName(), Font.PLAIN, 13));
         lblRoom.setForeground(new Color(102, 217, 239)); 
         add(lblRoom, gbc);
 
@@ -89,20 +93,39 @@ public class MudStatusBar extends JPanel {
         int totalRows = statusBarLabels.size() + 1;
         this.setPreferredSize(new Dimension(800, 20 * totalRows));
         
-        this.refreshStatus(null, null);
+        this.refreshStatus(null);
     }
 
     /**
      * 刷新方法
      */
-    public void refreshStatus(Map<String, Object> statusData, PkuxkxRoom room) {
+    public void refreshStatus(Map<String/* Channel Name */,Map<String,Object>> gmcpData) {
         // 1. 动态刷新属性标签文本
         for (List<StatusBarLabel> rowLabels : statusBarLabels) {
             for (StatusBarLabel sbl : rowLabels) {
                 List<String> values = new ArrayList<>();
                 for (String key : sbl.getKeys()) {
-                    if (statusData != null && statusData.containsKey(key)) {
-                        String value = String.valueOf(statusData.get(key));
+                    int lastDot = key.lastIndexOf(".");
+                    String channel;
+                    String gmcpKey;
+                    if (lastDot != -1) {
+                        // 1. 截取前面的部分（不包含最后一个点）
+                        channel = key.substring(0, lastDot); 
+                        
+                        // 2. 截取最后一部分
+                        gmcpKey = key.substring(lastDot + 1);
+                    } else {
+                        // 处理字符串中没有点号的特殊情况
+                        channel = key;
+                        gmcpKey = "";
+                    }
+                    Map<String,Object> gmcpDataForChannel = null;
+                    if(gmcpData!= null){
+                      gmcpDataForChannel = gmcpData.get(channel);
+                    }
+
+                    if (gmcpDataForChannel != null && gmcpDataForChannel.containsKey(gmcpKey)) {
+                        String value = String.valueOf(gmcpDataForChannel.get(gmcpKey));
                         values.add((value == null || "null".equals(value)) ? "--" : value);
                     } else {
                         values.add("--");
@@ -120,10 +143,14 @@ public class MudStatusBar extends JPanel {
             }
         }
 
-        // 2. 刷新房间位置文本
-        if (room != null && room.getResult() && room.getName() != null) {
-            String roomName = room.getName();
-            List<String> exitsList = room.getDir();
+        Map<String,Object> room = null;
+        if(gmcpData!= null){
+            room =  gmcpData.get("GMCP.Move");
+        }
+        // 2. 刷新房间位置文本 "TRUE".equalsIgnoreCase(String.valueOf(result)
+        if (room != null &&"TRUE".equalsIgnoreCase(String.valueOf(room.get("result"))) && room.get("short") != null) {
+            String roomName = (String) room.get("short");
+            List<String> exitsList = (List<String>) room.get("dir");
             String exits = (exitsList == null || exitsList.isEmpty()) ? "无" : String.join(", ", exitsList);
             lblRoom.setText(String.format("当前位置: 📍 %s  [ 出口: %s ]", roomName, exits));
         } else {
@@ -169,5 +196,14 @@ public class MudStatusBar extends JPanel {
         public List<String> getKeys() { return keys; }
         public JLabel getLabel() { return label; }
         public int getFixedWidth() { return fixedWidth; }
+    }
+
+    /**
+     * 不使用传入的theme
+     */
+    @Override
+    public void applyTheme(ITheme theme) {
+        setBackground(backgroundColor);
+        setBorder(border);
     }
 }

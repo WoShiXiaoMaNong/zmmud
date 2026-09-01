@@ -14,10 +14,14 @@ import zm.mud.core.automation.trigger.TriggerFactory;
 import zm.mud.core.client.MudClient;
 import zm.mud.core.network.threads.ThreadPoolService;
 import zm.mud.pkuxkx.gmcp.GMCPContext;
+import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.utils.SpringBeanUtil;
 
 public class MudSession {
     private static final Logger logger = LogManager.getLogger(MudSession.class);
+
+    private String host;
+    private int port;
 
     private String sessionId;
     private String sessionName;
@@ -31,13 +35,17 @@ public class MudSession {
 
     private ThreadPoolService threadPoolService;
 
+    private volatile SessionStatus status;
+
+    private GlobalCfg globalCfg ;
+
     private static final Map<String, MudSession> allSessionMap = new HashMap<>();
     private static final Lock sessionMapLock = new ReentrantLock();
 
-    public static MudSession newSession() {
+    public static MudSession newSession(String host,int port) {
         try {
             sessionMapLock.tryLock();
-            MudSession session = new MudSession(UuidUtil.getTimeBasedUuid().toString());
+            MudSession session = new MudSession(UuidUtil.getTimeBasedUuid().toString(),host,port);
             allSessionMap.put(session.getSessionId(), session);
             return session;
         } catch (Exception e) {
@@ -52,18 +60,44 @@ public class MudSession {
         return allSessionMap;
     }
 
-    private MudSession(String sessionId) {
+    private MudSession(String sessionId,String host,int port) {
         this.sessionId = sessionId;
         this.oubMsgService = SpringBeanUtil.getBean(OubMsgService.class);
         this.triggerFactory = SpringBeanUtil.getBean(TriggerFactory.class);
         this.threadPoolService = SpringBeanUtil.getBean(ThreadPoolService.class);
         this.gmcpContext = new GMCPContext();
+        this.host = host;
+        this.port = port;
+        this.status = SessionStatus.CREATED;
+        this.globalCfg = SpringBeanUtil.getBean(GlobalCfg.class);
+    }
+
+        
+
+    public GlobalCfg getGlobalCfg() {
+        return globalCfg;
+    }
+
+    public SessionStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(SessionStatus status) {
+        this.status = status;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public int getPort() {
+        return port;
     }
 
     public void start() {
-        this.client = ZmMud.context.getBean(MudClient.class);
+        this.client = ZmMud.context.getBean(MudClient.class,this);
         this.triggerFactory.load(this);
-        boolean isConnected = client.connect(this);
+        boolean isConnected = client.connect(this.getHost(),this.getPort());
         if (!isConnected) {
             logger.error("Failed to connect to server");
             return;
@@ -72,6 +106,7 @@ public class MudSession {
 
         ThreadPoolService threadStarter = ZmMud.context.getBean(ThreadPoolService.class);
         threadStarter.startAllThreads(this);
+        this.setStatus(SessionStatus.ACTIVE);
 
     }
 
@@ -104,6 +139,7 @@ public class MudSession {
             allSessionMap.remove(this.getSessionId());
             threadPoolService.shutdown(this);
             this.client.close();
+            this.setStatus(SessionStatus.CLOSED);
         } catch (Exception e) {
             logger.error("Session start error!", e);
         } finally {
@@ -128,4 +164,7 @@ public class MudSession {
         this.oubMsgService.send(this, input);
     }
 
+    public boolean isAvailable() {
+        return SessionStatus.isAvailable(this.status);
+    }
 }

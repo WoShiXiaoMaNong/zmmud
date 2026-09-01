@@ -71,7 +71,8 @@ public class FullmeShowAction implements IAction {
         }
         int fullmeUrlOffset = ui.getMsgOffset(session,fullmeUrl);
         logger.debug("Fullme URL offset:" + fullmeUrlOffset);
-        ui.printImg(session,imgUrls,fullmeUrlOffset);
+        //北侠的fullme验证码图片是通过一个网页来展示的，最多允许刷新四次，都在客户端做掉了，所以这里不传入onDoubleClick事件，避免用户双击图片后又去刷新fullme网页
+        ui.printImg(session,imgUrls,fullmeUrlOffset,null); 
         logger.info(">>>>>>>>>> url:" + imgUrls);
     }
 

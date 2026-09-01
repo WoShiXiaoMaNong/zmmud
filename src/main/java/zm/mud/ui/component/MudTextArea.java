@@ -1,6 +1,8 @@
 package zm.mud.ui.component;
 
 
+import java.awt.Color;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,13 +10,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import javax.swing.ImageIcon;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+
 
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.cfg.GlobalCfg;
@@ -28,6 +34,8 @@ public class MudTextArea extends JTextPane {
 
     // 新增：引入 50 行的缓冲区，避免每来一行就执行删除导致的界面抖动
     private static final int BUFFER_LINES = 200;
+
+    private final SimpleAttributeSet errorStyle;
 
     private StyledDocument doc;
     private AnsiToStyleDocUtil ansiToStyleDocUtil;
@@ -50,7 +58,11 @@ public class MudTextArea extends JTextPane {
         this.setParagraphAttributes(this.getParagraphAttributes(), true);
         this.doc = this.getStyledDocument();
         this.ansiToStyleDocUtil = ZmMudUI.getContext().getBean(AnsiToStyleDocUtil.class);
+        this.errorStyle = new SimpleAttributeSet();
+        StyleConstants.setForeground(errorStyle, Color.RED);
+        
         logger.info("displayBufLineNumber :" + this.displayBufLineNumber);
+       
     }
 
     /**
@@ -119,8 +131,8 @@ public class MudTextArea extends JTextPane {
         });
     }
 
-    public void printImg(List<ImageInfo> imgUrls) {
-        this.printImg(imgUrls, doc.getLength());
+    public void printImg(List<ImageInfo> imgUrls,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
+        this.printImg(imgUrls, doc.getLength(), onDoubleClick);
     }
 
     /**
@@ -129,7 +141,7 @@ public class MudTextArea extends JTextPane {
      * @param imgUrl
      * @param offset
      */
-    public void printImg(List<ImageInfo> imgUrls, int offset) {
+    public void printImg(List<ImageInfo> imgUrls, int offset,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
 
         try {
             List<ImageInfo> fetchSucceedImages = new ArrayList<>();
@@ -193,7 +205,7 @@ public class MudTextArea extends JTextPane {
                             doc.insertString(nextOffset, "\n", null);
                             nextOffset++;
                         }
-                        nextOffset = this.doImageInsert(imageIcon, image.isInsertMode(), nextOffset, imageHeight);
+                        nextOffset = this.doImageInsert(imageIcon, image.isInsertMode(), nextOffset, imageHeight,image.getImgUrl(), onDoubleClick);
 
                         if( image.isNeedNewLine()) {
                             // 在图片的精准屁股后面补上换行符
@@ -233,7 +245,7 @@ public class MudTextArea extends JTextPane {
         }
     }
 
-    private int doImageInsert(ImageIcon imageIcon, boolean insertMode, int offset, int imageHeight)
+    private int doImageInsert(ImageIcon imageIcon, boolean insertMode, int offset, int imageHeight,String originUrl,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick)
             throws BadLocationException {
 
         int baseOffset = offset;
@@ -249,7 +261,9 @@ public class MudTextArea extends JTextPane {
             // 【1. 插入模式】：从后一行开始插入，不破坏任何原有文本
             // ====================================================
             this.setCaretPosition(baseOffset);
-            this.insertIcon(imageIcon);
+
+            MudImgIcon imageLabel = new MudImgIcon(imageIcon, originUrl, onDoubleClick);
+            this.insertComponent(imageLabel); 
         
             // 明确计算：插入一个 Icon 占用 1 个字符长度
             return baseOffset + 1;
@@ -286,12 +300,15 @@ public class MudTextArea extends JTextPane {
 
             // 在安全位置插入图片
             this.setCaretPosition(baseOffset);
-            this.insertIcon(imageIcon);
+
+            MudImgIcon imageLabel = new MudImgIcon(imageIcon, originUrl, onDoubleClick);
+            this.insertComponent(imageLabel); 
 
             return baseOffset + 1;
         }
     }
 
+ 
     /**
      * 辅助方法：当图片下载/解析失败时，安全地在屏幕上打印错误提示
      */
@@ -299,7 +316,7 @@ public class MudTextArea extends JTextPane {
         SwingUtilities.invokeLater(() -> {
             printLock.lock();
             try {
-                doc.insertString(doc.getLength(), errorMsg + "\r\n", null);
+                doc.insertString(doc.getLength(), errorMsg + "\r\n", errorStyle);
                 trimLines();
                 this.setCaretPosition(doc.getLength());
             } catch (BadLocationException e) {

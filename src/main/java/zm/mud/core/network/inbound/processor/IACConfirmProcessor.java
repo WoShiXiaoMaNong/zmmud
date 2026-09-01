@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
 
 import zm.mud.core.network.inbound.message.IACConfirmInbMsg;
@@ -17,7 +16,7 @@ import zm.mud.utils.HexUtil;
 import zm.mud.utils.SpringBeanUtil;
 
 @Service
-public class IACConfirmProcessor implements IInbMsgProcessor, Ordered {
+public class IACConfirmProcessor extends AbsSessionValidatingInbMsgProcessor {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(IACConfirmProcessor.class);
 
@@ -26,7 +25,7 @@ public class IACConfirmProcessor implements IInbMsgProcessor, Ordered {
     private HexUtil hexUtil;
 
     @Override
-    public boolean processMessage(InbMsg msg) {
+    protected boolean doProcess(InbMsg msg) {
         if (msg == null || !(msg instanceof IACConfirmInbMsg)) {
             return true; // Not an IAC confirm message, ignore
         }

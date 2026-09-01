@@ -37,21 +37,13 @@ public class MudClient implements AutoCloseable,DisposableBean {
 
     private MudSession session;
 
-    public MudClient() {
+
+    public MudClient(MudSession session) {
+        this.session = session;
     }
 
-    /**
-     * <pre>
-     * 提供一个无参的 connect 方法，
-     * 使用已经设置好的 host、port 和 charset 进行连接。
-     * 这对于在 Spring 中通过配置文件注入参数后直接连接非常有用。
-     * </pre>
-     */
-    public boolean connect(MudSession session) {
-        return this.connect(session,this.host, this.port, this.charset);
-    }
 
-    public boolean connect(MudSession session,String host, int port, Charset charset) {
+    public boolean connect(String host, int port) {
         try {
             if (this.connectionManager == null) {
                 this.connectionManager = new ConnectionManager();
@@ -62,7 +54,7 @@ public class MudClient implements AutoCloseable,DisposableBean {
                 return true;
             }
 
-            this.connectionManager.connect(host, port, charset);
+            this.connectionManager.connect(host, port, this.charset);
             return true;
         } catch (Exception e) {
             logger.error("Failed to connect to server {}:{}", host, port, e);

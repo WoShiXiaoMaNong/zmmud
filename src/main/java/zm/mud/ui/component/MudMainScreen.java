@@ -1,19 +1,28 @@
 package zm.mud.ui.component;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+
 import zm.mud.core.api.ClientService;
 import zm.mud.core.api.InbMsgService;
 import zm.mud.core.session.MudSession;
@@ -88,7 +97,7 @@ public class MudMainScreen extends JFrame {
                     }
                     MudSession session = MudSession.getSession(sessionId);
                     GMCPContext gmcpContext = session.getGmcpContext();
-                    mTabPanel.refreshStatusBar(gmcpContext.getStatus(), gmcpContext.getCurrentRoom());
+                    mTabPanel.refreshStatusBar(gmcpContext.getGmcpData());
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
@@ -100,10 +109,10 @@ public class MudMainScreen extends JFrame {
         });
     }
 
-    private void createNewSession(String title) {
-        MudSession session = MudSession.newSession();
+    private void createNewSession(String title,String host,int port) {
+        MudSession session = MudSession.newSession(host,port);
         session.setSessionName(title);
-        addNewTab(session);
+        this.addNewTab(session);
         session.start();
         this.selectedSession = session.getSessionId();
         // 刷新容器布局和重绘，保证新布局立刻生效
@@ -143,6 +152,9 @@ public class MudMainScreen extends JFrame {
             }
         };
 
+        this.tabbedPane.addChangeListener(new TabbedPanelChangeListener());
+
+
         // 【核心修复】彻底消除 TabbedPane 的外边框和不必要的空白断层
         tabbedPane.setBorder(javax.swing.BorderFactory.createEmptyBorder());
         // 如果使用的LookAndFeel支持，还可以进一步强制其内部页边距为0
@@ -163,6 +175,8 @@ public class MudMainScreen extends JFrame {
 
         this.add(tabbedPane, BorderLayout.CENTER);
     }
+
+    
 
     /**
      * 创建专用于新增 Tab 的 "+" 号按钮组件
@@ -186,21 +200,110 @@ public class MudMainScreen extends JFrame {
 
             @Override
             public void mouseClicked(java.awt.event.MouseEvent e) {
-                // 点击 "+" 号直接弹出输入框并创建新 Tab
-                String tabName = javax.swing.JOptionPane.showInputDialog(
-                        MudMainScreen.this,
-                        "请输入新会话名称:",
-                        "新建 Tab",
-                        javax.swing.JOptionPane.PLAIN_MESSAGE);
-
-                if (tabName != null && !tabName.trim().isEmpty()) {
-                    createNewSession(tabName.trim());
-                }
+                showConnectDialog();
             }
         });
 
         return lblAdd;
     }
+
+
+/**
+ * 弹出连接MUD世界的对话框
+ */
+private void showConnectDialog() {
+    // 1. 创建包含三个输入框的面板
+    javax.swing.JPanel inputPanel = new javax.swing.JPanel(new java.awt.GridLayout(3, 2, 5, 5));
+
+    javax.swing.JTextField nameField = new javax.swing.JTextField();
+    javax.swing.JTextField hostField = new javax.swing.JTextField();
+    javax.swing.JTextField portField = new javax.swing.JTextField();
+
+    inputPanel.add(new javax.swing.JLabel("MUD世界名称:"));
+    nameField.setText(globleCfg.getDefaultServerName());
+    inputPanel.add(nameField);
+    inputPanel.add(new javax.swing.JLabel("Host (主机):"));
+    inputPanel.add(hostField);
+    hostField.setText(globleCfg.getDefaultHost());
+    inputPanel.add(new javax.swing.JLabel("Port (端口):"));
+    portField.setText(String.valueOf(globleCfg.getDefaultPost()));
+    inputPanel.add(portField);
+
+    // 2. 创建主面板，把输入面板和自定义的按钮放进去
+    javax.swing.JPanel mainPanel = new javax.swing.JPanel(new java.awt.BorderLayout(10, 10));
+    mainPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    mainPanel.add(inputPanel, java.awt.BorderLayout.CENTER);
+
+    // 3. 创建底部的 确定/取消 按钮
+    javax.swing.JPanel buttonPanel = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+    javax.swing.JButton okButton = new javax.swing.JButton("确定");
+    javax.swing.JButton cancelButton = new javax.swing.JButton("取消");
+    buttonPanel.add(okButton);
+    buttonPanel.add(cancelButton);
+    mainPanel.add(buttonPanel, java.awt.BorderLayout.SOUTH);
+
+    // 4. 使用 JDialog 承载这个面板
+    final javax.swing.JDialog dialog = new javax.swing.JDialog(MudMainScreen.this, "连接MUD世界", true); // true 表示模态窗口
+    dialog.setContentPane(mainPanel);
+
+    // 焦点在确定按钮上时，按回车就能直接触发点击了
+    dialog.getRootPane().setDefaultButton(okButton);
+
+    // 5. 绑定“确定”按钮的点击事件（核心逻辑）
+    okButton.addActionListener(new java.awt.event.ActionListener() {
+        @Override
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+            String tabName = nameField.getText().trim();
+            String host = hostField.getText().trim();
+            String portStr = portField.getText().trim();
+
+            // 基础非空校验
+            if (!tabName.isEmpty() && !host.isEmpty() && !portStr.isEmpty()) {
+                try {
+                    int port = Integer.parseInt(portStr);
+                    // 校验成功：创建新会话并关闭弹框
+                    createNewSession(tabName, host, port);
+                    dialog.dispose(); 
+                } catch (NumberFormatException ex) {
+                    // 端口错误提示：挂载在当前 dialog 之上，不会导致 dialog 消失
+                    javax.swing.JOptionPane.showMessageDialog(
+                            dialog,
+                            "端口号必须为数字！",
+                            "输入错误",
+                            javax.swing.JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                // 空字段提示
+                javax.swing.JOptionPane.showMessageDialog(
+                        dialog,
+                        "所有字段均不能为空！",
+                        "输入错误",
+                        javax.swing.JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    });
+
+    // 6. 绑定“取消”按钮事件
+    cancelButton.addActionListener(new java.awt.event.ActionListener() {
+        @Override
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+            dialog.dispose();
+        }
+    });
+
+    // 7. 渲染并显示弹框
+    dialog.pack();
+    dialog.setLocationRelativeTo(MudMainScreen.this); // 居中显示在主窗口
+    // 异步请求焦点，确保在窗口渲染完毕后“确定”按钮拿到焦点
+    javax.swing.SwingUtilities.invokeLater(new Runnable() {
+        @Override
+        public void run() {
+            okButton.requestFocusInWindow();
+        }
+    });
+    dialog.setVisible(true);
+}
+
 
     /**
      * 辅助方法：始终把新 Tab 插入到最后那个 "+" 号组件的左侧
@@ -211,23 +314,11 @@ public class MudMainScreen extends JFrame {
         // 2. 实例化你的 MudTabPanel
         MudTabPanel newTab = new MudTabPanel(session, this.globleCfg, this.tabbedPane.getPreferredSize());
         this.tabPanels.put(session.getSessionId(), newTab);
-
+        newTab.applyTheme(this.globleCfg.getThemeType().getTheme());
         newTab.resetFont(this.globleCfg.getFontName(), this.globleCfg.getFontSize());
 
         // 3. 调用 addMe，它会将黑色的 tabPanelArea 完美嵌入顶部的 tabbedPane 中
         newTab.addMe(this.tabbedPane, this);
-
-        this.tabbedPane.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                // 获取当前选中的组件或索引
-                Component selectedComponent = tabbedPane.getSelectedComponent();
-                if (selectedComponent != null) {
-                    selectedSession = selectedComponent.getName();
-                    foucesInputLine();
-                }
-            }
-        });
 
         return newTab;
     }
@@ -245,6 +336,12 @@ public class MudMainScreen extends JFrame {
 
     public void setShow() {
         this.setVisible(true);
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                showConnectDialog();
+            }
+        });
     }
 
     public void resetFont(MudSession session, String font, int size) {
@@ -274,16 +371,16 @@ public class MudMainScreen extends JFrame {
      * @param imgUrl
      * @param offset
      */
-    public void printImg(MudSession session, List<ImageInfo> imgUrls, int offset) {
+    public void printImg(MudSession session, List<ImageInfo> imgUrls, int offset,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
         String sessionId = session.getSessionId();
         MudTabPanel mudTabPanel = this.tabPanels.get(sessionId);
-        mudTabPanel.printImg(imgUrls, offset);
+        mudTabPanel.printImg(imgUrls, offset, onDoubleClick);
     }
 
-    public void printImg(MudSession session, List<ImageInfo> imgUrls) {
+    public void printImg(MudSession session, List<ImageInfo> imgUrls,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
         String sessionId = session.getSessionId();
         MudTabPanel mudTabPanel = this.tabPanels.get(sessionId);
-        mudTabPanel.printImg(imgUrls);
+        mudTabPanel.printImg(imgUrls, onDoubleClick);
     }
 
     public void setTitle(MudSession session, String title) {
@@ -291,5 +388,75 @@ public class MudMainScreen extends JFrame {
         MudTabPanel mudTabPanel = this.tabPanels.get(sessionId);
         mudTabPanel.setTitle(title);
     }
+
+
+    private class TabbedPanelChangeListener implements ChangeListener {
+
+        @Override
+        public void stateChanged(ChangeEvent e) {
+            // 1. 保留你原有的业务逻辑
+            Component selectedComponent = tabbedPane.getSelectedComponent();
+            if (selectedComponent != null) {
+                selectedSession = selectedComponent.getName();
+                foucesInputLine();
+            }
+
+            // 2. 刷新所有标签的视觉状态
+            int selectedIndex = tabbedPane.getSelectedIndex();
+            int tabCount = tabbedPane.getTabCount();
+
+            // 主题色配置
+            Color selectedColor = new Color(0, 102, 51);
+            Color unselectedColor = Color.BLACK; // 未选中时暗灰
+
+            for (int i = 0; i < tabCount; i++) {
+                Component header = tabbedPane.getTabComponentAt(i);
+
+                if (header instanceof JPanel) {
+                    JPanel pnlHeader = (JPanel) header;
+                    
+                    // 【新增：边框控制】根据是否选中，为面板设置虚线边框或清空边框
+                    if (i == selectedIndex) {
+                        // 参数依次为：颜色、线宽、虚线长度、间距、是否圆角
+                        pnlHeader.setBorder(BorderFactory.createDashedBorder(selectedColor, 1.0f, 2.0f, 2.0f, false));
+                    } else {
+                        pnlHeader.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1)); // 清空边框，保持 1 像素占位防止界面抖动
+                    }
+
+                    for (Component child : pnlHeader.getComponents()) {
+                        if (child instanceof JLabel) {
+                            // 关键点：强转为 JLabel 对象
+                            JLabel lblTitle = (JLabel) child;
+
+                            if (i == selectedIndex) {
+                                // 【选中】设置字体加粗，单独调用 setForeground 设置颜色
+                                lblTitle.setFont(lblTitle.getFont().deriveFont(Font.BOLD));
+                                lblTitle.setForeground(selectedColor);
+                            } else {
+                                // 【未选中】设置字体常规，单独调用 setForeground 设置颜色
+                                lblTitle.setFont(lblTitle.getFont().deriveFont(Font.PLAIN));
+                                lblTitle.setForeground(unselectedColor);
+                            }
+                            break; // 找到了标签文本，跳出当前 Panel 的循环
+                        }
+                    }
+                    
+                    // 确保边框修改后立即重绘
+                    pnlHeader.revalidate();
+                    pnlHeader.repaint();
+                }
+            }
+        }
+
+    }
+
+
+    public void setCurrentUserName(MudSession session, String userName) {
+        String sessionId = session.getSessionId();
+        MudTabPanel mudTabPanel = this.tabPanels.get(sessionId);
+        mudTabPanel.setUserName(userName);
+    }
+
+
 
 }
