@@ -62,7 +62,7 @@ public class MudScrollPane extends javax.swing.JScrollPane {
         int value = verticalBar.getValue();
         
         // 允许 5 像素的误差（防止部分系统缩放导致计算不精准）
-        if (value + extent >= maximum - 5) {
+        if (value + extent >= maximum - 10) {
             manualAdjustmentHandler.apply(true); // 调用外部传入的处理函数
         }
     }

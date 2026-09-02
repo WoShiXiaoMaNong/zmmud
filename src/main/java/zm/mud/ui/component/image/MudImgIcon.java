@@ -1,12 +1,16 @@
 package zm.mud.ui.component.image;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.function.BiConsumer;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+
+
 
 import zm.mud.core.session.MudSession;
 
@@ -32,6 +36,7 @@ public class MudImgIcon extends JLabel {
                 }
             }
         });
+        this.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
     }
 
     public MudSession getSession() {
