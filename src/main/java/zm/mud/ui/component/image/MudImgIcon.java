@@ -1,5 +1,6 @@
 package zm.mud.ui.component.image;
 
+import java.awt.Component;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.function.BiConsumer;
@@ -19,6 +20,7 @@ public class MudImgIcon extends JLabel {
         super( imageIcon);
         this.imgOriginUrl = imgOriginUrl;
         this.imageIcon = imageIcon;
+        this.setAlignmentY(Component.BOTTOM_ALIGNMENT);
         MudImgIcon self = this;
         this.addMouseListener(new MouseAdapter() {
             @Override

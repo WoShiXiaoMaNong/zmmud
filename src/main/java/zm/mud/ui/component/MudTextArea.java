@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -34,6 +32,7 @@ public class MudTextArea extends JTextPane {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(MudTextArea.class);
 
+
     // 新增：引入 50 行的缓冲区，避免每来一行就执行删除导致的界面抖动
     private static final int BUFFER_LINES = 200;
 
@@ -44,14 +43,13 @@ public class MudTextArea extends JTextPane {
 
     private GlobalCfg globleCfg;
 
-    private Lock printLock;
+
 
     private int displayBufLineNumber;
 
-    private boolean isAutoScrollEnabled = true; // 默认启用自动滚动
+    private volatile boolean isAutoScrollEnabled = true; // 默认启用自动滚动
 
     public MudTextArea(GlobalCfg cfg) {
-        this.printLock = new ReentrantLock();
         this.globleCfg = cfg;
         this.displayBufLineNumber = cfg.getDisplayBufLineNumber();
         this.setEditable(false);
@@ -76,32 +74,40 @@ public class MudTextArea extends JTextPane {
     }
 
     public void setAutoScrollEnabled(boolean enabled) {
-        this.isAutoScrollEnabled = enabled;
+        if (SwingUtilities.isEventDispatchThread()) {
+            this.isAutoScrollEnabled = enabled;
+        } else {
+            SwingUtilities.invokeLater(() -> this.isAutoScrollEnabled = enabled);
+        }
     }
 
    @Override
     public void setCaretPosition(int position) {
-        if (isAutoScrollEnabled) {
-            // 正常状态：允许默认的滚动置底行为
-            super.setCaretPosition(position);
-        } else {
-            // 锁定状态：通过修改光标策略，实现【只挪光标，不触发滚动】
-            javax.swing.text.Caret caret = this.getCaret();
-            if (caret instanceof javax.swing.text.DefaultCaret) {
-                javax.swing.text.DefaultCaret defaultCaret = (javax.swing.text.DefaultCaret) caret;
-                int oldPolicy = defaultCaret.getUpdatePolicy();
-                try {
-                    // 核心：强制策略为 NEVER_UPDATE，禁止引发滚动
-                    defaultCaret.setUpdatePolicy(javax.swing.text.DefaultCaret.NEVER_UPDATE);
-                    super.setCaretPosition(position);
-                } finally {
-                    // 恢复原有策略，确保不破坏系统的其他生命周期
-                    defaultCaret.setUpdatePolicy(oldPolicy);
-                }
-            } else {
-                // 兜底：如果不是 DefaultCaret，则维持原样
+        try{
+            if (isAutoScrollEnabled) {
+                // 正常状态：允许默认的滚动置底行为
                 super.setCaretPosition(position);
+            } else {
+                // 锁定状态：通过修改光标策略，实现【只挪光标，不触发滚动】
+                javax.swing.text.Caret caret = this.getCaret();
+                if (caret instanceof javax.swing.text.DefaultCaret) {
+                    javax.swing.text.DefaultCaret defaultCaret = (javax.swing.text.DefaultCaret) caret;
+                    int oldPolicy = defaultCaret.getUpdatePolicy();
+                    try {
+                        // 核心：强制策略为 NEVER_UPDATE，禁止引发滚动
+                        defaultCaret.setUpdatePolicy(javax.swing.text.DefaultCaret.NEVER_UPDATE);
+                        super.setCaretPosition(position);
+                    } finally {
+                        // 恢复原有策略，确保不破坏系统的其他生命周期
+                        defaultCaret.setUpdatePolicy(oldPolicy);
+                    }
+                } else {
+                    // 兜底：如果不是 DefaultCaret，则维持原样
+                    super.setCaretPosition(position);
+                }
             }
+        } catch (Exception e) {
+            logger.error("Failed to set caret position", e);
         }
     }
 
@@ -119,7 +125,6 @@ public class MudTextArea extends JTextPane {
      */
     public void printlnToScreen(String text, boolean enableBlod) {
         SwingUtilities.invokeLater(() -> {
-            printLock.lock();
             try {
                 ansiToStyleDocUtil.parseAnsiToStyledDocument(text + "\r\n", doc, this.globleCfg.getFont(),
                         this.globleCfg.getThemeType().getTheme(), enableBlod);
@@ -127,9 +132,7 @@ public class MudTextArea extends JTextPane {
                 this.setCaretPosition(doc.getLength());
             } catch (BadLocationException e) {
                 logger.error("Failed to print to screen", e);
-            } finally {
-                printLock.unlock();
-            }
+            } 
         });
     }
 
@@ -179,7 +182,6 @@ public class MudTextArea extends JTextPane {
 
             // 5. 切回 UI 线程，并严格加锁写入 JTextPane
             SwingUtilities.invokeLater(() -> {
-                printLock.lock(); // 加锁：保证图文严格的时序
                 try {
                     int nextOffset = offset;
                     int docLength = doc.getLength();
@@ -233,11 +235,12 @@ public class MudTextArea extends JTextPane {
                             this.setCaretPosition(targetOffset);
                         }
                     }
-
+                  
+                    trimLines(); 
+                    this.setCaretPosition(doc.getLength());
+                    // =======================================================
                 } catch (BadLocationException e) {
                     logger.error("Failed to process image to doc in cover mode,Offset:" + offset, e);
-                } finally {
-                    printLock.unlock(); // 释放锁
                 }
             });
 
@@ -316,16 +319,13 @@ public class MudTextArea extends JTextPane {
      */
     private void printErrorToScreenAsync(String errorMsg) {
         SwingUtilities.invokeLater(() -> {
-            printLock.lock();
             try {
                 doc.insertString(doc.getLength(), errorMsg + "\r\n", errorStyle);
                 trimLines();
                 this.setCaretPosition(doc.getLength());
             } catch (BadLocationException e) {
                 logger.error("Failed to print error msg to screen", e);
-            } finally {
-                printLock.unlock();
-            }
+            } 
         });
     }
 
@@ -364,8 +364,10 @@ public class MudTextArea extends JTextPane {
             }
         } catch (Exception e) {
             logger.error("Error reading text from document", e);
-        }
+        } 
         return -1;
     }
+
+
 
 }
