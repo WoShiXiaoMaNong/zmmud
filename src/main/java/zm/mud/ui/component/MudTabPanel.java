@@ -69,7 +69,7 @@ public class MudTabPanel implements IMudUiComponent{
         // =============================================================
 
         // 设置文本区固定高度
-        this.textArea = new MudTextArea(cfg);
+        this.textArea = new MudTextArea(this.session,cfg);
         Dimension maxDimension = this.tabMainPanel.getPreferredSize();
         this.textArea.setPreferredSize(new Dimension(maxDimension.width, maxDimension.height - 30));
         JScrollPane scrollPane = new MudScrollPane(this.textArea, (isBottom) -> {
@@ -249,12 +249,12 @@ public class MudTabPanel implements IMudUiComponent{
         return this.textArea.getMsgOffset(msg);
     }
 
-    public void printImg(List<ImageInfo> imgUrls, int offset,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
-        this.textArea.printImg(imgUrls,offset,onDoubleClick);
+    public void printImg(List<ImageInfo> imgUrls, int offset,BiConsumer<MouseEvent,MudImgIcon> onClick) {
+        this.textArea.printImg(imgUrls,offset,onClick);
     }
 
-    public void printImg(List<ImageInfo> imgUrls,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
-        this.textArea.printImg(imgUrls,onDoubleClick);
+    public void printImg(List<ImageInfo> imgUrls,BiConsumer<MouseEvent,MudImgIcon> onClick) {
+        this.textArea.printImg(imgUrls,onClick);
     }
 
     public void refreshStatusBar( Map<String/* Channel Name */,Map<String,Object>> gmcpData) {

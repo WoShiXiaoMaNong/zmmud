@@ -19,7 +19,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-
+import zm.mud.core.session.MudSession;
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.ui.component.image.ImageInfo;
@@ -43,13 +43,16 @@ public class MudTextArea extends JTextPane {
 
     private GlobalCfg globleCfg;
 
+    private MudSession session;
+
 
 
     private int displayBufLineNumber;
 
     private volatile boolean isAutoScrollEnabled = true; // 默认启用自动滚动
 
-    public MudTextArea(GlobalCfg cfg) {
+    public MudTextArea(MudSession session,GlobalCfg cfg) {
+        this.session = session;
         this.globleCfg = cfg;
         this.displayBufLineNumber = cfg.getDisplayBufLineNumber();
         this.setEditable(false);
@@ -64,6 +67,14 @@ public class MudTextArea extends JTextPane {
         logger.info("displayBufLineNumber :" + this.displayBufLineNumber);
        
     }
+
+
+    
+    public MudSession getSession() {
+        return session;
+    }
+
+
 
     /**
      * 
@@ -136,8 +147,8 @@ public class MudTextArea extends JTextPane {
         });
     }
 
-    public void printImg(List<ImageInfo> imgUrls,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
-        this.printImg(imgUrls, doc.getLength(), onDoubleClick);
+    public void printImg(List<ImageInfo> imgUrls,BiConsumer<MouseEvent,MudImgIcon> onClick) {
+        this.printImg(imgUrls, doc.getLength(), onClick);
     }
 
     /**
@@ -146,7 +157,7 @@ public class MudTextArea extends JTextPane {
      * @param imgUrl
      * @param offset
      */
-    public void printImg(List<ImageInfo> imgUrls, int offset,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
+    public void printImg(List<ImageInfo> imgUrls, int offset,BiConsumer<MouseEvent,MudImgIcon> onClick) {
 
         try {
             List<ImageInfo> fetchSucceedImages = new ArrayList<>();
@@ -209,7 +220,7 @@ public class MudTextArea extends JTextPane {
                             doc.insertString(nextOffset, "\n", null);
                             nextOffset++;
                         }
-                        nextOffset = this.doImageInsert(imageIcon, image.isInsertMode(), nextOffset, imageHeight,image.getImgUrl(), onDoubleClick);
+                        nextOffset = this.doImageInsert(imageIcon, image.isInsertMode(), nextOffset, imageHeight,image.getImgUrl(), onClick);
 
                         if( image.isNeedNewLine()) {
                             // 在图片的精准屁股后面补上换行符
@@ -219,7 +230,7 @@ public class MudTextArea extends JTextPane {
                     }
 
                     // 4. 触发你原有的行数裁剪逻辑
-                    trimLines();
+                   // trimLines();
 
                     // 5. 保持良好体验：滚动条自动滚动到最下方最新消息
                     int targetOffset = doc.getLength();
@@ -250,7 +261,7 @@ public class MudTextArea extends JTextPane {
         }
     }
 
-    private int doImageInsert(ImageIcon imageIcon, boolean insertMode, int offset, int imageHeight,String originUrl,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick)
+    private int doImageInsert(ImageIcon imageIcon, boolean insertMode, int offset, int imageHeight,String originUrl,BiConsumer<MouseEvent,MudImgIcon> onClick)
             throws BadLocationException {
 
         int baseOffset = offset;
@@ -267,7 +278,7 @@ public class MudTextArea extends JTextPane {
             // ====================================================
             this.setCaretPosition(baseOffset);
 
-            MudImgIcon imageLabel = new MudImgIcon(imageIcon, originUrl, onDoubleClick);
+            MudImgIcon imageLabel = new MudImgIcon(this.getSession(),imageIcon, originUrl, onClick);
             this.insertComponent(imageLabel); 
         
             // 明确计算：插入一个 Icon 占用 1 个字符长度
@@ -306,7 +317,7 @@ public class MudTextArea extends JTextPane {
             // 在安全位置插入图片
             this.setCaretPosition(baseOffset);
 
-            MudImgIcon imageLabel = new MudImgIcon(imageIcon, originUrl, onDoubleClick);
+            MudImgIcon imageLabel = new MudImgIcon(this.getSession(),imageIcon, originUrl, onClick);
             this.insertComponent(imageLabel); 
 
             return baseOffset + 1;

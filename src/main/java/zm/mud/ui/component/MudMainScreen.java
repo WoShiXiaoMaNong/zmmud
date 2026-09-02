@@ -373,16 +373,16 @@ private void showConnectDialog() {
      * @param imgUrl
      * @param offset
      */
-    public void printImg(MudSession session, List<ImageInfo> imgUrls, int offset,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
+    public void printImg(MudSession session, List<ImageInfo> imgUrls, int offset,BiConsumer<MouseEvent,MudImgIcon> onClick) {
         String sessionId = session.getSessionId();
         MudTabPanel mudTabPanel = this.tabPanels.get(sessionId);
-        mudTabPanel.printImg(imgUrls, offset, onDoubleClick);
+        mudTabPanel.printImg(imgUrls, offset, onClick);
     }
 
-    public void printImg(MudSession session, List<ImageInfo> imgUrls,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
+    public void printImg(MudSession session, List<ImageInfo> imgUrls,BiConsumer<MouseEvent,MudImgIcon> onClick) {
         String sessionId = session.getSessionId();
         MudTabPanel mudTabPanel = this.tabPanels.get(sessionId);
-        mudTabPanel.printImg(imgUrls, onDoubleClick);
+        mudTabPanel.printImg(imgUrls, onClick);
     }
 
     public void setTitle(MudSession session, String title) {
@@ -459,6 +459,7 @@ private void showConnectDialog() {
         mudTabPanel.setUserName(userName);
     }
 
+    
 
 
 }
