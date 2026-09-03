@@ -90,9 +90,9 @@ public class ZmMudUI {
     }
 
     public void printImg(MudSession session, List<ImageInfo> imgUrls, int offset,
-            BiConsumer<MouseEvent, MudImgIcon> onDoubleClick) {
+            BiConsumer<MouseEvent, MudImgIcon> onClick) {
         uiThreadPool.execute(() -> {
-            mudMain.printImg(session, imgUrls, offset, onDoubleClick);
+            mudMain.printImg(session, imgUrls, offset, onClick);
         });
     }
 
@@ -101,9 +101,9 @@ public class ZmMudUI {
     }
 
     public void printImg(MudSession session, List<ImageInfo> imgUrls,
-            BiConsumer<MouseEvent, MudImgIcon> onDoubleClick) {
+            BiConsumer<MouseEvent, MudImgIcon> onClick) {
         uiThreadPool.execute(() -> {
-            mudMain.printImg(session, imgUrls, onDoubleClick);
+            mudMain.printImg(session, imgUrls, onClick);
         });
     }
 

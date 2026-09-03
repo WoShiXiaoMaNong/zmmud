@@ -1,6 +1,5 @@
 package zm.mud.ui.component;
 
-
 import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -8,8 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -21,7 +18,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-
+import zm.mud.core.session.MudSession;
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.ui.component.image.ImageInfo;
@@ -44,14 +41,14 @@ public class MudTextArea extends JTextPane {
 
     private GlobalCfg globleCfg;
 
-    private Lock printLock;
+    private MudSession session;
 
     private int displayBufLineNumber;
 
-    private boolean isAutoScrollEnabled = true; // 默认启用自动滚动
+    private volatile boolean isAutoScrollEnabled = true; // 默认启用自动滚动
 
-    public MudTextArea(GlobalCfg cfg) {
-        this.printLock = new ReentrantLock();
+    public MudTextArea(MudSession session, GlobalCfg cfg) {
+        this.session = session;
         this.globleCfg = cfg;
         this.displayBufLineNumber = cfg.getDisplayBufLineNumber();
         this.setEditable(false);
@@ -62,9 +59,13 @@ public class MudTextArea extends JTextPane {
         this.ansiToStyleDocUtil = ZmMudUI.getContext().getBean(AnsiToStyleDocUtil.class);
         this.errorStyle = new SimpleAttributeSet();
         StyleConstants.setForeground(errorStyle, Color.RED);
-        
+
         logger.info("displayBufLineNumber :" + this.displayBufLineNumber);
-       
+
+    }
+
+    public MudSession getSession() {
+        return session;
     }
 
     /**
@@ -76,31 +77,67 @@ public class MudTextArea extends JTextPane {
     }
 
     public void setAutoScrollEnabled(boolean enabled) {
-        this.isAutoScrollEnabled = enabled;
+        // 统一在主线程切换状态，并立即同步更新光标策略
+        if (SwingUtilities.isEventDispatchThread()) {
+            this.isAutoScrollEnabled = enabled;
+            this.syncCaretPolicy(); // 状态改变时，立刻调整策略
+        } else {
+            SwingUtilities.invokeLater(() -> {
+                this.isAutoScrollEnabled = enabled;
+                this.syncCaretPolicy();
+            });
+        }
     }
 
-   @Override
+    @Override
     public void setCaretPosition(int position) {
-        if (isAutoScrollEnabled) {
-            // 正常状态：允许默认的滚动置底行为
+        try {
+            // 1. 确保策略是正确的
+            this.syncCaretPolicy();
+            
+            // 2. 调用父类方法移动光标（如果是 ALWAYS_UPDATE，此时会触发一次基于当前已知布局的滚动）
             super.setCaretPosition(position);
-        } else {
-            // 锁定状态：通过修改光标策略，实现【只挪光标，不触发滚动】
-            javax.swing.text.Caret caret = this.getCaret();
-            if (caret instanceof javax.swing.text.DefaultCaret) {
-                javax.swing.text.DefaultCaret defaultCaret = (javax.swing.text.DefaultCaret) caret;
-                int oldPolicy = defaultCaret.getUpdatePolicy();
-                try {
-                    // 核心：强制策略为 NEVER_UPDATE，禁止引发滚动
-                    defaultCaret.setUpdatePolicy(javax.swing.text.DefaultCaret.NEVER_UPDATE);
-                    super.setCaretPosition(position);
-                } finally {
-                    // 恢复原有策略，确保不破坏系统的其他生命周期
-                    defaultCaret.setUpdatePolicy(oldPolicy);
-                }
+            
+            // 3. 核心补丁：解决图片异步撑开导致的滚动不到位问题
+            if (this.isAutoScrollEnabled) {
+                // 使用双层 InvokeLater，确保在文档插入、图片标签生成、以及外层 JScrollPane 重新布局（validate）全部完成后执行
+                SwingUtilities.invokeLater(() -> {
+                    SwingUtilities.invokeLater(() -> {
+                        // 检查当前光标是否依然在文档末尾（防止用户在此期间已经手动点到了别的地方）
+                        if (this.isAutoScrollEnabled && this.getCaretPosition() == this.getDocument().getLength()) {
+                            try {
+                                // 获取末尾真实的几何矩形（此时图片已经撑开，高度绝对准确）
+                                java.awt.Rectangle rect = this.modelToView2D(this.getDocument().getLength()).getBounds();
+                                // 稍微向下加一点冗余高度，确保安全彻底地置底
+                                rect.y += rect.height + 10;
+                                this.scrollRectToVisible(rect);
+                            } catch (BadLocationException e) {
+                                // 降级备用方案：如果上面由于索引问题报错，直接强行按组件当前实际总高度的最底部进行滚动
+                                java.awt.Rectangle rect = new java.awt.Rectangle(0, this.getHeight() - 1, 1, 1);
+                                this.scrollRectToVisible(rect);
+                            }
+                        }
+                    });
+                });
+            }
+            
+        } catch (Exception e) {
+            logger.error("Failed to set caret position", e);
+        }
+    }
+
+    private void syncCaretPolicy() {
+        javax.swing.text.Caret caret = this.getCaret();
+        if (caret instanceof javax.swing.text.DefaultCaret) {
+            javax.swing.text.DefaultCaret defaultCaret = (javax.swing.text.DefaultCaret) caret;
+            if (this.isAutoScrollEnabled) {
+                // 开启自动滚动时：强制策略为 ALWAYS_UPDATE
+                // 这样不管是插入新文本，还是手动调用 setCaretPosition，组件都会雷打不动地滚到最后
+                defaultCaret.setUpdatePolicy(javax.swing.text.DefaultCaret.ALWAYS_UPDATE);
             } else {
-                // 兜底：如果不是 DefaultCaret，则维持原样
-                super.setCaretPosition(position);
+                // 关闭自动滚动时：强制策略为 NEVER_UPDATE
+                // 此时任何文本追增、光标赋值，底层都不会触发任何滚动，实现彻底锁定
+                defaultCaret.setUpdatePolicy(javax.swing.text.DefaultCaret.NEVER_UPDATE);
             }
         }
     }
@@ -109,7 +146,7 @@ public class MudTextArea extends JTextPane {
     public void scrollRectToVisible(java.awt.Rectangle aRect) {
         if (isAutoScrollEnabled) {
             super.scrollRectToVisible(aRect);
-        } 
+        }
     }
 
     /**
@@ -119,7 +156,6 @@ public class MudTextArea extends JTextPane {
      */
     public void printlnToScreen(String text, boolean enableBlod) {
         SwingUtilities.invokeLater(() -> {
-            printLock.lock();
             try {
                 ansiToStyleDocUtil.parseAnsiToStyledDocument(text + "\r\n", doc, this.globleCfg.getFont(),
                         this.globleCfg.getThemeType().getTheme(), enableBlod);
@@ -127,14 +163,12 @@ public class MudTextArea extends JTextPane {
                 this.setCaretPosition(doc.getLength());
             } catch (BadLocationException e) {
                 logger.error("Failed to print to screen", e);
-            } finally {
-                printLock.unlock();
             }
         });
     }
 
-    public void printImg(List<ImageInfo> imgUrls,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
-        this.printImg(imgUrls, doc.getLength(), onDoubleClick);
+    public void printImg(List<ImageInfo> imgUrls, BiConsumer<MouseEvent, MudImgIcon> onClick) {
+        this.printImg(imgUrls, doc.getLength(), onClick);
     }
 
     /**
@@ -143,7 +177,7 @@ public class MudTextArea extends JTextPane {
      * @param imgUrl
      * @param offset
      */
-    public void printImg(List<ImageInfo> imgUrls, int offset,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
+    public void printImg(List<ImageInfo> imgUrls, int offset, BiConsumer<MouseEvent, MudImgIcon> onClick) {
 
         try {
             List<ImageInfo> fetchSucceedImages = new ArrayList<>();
@@ -179,7 +213,6 @@ public class MudTextArea extends JTextPane {
 
             // 5. 切回 UI 线程，并严格加锁写入 JTextPane
             SwingUtilities.invokeLater(() -> {
-                printLock.lock(); // 加锁：保证图文严格的时序
                 try {
                     int nextOffset = offset;
                     int docLength = doc.getLength();
@@ -196,20 +229,22 @@ public class MudTextArea extends JTextPane {
                         int imageHeight = image.getBufferedImage().getHeight();
 
                         // 4. 下载成功！构建 ImageIcon
-                        if( image.getMaxWidth() > 0 && image.getBufferedImage().getWidth() > image.getMaxWidth()) {
+                        if (image.getMaxWidth() > 0 && image.getBufferedImage().getWidth() > image.getMaxWidth()) {
                             // 如果设置了最大宽度，并且图片宽度超过了这个限制，则进行等比例缩放
-                            BufferedImage scaledImage = zm.mud.ui.util.ImageUtil.scaleImage(image.getBufferedImage(), image.getMaxWidth());
+                            BufferedImage scaledImage = zm.mud.ui.util.ImageUtil.scaleImage(image.getBufferedImage(),
+                                    image.getMaxWidth());
                             image.setBufferedImage(scaledImage);
                             imageHeight = scaledImage.getHeight(); // 更新图片高度
                         }
                         ImageIcon imageIcon = new ImageIcon(image.getBufferedImage());
-                         if( image.isNeedBeforeNewLine()) {
+                        if (image.isNeedBeforeNewLine()) {
                             doc.insertString(nextOffset, "\n", null);
                             nextOffset++;
                         }
-                        nextOffset = this.doImageInsert(imageIcon, image.isInsertMode(), nextOffset, imageHeight,image.getImgUrl(), onDoubleClick);
+                        nextOffset = this.doImageInsert(imageIcon, image.isInsertMode(), nextOffset, imageHeight,
+                                image.getImgUrl(), onClick);
 
-                        if( image.isNeedNewLine()) {
+                        if (image.isNeedNewLine()) {
                             // 在图片的精准屁股后面补上换行符
                             doc.insertString(nextOffset, "\n", null);
                             nextOffset++;
@@ -217,7 +252,7 @@ public class MudTextArea extends JTextPane {
                     }
 
                     // 4. 触发你原有的行数裁剪逻辑
-                    trimLines();
+                    // trimLines();
 
                     // 5. 保持良好体验：滚动条自动滚动到最下方最新消息
                     int targetOffset = doc.getLength();
@@ -234,10 +269,11 @@ public class MudTextArea extends JTextPane {
                         }
                     }
 
+                    trimLines();
+                    this.setCaretPosition(doc.getLength());
+                    // =======================================================
                 } catch (BadLocationException e) {
                     logger.error("Failed to process image to doc in cover mode,Offset:" + offset, e);
-                } finally {
-                    printLock.unlock(); // 释放锁
                 }
             });
 
@@ -247,7 +283,8 @@ public class MudTextArea extends JTextPane {
         }
     }
 
-    private int doImageInsert(ImageIcon imageIcon, boolean insertMode, int offset, int imageHeight,String originUrl,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick)
+    private int doImageInsert(ImageIcon imageIcon, boolean insertMode, int offset, int imageHeight, String originUrl,
+            BiConsumer<MouseEvent, MudImgIcon> onClick)
             throws BadLocationException {
 
         int baseOffset = offset;
@@ -264,9 +301,9 @@ public class MudTextArea extends JTextPane {
             // ====================================================
             this.setCaretPosition(baseOffset);
 
-            MudImgIcon imageLabel = new MudImgIcon(imageIcon, originUrl, onDoubleClick);
-            this.insertComponent(imageLabel); 
-        
+            MudImgIcon imageLabel = new MudImgIcon(this.getSession(), imageIcon, originUrl, onClick);
+            this.insertComponent(imageLabel);
+
             // 明确计算：插入一个 Icon 占用 1 个字符长度
             return baseOffset + 1;
 
@@ -274,7 +311,7 @@ public class MudTextArea extends JTextPane {
             // ====================================================
             // 【2. 覆盖模式】：动态计算图片占用的行数，并将其全部覆盖（删除）
             // ====================================================
-            
+
             // 假设你原本计算出的需要删除的长度是某个值，这里用你的变量替代，此处假设为 lengthToRemove
             int lengthToRemove = 1; // 【请将此处替换为您原代码里计算出来的删除长度变量】
 
@@ -289,7 +326,8 @@ public class MudTextArea extends JTextPane {
                 try {
                     doc.remove(baseOffset, lengthToRemove);
                 } catch (BadLocationException e) {
-                    logger.error("Failed to remove text for image cover. Offset: " + baseOffset + ", Length: " + lengthToRemove + ", DocLength: " + currentDocLength, e);
+                    logger.error("Failed to remove text for image cover. Offset: " + baseOffset + ", Length: "
+                            + lengthToRemove + ", DocLength: " + currentDocLength, e);
                     // 降级处理：既然删除失败，把写入点直接修正到当前末尾，避免后续 insert 跟着连带崩溃
                     baseOffset = doc.getLength();
                 }
@@ -303,28 +341,24 @@ public class MudTextArea extends JTextPane {
             // 在安全位置插入图片
             this.setCaretPosition(baseOffset);
 
-            MudImgIcon imageLabel = new MudImgIcon(imageIcon, originUrl, onDoubleClick);
-            this.insertComponent(imageLabel); 
+            MudImgIcon imageLabel = new MudImgIcon(this.getSession(), imageIcon, originUrl, onClick);
+            this.insertComponent(imageLabel);
 
             return baseOffset + 1;
         }
     }
 
- 
     /**
      * 辅助方法：当图片下载/解析失败时，安全地在屏幕上打印错误提示
      */
     private void printErrorToScreenAsync(String errorMsg) {
         SwingUtilities.invokeLater(() -> {
-            printLock.lock();
             try {
                 doc.insertString(doc.getLength(), errorMsg + "\r\n", errorStyle);
                 trimLines();
                 this.setCaretPosition(doc.getLength());
             } catch (BadLocationException e) {
                 logger.error("Failed to print error msg to screen", e);
-            } finally {
-                printLock.unlock();
             }
         });
     }

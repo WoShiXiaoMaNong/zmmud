@@ -48,7 +48,7 @@ public class LuaScriptAction implements IAction {
 
             // 2. 调用 Lua 引擎执行脚本，并将当前的 trigger 和正则匹配结果 ret 传进去
             logger.debug("开始启动 Lua 脚本: {}, 触发器: {}", script, trigger.getTriggerName());
-            luaService.runScript(script, trigger, ret);
+            luaService.runScript(session, script, trigger, ret);
 
         } catch (Exception e) {
             logger.error("启动 Lua 脚本失败: " + script, e);
