@@ -10,6 +10,8 @@ import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import zm.mud.core.session.MudSession;
+
 @Service
 public class LuaService {
     
@@ -24,7 +26,7 @@ public class LuaService {
     /**
      * 执行指定的 Lua 脚本，并传入 Java 对象参数
      */
-    public void runScript(String scriptPath, Object trigger, Object matchResult) {
+    public void runScript(MudSession session,String scriptPath, Object trigger, Object matchResult) {
 
         this.registerLuaApi();
 
@@ -34,9 +36,10 @@ public class LuaService {
         // 2. 将 Java 的对象转换为 Lua 能够识别的变量 (Coerce 转换)
         LuaValue luaTrigger = CoerceJavaToLua.coerce(trigger);
         LuaValue luaRet = CoerceJavaToLua.coerce(matchResult);
+        LuaValue luaSession = CoerceJavaToLua.coerce(session);
         
         // 3. 执行 Lua 脚本，并将两个对象作为参数传入
-        chunk.call(luaTrigger, luaRet);
+        chunk.call(luaTrigger, luaRet, luaSession);
     }
 
    private void registerLuaApi(){

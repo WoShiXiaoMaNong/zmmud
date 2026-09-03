@@ -1,7 +1,7 @@
 -- scripts/hp_handler.lua
 
 -- 接收 Java 传过来的参数（... 代表入参列表）
-local trigger, ret = ...
+local trigger, ret, session = ...
 
 -- 打印调试信息，确认收到了 Java 对象
 --print("Lua 脚本启动成功！触发器名称: " .. trigger:getTriggerName())
@@ -21,7 +21,7 @@ for i = 0, size - 1 do
     -- print(i .. " : " .. tostring(value))
     ssinfo = ssinfo .. tostring(value) .. ","
 end
-LuaApi:sendMsg(ssinfo .. "aaa")
+Sys:print(session,ssinfo .. "aaa")
 local cmd = "id"
 --LuaApi:sendCommand(cmd .. " ")
 -- 你可以在这里写你核心的 MUD 机器人逻辑（比如血量过低自动吃药等）
