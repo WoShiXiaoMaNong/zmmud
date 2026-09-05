@@ -25,7 +25,7 @@
                     "expression": "fullme-url"
                 },
                 "type": "outbound",
-                "remainningCount": -1
+                "remainingCount": -1
             },
             {
                 "name": "fullme-url",
@@ -44,7 +44,7 @@
                     }
                 },
                 "type": "inbound",
-                "remainningCount": 1
+                "remainingCount": 1
             },
             {
                 "name": "hpbrief-oub-trigger",
@@ -60,7 +60,7 @@
                     "expression": "hpbrief-inb-trigger"
                 },
                 "type": "outbound",
-                "remainningCount": -1
+                "remainingCount": -1
             },
             {
                 "name": "hpbrief-inb-trigger",
@@ -79,7 +79,7 @@
                     }
                 },
                 "type": "inbound",
-                "remainningCount": 3
+                "remainingCount": 3
             }
         ],
         "status_bar": [

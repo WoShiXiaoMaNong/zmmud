@@ -1,37 +1,52 @@
 package zm.mud.ui.component.menu;
 
+import java.awt.Container;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class AbsZmudMenuItem extends JMenuItem {
-    private static final Logger logger = LogManager.getLogger(AbsZmudMenuItem.class);
+public class ZmudMenuItem extends JMenuItem {
+    private static final Logger logger = LogManager.getLogger(ZmudMenuItem.class);
 
-    protected AbsZmudMenuItem(String text,Font font) {
+
+    private  AbsZmMudDialog dialog;
+
+    protected ZmudMenuItem(String text,Font font) {
         super(text);
         this.setFont(font);
         this.addListener();
+       
     }
 
-    public static AbsZmudMenuItem createMenuItem(String className, String text, Font font) {
+    public static ZmudMenuItem createMenuItem(ZmudMenuNode node, Font font,Frame owner) {
         try {
-            Class<?> clazz = Class.forName(className);
-            if (AbsZmudMenuItem.class.isAssignableFrom(clazz)) {
-                return (AbsZmudMenuItem) clazz.getConstructor(String.class, Font.class).newInstance(text, font);
+            ZmudMenuItem menuItem = new ZmudMenuItem(node.title(), font);
+            Class<?> dialogClass = Class.forName(node.menuDialog());
+            if (AbsZmMudDialog.class.isAssignableFrom(dialogClass)) {
+                AbsZmMudDialog dialog = (AbsZmMudDialog) dialogClass.getConstructor(Frame.class, String.class).newInstance(owner, node.title());
+                menuItem.setDialog(dialog);
+
             } else {
-                throw new IllegalArgumentException("Class " + className + " is not a subclass of AbsZmudMenuItem");
+                throw new IllegalArgumentException("Class " + node.menuDialog() + " is not a subclass of AbsZmudDialog");
             }
+            return menuItem;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Failed to create menu item for class: " + node.menuDialog(), e);
         }
         return null;
     }
 
+
+    private void setDialog(AbsZmMudDialog dialog) {
+        this.dialog = dialog;
+    }
 
     private void addListener() {
         JMenuItem self = this;
@@ -52,14 +67,12 @@ public abstract class AbsZmudMenuItem extends JMenuItem {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                onClick(e);
+                if (dialog != null) {
+                    dialog.setVisible(true);
+                }
             }
 
             
         });
     }
-
-
-    protected abstract void onClick(MouseEvent e);
-    
 }

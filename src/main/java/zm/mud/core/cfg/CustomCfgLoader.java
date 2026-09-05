@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -13,6 +13,8 @@ import org.springframework.core.io.ClassPathResource;
 
 import com.alibaba.fastjson2.JSONPath;
 import com.alibaba.fastjson2.TypeReference;
+
+import zm.mud.core.automation.trigger.cfg.TriggerConfigEntry;
 
 public class CustomCfgLoader {
     private static final Logger logger = LogManager.getLogger(CustomCfgLoader.class);
@@ -52,5 +54,10 @@ public class CustomCfgLoader {
             logger.error("Load trigger error!", e);
         }
         return null;
+    }
+
+    public static void saveUIConfig(String jsonFileName /* {mudName}.json */, String key, List<TriggerConfigEntry> configs) {
+   
+        logger.error("Unimplemented method 'saveUIConfig'");
     }
 }

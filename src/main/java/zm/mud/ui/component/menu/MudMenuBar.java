@@ -18,6 +18,7 @@ import com.alibaba.fastjson2.TypeReference;
 
 import zm.mud.core.cfg.CustomCfgLoader;
 import zm.mud.ui.cfg.GlobalCfg;
+import zm.mud.ui.component.MudMainScreen;
 
 /**
  * 符合 MUD 风格的菜单栏
@@ -31,8 +32,11 @@ public class MudMenuBar extends JMenuBar {
 
     private final Font menuFont = new Font("SimSun", Font.PLAIN, 13); // 复古宋体
     private GlobalCfg globleCfg;
+    private MudMainScreen mainScreen;
 
-    public MudMenuBar(GlobalCfg globleCfg) {
+
+    public MudMenuBar(MudMainScreen mainScreen, GlobalCfg globleCfg) {
+        this.mainScreen = mainScreen;
         this.globleCfg = globleCfg;
         this.initStyle();
         this.createMenus();
@@ -72,7 +76,7 @@ public class MudMenuBar extends JMenuBar {
             }
             boolean isLeafNode = !node.hasChildren() && ZmudMenuType.MENU_ITEM.equals(node.type());
             if(isLeafNode) {
-                AbsZmudMenuItem menuItem = createMenuItem(node);
+                ZmudMenuItem menuItem = createMenuItem(node);
                 parent.add(menuItem);
             } else {
                 JMenu subMenu = createSubMenu(node.title());
@@ -110,10 +114,10 @@ public class MudMenuBar extends JMenuBar {
     /**
      * 创建普通叶子子菜单项
      */
-    private AbsZmudMenuItem createMenuItem(ZmudMenuNode node) {
+    private ZmudMenuItem createMenuItem(ZmudMenuNode node) {
         try{
-            String className = node.itemWindow();
-            AbsZmudMenuItem item = AbsZmudMenuItem.createMenuItem(className, node.title(), menuFont);
+            
+            ZmudMenuItem item = ZmudMenuItem.createMenuItem(node, menuFont,this.mainScreen);
             applySubMenuStyles(item);
             return item;
         } catch (Exception e) {

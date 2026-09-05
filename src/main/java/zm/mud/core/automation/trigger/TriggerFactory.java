@@ -3,10 +3,12 @@ package zm.mud.core.automation.trigger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson2.TypeReference;
@@ -28,14 +30,15 @@ public class TriggerFactory {
     private Map<String/* Session ID */,List<TriggerConfigEntry>> triggers;
     private Map<String/* Session ID */,Map<String,TriggerConfigEntry>> triggerMap;
 
-
+    @Autowired
+    private TriggerRegister triggerRegister;
 
     public TriggerFactory(){
         this.triggers = new ConcurrentHashMap<>();
         this.triggerMap = new ConcurrentHashMap<>();
     }
 
-    public Trigger buildByeName(MudSession session, String triggerName){
+    public synchronized Trigger buildByeName(MudSession session, String triggerName){
         Map<String,TriggerConfigEntry> trggerMapForCurrentSession = this.triggerMap.get(session.getSessionId());
         if(trggerMapForCurrentSession == null){
             return null;
@@ -44,12 +47,12 @@ public class TriggerFactory {
     }
    
 
-    public Trigger build(MudSession session,TriggerConfigEntry cfgEntry){
+    public synchronized Trigger build(MudSession session,TriggerConfigEntry cfgEntry){
         String trggerName = cfgEntry.getName();
         String triggerTypeStr = cfgEntry.getType();
         MatcherAndActionConfigEntry actionEntry = cfgEntry.getAction();
         MatcherAndActionConfigEntry matcherEntry = cfgEntry.getMatcher();
-        Integer remainningCount = cfgEntry.getRemainningCount();
+        Integer remainingCount = cfgEntry.getRemainingCount();
 
 
         IMatcher matcher =  SpringBeanUtil.getBean("MATCHER_" + matcherEntry.getType(),IMatcher.class);
@@ -70,7 +73,7 @@ public class TriggerFactory {
        }
 
 
-        Trigger trigger = new Trigger(session,triggerType,trggerName,matcher, action,remainningCount);
+        Trigger trigger = new Trigger(session,triggerType,trggerName,matcher, action,remainingCount);
         trigger.setSync(cfgEntry.isSync());
         trigger.setUnique(cfgEntry.isUnique());
         trigger.setAutoRegister(cfgEntry.isAutoRegister());
@@ -78,9 +81,12 @@ public class TriggerFactory {
 
     }
 
-    public void load(MudSession session) {
+    public synchronized void reload(MudSession session) {
+        
         logger.info("Trigger init start....");
-        TriggerRegister triggerRegister = SpringBeanUtil.getBean(TriggerRegister.class);
+        this.triggers.clear();
+        this.triggerMap.clear();
+
         List<TriggerConfigEntry> triggersForCurrentSession = (List<TriggerConfigEntry> ) CustomCfgLoader.loadUIConfig("pkuxkx", "triggers",
                     new TypeReference<List<TriggerConfigEntry>>(){});
         this.triggers.put(session.getSessionId(),triggersForCurrentSession);
@@ -110,5 +116,27 @@ public class TriggerFactory {
         return triggers.get(session.getSessionId());
     }
 
+
+    public synchronized void save(  List<TriggerConfigEntry> configs) {
+
+        // 1. 保存配置文件
+
+        CustomCfgLoader.saveUIConfig(
+                "pkuxkx",
+                "triggers",
+                configs
+        );
+
+        // 2. 重新加载
+
+        for( String sessionId: triggers.keySet()){
+            MudSession session = MudSession.getSession(sessionId);
+            if(session == null){
+                continue;
+            }
+            reload(session);
+        }
+       
+    }
     
 }

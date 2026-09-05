@@ -8,7 +8,7 @@ import java.util.List;
 public record ZmudMenuNode(
     String title,
     ZmudMenuType type,
-    String itemWindow,
+    String menuDialog,
     List<ZmudMenuNode> children
 ) {
     // 可以在这里增加一个快速判断是否包含子项的辅助方法
@@ -21,7 +21,7 @@ public record ZmudMenuNode(
         return "ZmudMenuNode{" +
                 "title='" + title + '\'' +
                 ", type=" + type +
-                ", itemWindow='" + itemWindow + '\'' +
+                ", menuDialog='" + menuDialog + '\'' +
                 ", children=" + children +
                 '}';
     }

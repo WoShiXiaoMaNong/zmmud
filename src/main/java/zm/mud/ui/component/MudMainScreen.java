@@ -138,7 +138,7 @@ public class MudMainScreen extends JFrame {
         this.setLayout(new BorderLayout());
 
         // 1. 最上面：预留的 menu bar 留空
-        this.mudMenuBar = new MudMenuBar(this.globleCfg);
+        this.mudMenuBar = new MudMenuBar(this,this.globleCfg);
 
         // 2. 中间：Tab 管理组件（贴在顶部一行）
         tabbedPane = new javax.swing.JTabbedPane(javax.swing.JTabbedPane.TOP) {

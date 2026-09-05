@@ -96,7 +96,7 @@ public class MudSession {
 
     public void start() {
         this.client = ZmMud.context.getBean(MudClient.class,this);
-        this.triggerFactory.load(this);
+        this.triggerFactory.reload(this);
         boolean isConnected = client.connect(this.getHost(),this.getPort());
         if (!isConnected) {
             logger.error("Failed to connect to server");

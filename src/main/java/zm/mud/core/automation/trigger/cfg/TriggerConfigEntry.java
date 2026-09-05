@@ -3,7 +3,7 @@ package zm.mud.core.automation.trigger.cfg;
 public class TriggerConfigEntry {
     private String name;
     private String type;
-    private Integer remainningCount;
+    private Integer remainingCount;
     private MatcherAndActionConfigEntry matcher;
     private MatcherAndActionConfigEntry action;
 
@@ -64,11 +64,11 @@ public class TriggerConfigEntry {
     public void setType(String type) {
         this.type = type;
     }
-    public Integer getRemainningCount() {
-        return remainningCount;
+    public Integer getRemainingCount() {
+        return remainingCount;
     }
-    public void setRemainningCount(Integer remainningCount) {
-        this.remainningCount = remainningCount;
+    public void setRemainingCount(Integer remainingCount) {
+        this.remainingCount = remainingCount;
     }
     public MatcherAndActionConfigEntry getMatcher() {
         return matcher;
