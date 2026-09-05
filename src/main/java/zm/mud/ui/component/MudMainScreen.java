@@ -31,6 +31,7 @@ import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.ui.component.image.ImageInfo;
 import zm.mud.ui.component.image.MudImgIcon;
+import zm.mud.ui.component.menu.MudMenuBar;
 import zm.mud.ui.processor.MsgPrintProcessor;
 import zm.mud.utils.SpringBeanUtil;
 
@@ -43,6 +44,8 @@ public class MudMainScreen extends JFrame {
     private ZmMudUI ui;
 
     private JTabbedPane tabbedPane;
+
+    private MudMenuBar mudMenuBar;
 
     private volatile String selectedSession;
 
@@ -135,6 +138,7 @@ public class MudMainScreen extends JFrame {
         this.setLayout(new BorderLayout());
 
         // 1. 最上面：预留的 menu bar 留空
+        this.mudMenuBar = new MudMenuBar(this.globleCfg);
 
         // 2. 中间：Tab 管理组件（贴在顶部一行）
         tabbedPane = new javax.swing.JTabbedPane(javax.swing.JTabbedPane.TOP) {
@@ -174,6 +178,7 @@ public class MudMainScreen extends JFrame {
         tabbedPane.setPreferredSize(new Dimension(dimension));
         tabbedPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
 
+        this.add(mudMenuBar, BorderLayout.NORTH);
         this.add(tabbedPane, BorderLayout.CENTER);
     }
 

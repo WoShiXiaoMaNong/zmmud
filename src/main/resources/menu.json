@@ -1,0 +1,41 @@
+{
+    "menus":[
+  {
+    "title": "连接(C)",
+    "type": "menu",
+    "itemWindow": "",
+    "children": [
+      { "title": "重新连接", "type": "menuItem", "itemWindow": "zm.mud.ui.component.menu.setting.Trigger" },
+      { "title": "断开连接", "type": "menuItem", "itemWindow": "zm.mud.ui.component.menu.setting.Trigger" }
+    ]
+  },
+  {
+    "title": "设置(S)",
+    "type": "menu",
+    "itemWindow": "",
+    "children": [
+      { "title": "触发器 (Trigger)", "type": "menuItem", "itemWindow": "zm.mud.ui.component.menu.setting.Trigger" },
+      { "title": "别名 (Alias)", "type": "menuItem", "itemWindow": "zm.mud.ui.component.menu.setting.Trigger" },
+      { "title": "宏设置 (Macro)", "type": "menuItem", "itemWindow": "zm.mud.ui.component.menu.setting.Trigger" },
+      { "title": "", "type": "separator", "itemWindow": "" },
+      {
+        "title": "高级设置",
+        "type": "menu",
+        "itemWindow": "",
+        "children": [
+          { "title": "脚本编辑器", "type": "menuItem", "itemWindow": "zm.mud.ui.component.menu.setting.Trigger" },
+          { "title": "变量管理", "type": "menuItem", "itemWindow": "zm.mud.ui.component.menu.setting.Trigger" }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "帮助(H)",
+    "type": "menu",
+    "itemWindow": "",
+    "children": [
+      { "title": "关于 Zm Mud", "type": "menuItem", "itemWindow": "zm.mud.ui.component.menu.setting.Trigger" }
+    ]
+  }
+]
+}

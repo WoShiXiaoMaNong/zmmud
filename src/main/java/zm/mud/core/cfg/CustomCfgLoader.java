@@ -17,10 +17,10 @@ import com.alibaba.fastjson2.TypeReference;
 public class CustomCfgLoader {
     private static final Logger logger = LogManager.getLogger(CustomCfgLoader.class);
 
-    public static Object loadUIConfig(String mudName /* {mudName}.json */, String key, TypeReference<?> type) {
+    public static Object loadUIConfig(String jsonFileName /* {mudName}.json */, String key, TypeReference<?> type) {
         try {
             // 1. 获取 resources 下的文件输入流
-            String configFileName = mudName + ".json";
+            String configFileName = jsonFileName + ".json";
             logger.info("Start to load UI config info from " + configFileName);
             ClassPathResource resource = new ClassPathResource(configFileName);
 
