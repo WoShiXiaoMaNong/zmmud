@@ -634,7 +634,7 @@ public class Trigger extends AbsZmMudDialog {
 
                 panel.setBorder(
                                 BorderFactory.createTitledBorder(
-                                                "Matcher"));
+                                                "Matcher 匹配器"));
 
                 JPanel top = new JPanel(
                                 new GridBagLayout());
@@ -678,7 +678,7 @@ public class Trigger extends AbsZmMudDialog {
 
                 expressionPanel.add(
                                 new JLabel(
-                                                "Expression:"),
+                                                "Expression 表达式:"),
                                 BorderLayout.NORTH);
 
                 taMatcherExpression = new JTextArea(
@@ -741,7 +741,7 @@ public class Trigger extends AbsZmMudDialog {
 
                 panel.setBorder(
                                 BorderFactory.createTitledBorder(
-                                                "Action"));
+                                                "Action 动作器"));
 
                 JPanel top = new JPanel(
                                 new BorderLayout(
@@ -781,7 +781,7 @@ public class Trigger extends AbsZmMudDialog {
 
                 expressionPanel.add(
                                 new JLabel(
-                                                "Expression:"),
+                                                "Expression表达式:"),
                                 BorderLayout.NORTH);
 
                 taActionExpression = new JTextArea();
