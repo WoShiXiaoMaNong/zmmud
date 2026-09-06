@@ -33,6 +33,11 @@ zhongming139@126.com
 
 <img width="1241" height="945" alt="pkuxkx" src="https://github.com/user-attachments/assets/51275cc3-4835-46f7-9903-4e8487c5764c" />
 
+---
+
+<img width="1220" height="843" alt="image" src="https://github.com/user-attachments/assets/cdd0926d-8aa5-4ac1-b5e1-ed99a1e6ff76" />
+
+
 ## ⚙️ 配置说明
 
 项目支持 YAML 配置：
