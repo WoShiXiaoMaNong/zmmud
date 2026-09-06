@@ -1,4 +1,4 @@
-package zm.mud.ui.component.menu.setting;
+package zm.mud.ui.component.menu.setting.trigger;
 
 import java.util.ArrayList;
 import java.util.List;
