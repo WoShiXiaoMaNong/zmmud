@@ -87,5 +87,12 @@ public class TriggerConfigEntry {
         this.sync = sync;
     }
 
+    @Override
+    public String toString() {
+        return "TriggerConfigEntry [name=" + name + ", type=" + type + ", remainingCount=" + remainingCount
+                + ", matcher=" + matcher + ", action=" + action + ", sync=" + sync + ", unique=" + unique
+                + ", autoRegister=" + autoRegister + "]";
+    }
+
     
 }

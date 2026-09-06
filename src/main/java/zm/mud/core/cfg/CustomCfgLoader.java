@@ -57,7 +57,9 @@ public class CustomCfgLoader {
     }
 
     public static void saveUIConfig(String jsonFileName /* {mudName}.json */, String key, List<TriggerConfigEntry> configs) {
-   
+        for(TriggerConfigEntry entry : configs){
+            logger.error(entry);
+        }
         logger.error("Unimplemented method 'saveUIConfig'");
     }
 }

@@ -18,6 +18,10 @@ public class MatcherAndActionConfigEntry {
     public void setParams(Map<String, Object> params) {
         this.params = params;
     }
+    @Override
+    public String toString() {
+        return "MatcherAndActionConfigEntry [type=" + type + ", expression=" + expression + ", params=" + params + "]";
+    }
 
     
 

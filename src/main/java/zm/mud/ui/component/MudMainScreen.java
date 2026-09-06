@@ -39,6 +39,8 @@ public class MudMainScreen extends JFrame {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(MudMainScreen.class);
 
+    private static final String CURRENT_MUD_WORLD_CODE = "pkuxkx";
+
     private GlobalCfg globleCfg;
 
     private ZmMudUI ui;
@@ -114,7 +116,7 @@ public class MudMainScreen extends JFrame {
     }
 
     private void createNewSession(String title,String host,int port) {
-        MudSession session = MudSession.newSession(host,port);
+        MudSession session = MudSession.newSession(host,port,CURRENT_MUD_WORLD_CODE);
         session.setSessionName(title);
         this.addNewTab(session);
         session.start();

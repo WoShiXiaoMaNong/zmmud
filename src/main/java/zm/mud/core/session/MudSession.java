@@ -20,6 +20,8 @@ import zm.mud.utils.SpringBeanUtil;
 public class MudSession {
     private static final Logger logger = LogManager.getLogger(MudSession.class);
 
+    private String mudWorldCode;
+
     private String host;
     private int port;
 
@@ -42,11 +44,21 @@ public class MudSession {
     private static final Map<String, MudSession> allSessionMap = new HashMap<>();
     private static final Lock sessionMapLock = new ReentrantLock();
 
-    public static MudSession newSession(String host,int port) {
+    /**
+     * <pre>
+     * mudWorldCode:用于唯一确定一套mud游戏世界的配置相关文件，例如 trigger配置，timer配置等
+     * </pre>
+     * @param host
+     * @param port
+     * @param mudWorldCode
+     * @return
+     */
+    public static MudSession newSession(String host,int port,String mudWorldCode) {
         try {
             sessionMapLock.tryLock();
-            MudSession session = new MudSession(UuidUtil.getTimeBasedUuid().toString(),host,port);
+            MudSession session = new MudSession(UuidUtil.getTimeBasedUuid().toString(),host,port,mudWorldCode);
             allSessionMap.put(session.getSessionId(), session);
+            
             return session;
         } catch (Exception e) {
             logger.error("Session start error!", e);
@@ -60,7 +72,7 @@ public class MudSession {
         return allSessionMap;
     }
 
-    private MudSession(String sessionId,String host,int port) {
+    private MudSession(String sessionId,String host,int port,String mudWorldCode) {
         this.sessionId = sessionId;
         this.oubMsgService = SpringBeanUtil.getBean(OubMsgService.class);
         this.triggerFactory = SpringBeanUtil.getBean(TriggerFactory.class);
@@ -68,11 +80,16 @@ public class MudSession {
         this.gmcpContext = new GMCPContext();
         this.host = host;
         this.port = port;
+        this.mudWorldCode = mudWorldCode;
         this.status = SessionStatus.CREATED;
         this.globalCfg = SpringBeanUtil.getBean(GlobalCfg.class);
     }
 
         
+
+    public String getMudWorldCode() {
+        return mudWorldCode;
+    }
 
     public GlobalCfg getGlobalCfg() {
         return globalCfg;

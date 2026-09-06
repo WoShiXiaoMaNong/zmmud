@@ -1,12 +1,36 @@
 package zm.mud.ui.component.menu.setting;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ListSelectionEvent;
 
 import org.apache.logging.log4j.LogManager;
@@ -25,13 +49,32 @@ public class Trigger extends AbsZmMudDialog {
         private static final Logger logger = LogManager.getLogger(Trigger.class);
 
         // =========================================================
+        // MUD World
+        // =========================================================
+
+        /**
+         * MUD World 下拉框
+         *
+         * Key = mudWorldCode
+         * Value = MUD World 显示名称
+         */
+        private JComboBox<KeyValuePair<String, String>> cbMudWorld;
+
+        /**
+         * 当前选择的 MUD World Code
+         */
+        private String currentMudWorldCode;
+
+        // =========================================================
         // 左侧 Trigger
         // =========================================================
 
         private JList<TriggerConfigEntry> triggerList;
+
         private DefaultListModel<TriggerConfigEntry> listModel;
 
         private JButton btnAdd;
+
         private JButton btnDelete;
 
         private TriggerConfigEntry currentTrigger;
@@ -76,47 +119,249 @@ public class Trigger extends AbsZmMudDialog {
 
         private JCheckBox chkAutoRegister;
 
+     
+        // =========================================================
+        // Constructor
+        // =========================================================
+
         public Trigger(Frame owner, String title) {
+
                 super(owner, title);
-                 this.setSize(1100, 500);     
+
+                this.setSize(950, 550);
 
         }
 
+        // =========================================================
+        // Main UI
+        // =========================================================
+
         @Override
         protected JPanel getContentPanelUi() {
-                JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+
+                JPanel mainPanel = new JPanel(
+                                new BorderLayout(
+                                                10,
+                                                10));
 
                 mainPanel.setBorder(
                                 BorderFactory.createEmptyBorder(
-                                                10, 10, 10, 10));
+                                                10,
+                                                10,
+                                                10,
+                                                10));
+
+                // -----------------------------------------------------
+                // 顶部 MUD World
+                // -----------------------------------------------------
 
                 mainPanel.add(
+                                createMudWorldPanel(),
+                                BorderLayout.NORTH);
+
+                // -----------------------------------------------------
+                // 中间内容
+                // -----------------------------------------------------
+
+                JPanel contentPanel = new JPanel(
+                                new BorderLayout(
+                                                10,
+                                                10));
+
+                contentPanel.add(
                                 createLeftPanel(),
                                 BorderLayout.WEST);
 
-                mainPanel.add(
+                contentPanel.add(
                                 createRightPanel(),
                                 BorderLayout.CENTER);
 
-                loadTriggerConfigData();
+                mainPanel.add(
+                                contentPanel,
+                                BorderLayout.CENTER);
+
+                /*
+                 * 注意：
+                 *
+                 * 初始化时不加载 Trigger 数据。
+                 *
+                 * 原来的：
+                 *
+                 * loadTriggerConfigData();
+                 *
+                 * 已经删除。
+                 *
+                 * 只有选择 MUD World 后才加载。
+                 */
 
                 return mainPanel;
         }
 
         // =========================================================
-        // 左侧
+        // MUD World
+        // =========================================================
+
+        private JPanel createMudWorldPanel() {
+
+                JPanel panel = new JPanel(
+                                new BorderLayout(
+                                                8,
+                                                5));
+
+                panel.setBorder(
+                                BorderFactory.createTitledBorder(
+                                                "MUD 配置"));
+
+                panel.add(
+                                new JLabel("选择配置"),
+                                BorderLayout.WEST);
+
+                cbMudWorld = new JComboBox<>();
+
+                /*
+                 * 加载 MUD World 列表。
+                 *
+                 * 注意：
+                 * 这里只加载 World 列表，
+                 * 不加载 Trigger。
+                 */
+                loadMudWorlds();
+
+                /*
+                 * World 选择变化时加载对应 Trigger。
+                 */
+                cbMudWorld.addActionListener(
+                                e -> onMudWorldChanged());
+
+                panel.add(
+                                cbMudWorld,
+                                BorderLayout.CENTER);
+
+                return panel;
+        }
+
+        // =========================================================
+        // 加载 MUD World 列表
+        // =========================================================
+
+        private void loadMudWorlds() {
+
+                cbMudWorld.removeAllItems();
+
+                /*
+                 * key = mudWorldCode
+                 * value = MUD World 名称
+                 */
+                List<KeyValuePair<String, String>> mudWorlds = TriggerService.getMudWorlds();
+
+                if (mudWorlds == null
+                                || mudWorlds.isEmpty()) {
+
+                        return;
+                }
+
+                for (KeyValuePair<String, String> mudWorld : mudWorlds) {
+
+                        cbMudWorld.addItem(
+                                        mudWorld);
+                }
+
+                /*
+                 * 初始化时不要主动选择第一个。
+                 *
+                 * 如果自动选择第一个，
+                 * JComboBox 会触发 ActionListener，
+                 * 从而提前加载 Trigger。
+                 */
+                cbMudWorld.setSelectedIndex(-1);
+        }
+
+        // =========================================================
+        // MUD World 改变
+        // =========================================================
+
+        private void onMudWorldChanged() {
+
+                KeyValuePair<String, String> selectedWorld = (KeyValuePair<String, String>) cbMudWorld
+                                .getSelectedItem();
+
+                if (selectedWorld == null) {
+                        return;
+                }
+
+                String mudWorldCode = selectedWorld.getKey();
+
+                if (mudWorldCode == null
+                                || mudWorldCode.trim().isEmpty()) {
+
+                        return;
+                }
+
+                /*
+                 * 如果选择的还是当前 World，
+                 * 不需要重新加载。
+                 */
+                if (mudWorldCode.equals(
+                                currentMudWorldCode)) {
+
+                        return;
+                }
+
+                /*
+                 * 如果之前有正在编辑的 Trigger，
+                 * 先把 UI 数据保存回 POJO。
+                 */
+                saveCurrentTrigger();
+
+                /*
+                 * 更新当前 World。
+                 */
+                currentMudWorldCode = mudWorldCode;
+
+                /*
+                 * 根据 mudWorldCode 加载 Trigger。
+                 */
+                loadTriggerConfigData(
+                                mudWorldCode);
+        }
+
+        // =========================================================
+        // 保存当前 Trigger
+        // =========================================================
+
+        private void saveCurrentTrigger() {
+
+                if (currentTrigger == null) {
+                        return;
+                }
+
+                saveFormToConfig(
+                                currentTrigger);
+        }
+
+        // =========================================================
+        // 左侧 Trigger
         // =========================================================
 
         private JPanel createLeftPanel() {
 
-                JPanel panel = new JPanel(new BorderLayout(5, 5));
+                JPanel panel = new JPanel(
+                                new BorderLayout(
+                                                5,
+                                                5));
 
+                panel.setBorder(
+                                BorderFactory.createTitledBorder(
+                                                "触发器列表"));                               
                 panel.setPreferredSize(
-                                new Dimension(220, 0));
+                                new Dimension(
+                                                180,
+                                                0));
 
                 listModel = new DefaultListModel<>();
 
-                triggerList = new JList<>(listModel);
+                triggerList = new JList<>(
+                                listModel);
 
                 triggerList.setSelectionMode(
                                 ListSelectionModel.SINGLE_SELECTION);
@@ -159,11 +404,20 @@ public class Trigger extends AbsZmMudDialog {
                                 this::onTriggerSelected);
 
                 panel.add(
-                                new JScrollPane(triggerList),
+                                new JScrollPane(
+                                                triggerList),
                                 BorderLayout.CENTER);
 
+                // -----------------------------------------------------
+                // Buttons
+                // -----------------------------------------------------
+
                 JPanel buttonPanel = new JPanel(
-                                new GridLayout(1, 2, 5, 5));
+                                new GridLayout(
+                                                1,
+                                                2,
+                                                5,
+                                                5));
 
                 btnAdd = new JButton("添加");
 
@@ -175,8 +429,11 @@ public class Trigger extends AbsZmMudDialog {
                 btnDelete.addActionListener(
                                 e -> deleteTrigger());
 
-                buttonPanel.add(btnAdd);
-                buttonPanel.add(btnDelete);
+                buttonPanel.add(
+                                btnAdd);
+
+                buttonPanel.add(
+                                btnDelete);
 
                 panel.add(
                                 buttonPanel,
@@ -191,13 +448,17 @@ public class Trigger extends AbsZmMudDialog {
 
         private JPanel createRightPanel() {
 
-                JPanel panel = new JPanel(new BorderLayout(8, 8));
+                JPanel panel = new JPanel(
+                                new BorderLayout(
+                                                8,
+                                                8));
 
                 // -----------------------------------------------------
                 // 基础配置
                 // -----------------------------------------------------
 
-                JPanel basicPanel = new JPanel(new GridBagLayout());
+                JPanel basicPanel = new JPanel(
+                                new GridBagLayout());
 
                 basicPanel.setBorder(
                                 BorderFactory.createTitledBorder(
@@ -205,7 +466,9 @@ public class Trigger extends AbsZmMudDialog {
 
                 GridBagConstraints gbc = createGbc();
 
+                // -----------------------------------------------------
                 // Name
+                // -----------------------------------------------------
 
                 addLabel(
                                 basicPanel,
@@ -223,7 +486,9 @@ public class Trigger extends AbsZmMudDialog {
                                 0,
                                 txtName);
 
+                // -----------------------------------------------------
                 // Trigger Type
+                // -----------------------------------------------------
 
                 addLabel(
                                 basicPanel,
@@ -233,8 +498,11 @@ public class Trigger extends AbsZmMudDialog {
                                 "Trigger 类型:");
 
                 cbTriggerType = new JComboBox<>();
-                for(KeyValuePair<String,String> tirggerType: TriggerService.getTriggerTypes()){
-                        cbTriggerType.addItem(tirggerType);
+
+                for (KeyValuePair<String, String> triggerType : TriggerService.getTriggerTypes()) {
+
+                        cbTriggerType.addItem(
+                                        triggerType);
                 }
 
                 addComponent(
@@ -244,7 +512,9 @@ public class Trigger extends AbsZmMudDialog {
                                 1,
                                 cbTriggerType);
 
+                // -----------------------------------------------------
                 // Remaining Count
+                // -----------------------------------------------------
 
                 addLabel(
                                 basicPanel,
@@ -268,7 +538,7 @@ public class Trigger extends AbsZmMudDialog {
                                 spRemainingCount);
 
                 // -----------------------------------------------------
-                // Trigger Options
+                // Options
                 // -----------------------------------------------------
 
                 addLabel(
@@ -288,11 +558,17 @@ public class Trigger extends AbsZmMudDialog {
 
                 chkUnique = new JCheckBox("Unique");
 
-                chkAutoRegister = new JCheckBox("Auto Register");
+                chkAutoRegister = new JCheckBox(
+                                "Auto Register");
 
-                optionsPanel.add(chkSync);
-                optionsPanel.add(chkUnique);
-                optionsPanel.add(chkAutoRegister);
+                optionsPanel.add(
+                                chkSync);
+
+                optionsPanel.add(
+                                chkUnique);
+
+                optionsPanel.add(
+                                chkAutoRegister);
 
                 addComponent(
                                 basicPanel,
@@ -314,36 +590,33 @@ public class Trigger extends AbsZmMudDialog {
                 JPanel actionPanel = createActionPanel();
 
                 // -----------------------------------------------------
-                // 顶部
+                // Top
                 // -----------------------------------------------------
 
                 JPanel topPanel = new JPanel(
-                                new GridLayout(1, 2, 8, 8));
+                                new GridLayout(
+                                                1,
+                                                2,
+                                                8,
+                                                8));
 
-                topPanel.add(basicPanel);
-                topPanel.add(matcherPanel);
+                topPanel.add(
+                                basicPanel);
+
+                topPanel.add(
+                                matcherPanel);
 
                 panel.add(
                                 topPanel,
                                 BorderLayout.NORTH);
 
                 // -----------------------------------------------------
-                // 中间 Action
+                // Action
                 // -----------------------------------------------------
 
                 panel.add(
                                 actionPanel,
                                 BorderLayout.CENTER);
-
-                // -----------------------------------------------------
-                // 底部 Options
-                // -----------------------------------------------------
-
-                // JPanel optionPanel = createOptionPanel();
-
-                // panel.add(
-                // optionPanel,
-                // BorderLayout.SOUTH);
 
                 return panel;
         }
@@ -354,13 +627,17 @@ public class Trigger extends AbsZmMudDialog {
 
         private JPanel createMatcherPanel() {
 
-                JPanel panel = new JPanel(new BorderLayout(5, 5));
+                JPanel panel = new JPanel(
+                                new BorderLayout(
+                                                5,
+                                                5));
 
                 panel.setBorder(
                                 BorderFactory.createTitledBorder(
                                                 "Matcher"));
 
-                JPanel top = new JPanel(new GridBagLayout());
+                JPanel top = new JPanel(
+                                new GridBagLayout());
 
                 GridBagConstraints gbc = createGbc();
 
@@ -374,7 +651,9 @@ public class Trigger extends AbsZmMudDialog {
                 cbMatcherType = new JComboBox<>();
 
                 for (KeyValuePair<String, String> matcherItem : TriggerService.getMathers()) {
-                        cbMatcherType.addItem(matcherItem);
+
+                        cbMatcherType.addItem(
+                                        matcherItem);
                 }
 
                 addComponent(
@@ -388,15 +667,26 @@ public class Trigger extends AbsZmMudDialog {
                                 top,
                                 BorderLayout.NORTH);
 
-                JPanel expressionPanel = new JPanel(new BorderLayout(5, 5));
+                // -----------------------------------------------------
+                // Expression
+                // -----------------------------------------------------
+
+                JPanel expressionPanel = new JPanel(
+                                new BorderLayout(
+                                                5,
+                                                5));
 
                 expressionPanel.add(
-                                new JLabel("Expression:"),
+                                new JLabel(
+                                                "Expression:"),
                                 BorderLayout.NORTH);
 
-                taMatcherExpression = new JTextArea(4, 30);
+                taMatcherExpression = new JTextArea(
+                                4,
+                                30);
 
-                taMatcherExpression.setLineWrap(false);
+                taMatcherExpression.setLineWrap(
+                                false);
 
                 taMatcherExpression.setFont(
                                 new Font(
@@ -413,20 +703,24 @@ public class Trigger extends AbsZmMudDialog {
                                 expressionPanel,
                                 BorderLayout.CENTER);
 
-                matcherParamsPanel = new JPanel();
+                // -----------------------------------------------------
+                // Params
+                // -----------------------------------------------------
 
-                matcherParamsPanel.setLayout(
-                                new BoxLayout(
-                                                matcherParamsPanel,
-                                                BoxLayout.Y_AXIS));
+                // matcherParamsPanel = new JPanel();
 
-                matcherParamsPanel.setBorder(
-                                BorderFactory.createTitledBorder(
-                                                "Params"));
+                // matcherParamsPanel.setLayout(
+                //                 new BoxLayout(
+                //                                 matcherParamsPanel,
+                //                                 BoxLayout.Y_AXIS));
 
-                panel.add(
-                                matcherParamsPanel,
-                                BorderLayout.SOUTH);
+                // matcherParamsPanel.setBorder(
+                //                 BorderFactory.createTitledBorder(
+                //                                 "Params"));
+
+                // panel.add(
+                //                 matcherParamsPanel,
+                //                 BorderLayout.SOUTH);
 
                 cbMatcherType.addActionListener(
                                 e -> rebuildMatcherParams());
@@ -440,22 +734,32 @@ public class Trigger extends AbsZmMudDialog {
 
         private JPanel createActionPanel() {
 
-                JPanel panel = new JPanel(new BorderLayout(5, 5));
+                JPanel panel = new JPanel(
+                                new BorderLayout(
+                                                5,
+                                                5));
 
                 panel.setBorder(
                                 BorderFactory.createTitledBorder(
                                                 "Action"));
 
-                JPanel top = new JPanel(new BorderLayout(5, 5));
+                JPanel top = new JPanel(
+                                new BorderLayout(
+                                                5,
+                                                5));
 
                 top.add(
                                 new JLabel("类型:"),
                                 BorderLayout.WEST);
-                
-                List<KeyValuePair<String, String>> actionTeypes = TriggerService.getActionTypes();
+
+                List<KeyValuePair<String, String>> actionTypes = TriggerService.getActionTypes();
+
                 cbActionType = new JComboBox<>();
-                for(KeyValuePair<String, String> actionType : actionTeypes ){
-                        cbActionType.addItem(actionType);
+
+                for (KeyValuePair<String, String> actionType : actionTypes) {
+
+                        cbActionType.addItem(
+                                        actionType);
                 }
 
                 top.add(
@@ -466,15 +770,24 @@ public class Trigger extends AbsZmMudDialog {
                                 top,
                                 BorderLayout.NORTH);
 
-                JPanel expressionPanel = new JPanel(new BorderLayout(5, 5));
+                // -----------------------------------------------------
+                // Expression
+                // -----------------------------------------------------
+
+                JPanel expressionPanel = new JPanel(
+                                new BorderLayout(
+                                                5,
+                                                5));
 
                 expressionPanel.add(
-                                new JLabel("Expression:"),
+                                new JLabel(
+                                                "Expression:"),
                                 BorderLayout.NORTH);
 
                 taActionExpression = new JTextArea();
 
-                taActionExpression.setLineWrap(false);
+                taActionExpression.setLineWrap(
+                                false);
 
                 taActionExpression.setFont(
                                 new Font(
@@ -491,20 +804,24 @@ public class Trigger extends AbsZmMudDialog {
                                 expressionPanel,
                                 BorderLayout.CENTER);
 
-                actionParamsPanel = new JPanel();
+                // -----------------------------------------------------
+                // Params
+                // -----------------------------------------------------
 
-                actionParamsPanel.setLayout(
-                                new BoxLayout(
-                                                actionParamsPanel,
-                                                BoxLayout.Y_AXIS));
+                // actionParamsPanel = new JPanel();
 
-                actionParamsPanel.setBorder(
-                                BorderFactory.createTitledBorder(
-                                                "Params"));
+                // actionParamsPanel.setLayout(
+                //                 new BoxLayout(
+                //                                 actionParamsPanel,
+                //                                 BoxLayout.Y_AXIS));
 
-                panel.add(
-                                actionParamsPanel,
-                                BorderLayout.SOUTH);
+                // actionParamsPanel.setBorder(
+                //                 BorderFactory.createTitledBorder(
+                //                                 "Params"));
+
+                // panel.add(
+                //                 actionParamsPanel,
+                //                 BorderLayout.SOUTH);
 
                 cbActionType.addActionListener(
                                 e -> rebuildActionParams());
@@ -518,37 +835,33 @@ public class Trigger extends AbsZmMudDialog {
 
         private void rebuildMatcherParams() {
 
-                matcherParamsPanel.removeAll();
+                // matcherParamsPanel.removeAll();
 
-                KeyValuePair<String, String> selectedItem = (KeyValuePair<String, String>) cbMatcherType
-                                .getSelectedItem();
-                String type = selectedItem.getKey();
-                /*
-                 * 这里根据你的 Matcher 实际实现继续扩展。
-                 *
-                 * 例如：
-                 *
-                 * Regex:
-                 * ignoreCase
-                 *
-                 * Include:
-                 * ignoreCase
-                 *
-                 * 其他 Matcher:
-                 * 暂时没有参数
-                 */
+                // KeyValuePair<String, String> selectedItem = (KeyValuePair<String, String>) cbMatcherType
+                //                 .getSelectedItem();
 
-                if ("Regex".equals(type)) {
+                // if (selectedItem == null) {
 
-                        JCheckBox ignoreCase = new JCheckBox("ignoreCase");
+                //         matcherParamsPanel.revalidate();
+                //         matcherParamsPanel.repaint();
 
-                        matcherParamsPanel.add(
-                                        ignoreCase);
-                }
+                //         return;
+                // }
 
-                matcherParamsPanel.revalidate();
+                // String type = selectedItem.getKey();
 
-                matcherParamsPanel.repaint();
+                // if ("Regex".equals(type)) {
+
+                //         JCheckBox ignoreCase = new JCheckBox(
+                //                         "ignoreCase");
+
+                //         matcherParamsPanel.add(
+                //                         ignoreCase);
+                // }
+
+                // matcherParamsPanel.revalidate();
+
+                // matcherParamsPanel.repaint();
         }
 
         // =========================================================
@@ -557,50 +870,43 @@ public class Trigger extends AbsZmMudDialog {
 
         private void rebuildActionParams() {
 
-                actionParamsPanel.removeAll();
-                String type =  null;
-                KeyValuePair<String,String> selectedActionType = (KeyValuePair<String, String>) cbActionType.getSelectedItem();
-                if( selectedActionType != null){
-                        type = selectedActionType.getKey();
-                }
-               
+                // actionParamsPanel.removeAll();
 
-                /*
-                 * 根据 Action 实现动态生成参数。
-                 *
-                 * 例如：
-                 *
-                 * Lua:
-                 * timeout
-                 *
-                 * Command:
-                 * delay
-                 *
-                 * Java:
-                 * class
-                 */
+                // String type = null;
 
-                if ("Lua".equals(type)) {
+                // KeyValuePair<String, String> selectedActionType = (KeyValuePair<String, String>) cbActionType
+                //                 .getSelectedItem();
 
-                        JTextField timeout = new JTextField();
+                // if (selectedActionType != null) {
 
-                        JPanel row = new JPanel(
-                                        new BorderLayout(5, 5));
+                //         type = selectedActionType.getKey();
+                // }
 
-                        row.add(
-                                        new JLabel("timeout:"),
-                                        BorderLayout.WEST);
+                // if ("Lua".equals(type)) {
 
-                        row.add(
-                                        timeout,
-                                        BorderLayout.CENTER);
+                //         JTextField timeout = new JTextField();
 
-                        actionParamsPanel.add(row);
-                }
+                //         JPanel row = new JPanel(
+                //                         new BorderLayout(
+                //                                         5,
+                //                                         5));
 
-                actionParamsPanel.revalidate();
+                //         row.add(
+                //                         new JLabel(
+                //                                         "timeout:"),
+                //                         BorderLayout.WEST);
 
-                actionParamsPanel.repaint();
+                //         row.add(
+                //                         timeout,
+                //                         BorderLayout.CENTER);
+
+                //         actionParamsPanel.add(
+                //                         row);
+                // }
+
+                // actionParamsPanel.revalidate();
+
+                // actionParamsPanel.repaint();
         }
 
         // =========================================================
@@ -620,9 +926,11 @@ public class Trigger extends AbsZmMudDialog {
                         return;
                 }
 
-                // 保存之前正在编辑的 Trigger
-
-                if (currentTrigger != null) {
+                /*
+                 * 保存之前正在编辑的 Trigger
+                 */
+                if (currentTrigger != null
+                                && currentTrigger != selected) {
 
                         saveFormToConfig(
                                         currentTrigger);
@@ -649,7 +957,9 @@ public class Trigger extends AbsZmMudDialog {
                                 nullToEmpty(
                                                 config.getName()));
 
-                cbTriggerType.setSelectedItem(TriggerService.getTriggerType(config.getType()));
+                cbTriggerType.setSelectedItem(
+                                TriggerService.getTriggerType(
+                                                config.getType()));
 
                 spRemainingCount.setValue(
                                 config.getRemainingCount() == null
@@ -677,14 +987,21 @@ public class Trigger extends AbsZmMudDialog {
 
                 if (matcher != null) {
 
-                        cbMatcherType.setSelectedItem(TriggerService.getMatcherType(matcher.getType()) );
+                        cbMatcherType.setSelectedItem(
+                                        TriggerService.getMatcherType(
+                                                        matcher.getType()));
 
                         taMatcherExpression.setText(
                                         nullToEmpty(
                                                         matcher.getExpression()));
+
                 } else {
 
-                        cbMatcherType.setSelectedIndex(0);
+                        if (cbMatcherType.getItemCount() > 0) {
+
+                                cbMatcherType.setSelectedIndex(
+                                                0);
+                        }
 
                         taMatcherExpression.setText("");
                 }
@@ -697,19 +1014,28 @@ public class Trigger extends AbsZmMudDialog {
 
                 if (action != null) {
 
-                        cbActionType.setSelectedItem(TriggerService.getActionType(action.getType()));
+                        cbActionType.setSelectedItem(
+                                        TriggerService.getActionType(
+                                                        action.getType()));
 
                         taActionExpression.setText(
                                         nullToEmpty(
                                                         action.getExpression()));
+
                 } else {
 
-                        cbActionType.setSelectedIndex(0);
+                        if (cbActionType.getItemCount() > 0) {
+
+                                cbActionType.setSelectedIndex(
+                                                0);
+                        }
 
                         taActionExpression.setText("");
                 }
 
-                // 重新生成参数 UI
+                // -----------------------------------------------------
+                // 重建参数 UI
+                // -----------------------------------------------------
 
                 rebuildMatcherParams();
 
@@ -727,11 +1053,16 @@ public class Trigger extends AbsZmMudDialog {
                 // 基础配置
                 // -----------------------------------------------------
 
-                config.setName(txtName.getText().trim());
+                config.setName(
+                                txtName.getText().trim());
 
-                KeyValuePair<String,String> selectedTriggerType = (KeyValuePair<String, String>) cbTriggerType.getSelectedItem();
-                if(selectedTriggerType != null ){
-                        config.setType(selectedTriggerType.getKey());
+                KeyValuePair<String, String> selectedTriggerType = (KeyValuePair<String, String>) cbTriggerType
+                                .getSelectedItem();
+
+                if (selectedTriggerType != null) {
+
+                        config.setType(
+                                        selectedTriggerType.getKey());
                 }
 
                 config.setRemainingCount(
@@ -760,12 +1091,18 @@ public class Trigger extends AbsZmMudDialog {
 
                         matcher = new MatcherAndActionConfigEntry();
 
-                        config.setMatcher(matcher);
+                        config.setMatcher(
+                                        matcher);
                 }
 
-                KeyValuePair<String, String> selectedItem = (KeyValuePair<String, String>) cbMatcherType
+                KeyValuePair<String, String> selectedMatcherType = (KeyValuePair<String, String>) cbMatcherType
                                 .getSelectedItem();
-                matcher.setType(selectedItem.getKey());
+
+                if (selectedMatcherType != null) {
+
+                        matcher.setType(
+                                        selectedMatcherType.getKey());
+                }
 
                 matcher.setExpression(
                                 taMatcherExpression.getText());
@@ -783,13 +1120,18 @@ public class Trigger extends AbsZmMudDialog {
 
                         action = new MatcherAndActionConfigEntry();
 
-                        config.setAction(action);
+                        config.setAction(
+                                        action);
                 }
-                KeyValuePair<String,String> selectedActionType = (KeyValuePair<String, String>) cbActionType.getSelectedItem();
-                if( selectedActionType != null){
-                action.setType(selectedActionType.getKey());
+
+                KeyValuePair<String, String> selectedActionType = (KeyValuePair<String, String>) cbActionType
+                                .getSelectedItem();
+
+                if (selectedActionType != null) {
+
+                        action.setType(
+                                        selectedActionType.getKey());
                 }
-                
 
                 action.setExpression(
                                 taActionExpression.getText());
@@ -799,7 +1141,7 @@ public class Trigger extends AbsZmMudDialog {
         }
 
         // =========================================================
-        // Params
+        // Matcher Params
         // =========================================================
 
         private Map<String, Object> collectMatcherParams() {
@@ -809,14 +1151,11 @@ public class Trigger extends AbsZmMudDialog {
                 KeyValuePair<String, String> selectedItem = (KeyValuePair<String, String>) cbMatcherType
                                 .getSelectedItem();
 
-                String type = (String) selectedItem.getKey();
+                if (selectedItem == null) {
+                        return params;
+                }
 
-                /*
-                 * 这里暂时只是演示。
-                 *
-                 * 真正项目中应该根据你的 Matcher
-                 * 实现类定义参数。
-                 */
+                String type = selectedItem.getKey();
 
                 if ("Regex".equals(type)) {
 
@@ -831,11 +1170,20 @@ public class Trigger extends AbsZmMudDialog {
                 return params;
         }
 
+        // =========================================================
+        // Action Params
+        // =========================================================
+
         private Map<String, Object> collectActionParams() {
 
                 Map<String, Object> params = new LinkedHashMap<>();
-                KeyValuePair<String,String> selecteActionType = (KeyValuePair<String, String>) cbActionType.getSelectedItem();
-                String type = selecteActionType == null ? null : selecteActionType.getKey();
+
+                KeyValuePair<String, String> selectedActionType = (KeyValuePair<String, String>) cbActionType
+                                .getSelectedItem();
+
+                String type = selectedActionType == null
+                                ? null
+                                : selectedActionType.getKey();
 
                 if ("Lua".equals(type)) {
 
@@ -851,53 +1199,88 @@ public class Trigger extends AbsZmMudDialog {
         }
 
         // =========================================================
-        // 添加
+        // 添加 Trigger
         // =========================================================
 
         private void addTrigger() {
+
+                /*
+                 * 必须先选择 MUD World。
+                 */
+                if (currentMudWorldCode == null
+                                || currentMudWorldCode.trim().isEmpty()) {
+
+                        JOptionPane.showMessageDialog(
+                                        this,
+                                        "请先选择 MUD World。",
+                                        "提示",
+                                        JOptionPane.INFORMATION_MESSAGE);
+
+                        return;
+                }
 
                 TriggerConfigEntry config = new TriggerConfigEntry();
 
                 config.setName(
                                 "新 Trigger");
 
-                config.setType(TriggerType.INBOUNG_TRIGGER.getType());
+                config.setType(
+                                TriggerType.INBOUNG_TRIGGER.getType());
 
-                config.setRemainingCount(0);
+                config.setRemainingCount(
+                                0);
 
-                config.setSync(false);
+                config.setSync(
+                                false);
 
-                config.setUnique(false);
+                config.setUnique(
+                                false);
 
-                config.setAutoRegister(false);
+                config.setAutoRegister(
+                                false);
 
+                // -----------------------------------------------------
                 // 默认 Matcher
+                // -----------------------------------------------------
 
                 MatcherAndActionConfigEntry matcher = new MatcherAndActionConfigEntry();
 
-                matcher.setType("Regex");
+                matcher.setType(
+                                "Regex");
 
-                matcher.setExpression("");
+                matcher.setExpression(
+                                "");
 
                 matcher.setParams(
                                 new LinkedHashMap<>());
 
-                config.setMatcher(matcher);
+                config.setMatcher(
+                                matcher);
 
+                // -----------------------------------------------------
                 // 默认 Action
+                // -----------------------------------------------------
 
                 MatcherAndActionConfigEntry action = new MatcherAndActionConfigEntry();
 
-                action.setType("Command");
+                action.setType(
+                                "Command");
 
-                action.setExpression("");
+                action.setExpression(
+                                "");
 
                 action.setParams(
                                 new LinkedHashMap<>());
 
-                config.setAction(action);
+                config.setAction(
+                                action);
 
-                listModel.addElement(config);
+                // -----------------------------------------------------
+                // 添加到列表
+                // -----------------------------------------------------
+
+                listModel.addElement(
+                                config);
 
                 triggerList.setSelectedValue(
                                 config,
@@ -905,7 +1288,7 @@ public class Trigger extends AbsZmMudDialog {
         }
 
         // =========================================================
-        // 删除
+        // 删除 Trigger
         // =========================================================
 
         private void deleteTrigger() {
@@ -916,7 +1299,8 @@ public class Trigger extends AbsZmMudDialog {
                         return;
                 }
 
-                TriggerConfigEntry config = listModel.getElementAt(index);
+                TriggerConfigEntry config = listModel.getElementAt(
+                                index);
 
                 int result = JOptionPane.showConfirmDialog(
                                 this,
@@ -930,7 +1314,8 @@ public class Trigger extends AbsZmMudDialog {
                         return;
                 }
 
-                listModel.remove(index);
+                listModel.remove(
+                                index);
 
                 currentTrigger = null;
 
@@ -940,6 +1325,10 @@ public class Trigger extends AbsZmMudDialog {
                                         Math.min(
                                                         index,
                                                         listModel.size() - 1));
+
+                } else {
+
+                        clearForm();
                 }
         }
 
@@ -950,13 +1339,25 @@ public class Trigger extends AbsZmMudDialog {
         @Override
         protected void ok() {
 
-                if (currentTrigger != null) {
-                        saveFormToConfig(currentTrigger);
+                /*
+                 * 没有选择 MUD World，
+                 * 不保存任何 Trigger。
+                 */
+                if (currentMudWorldCode == null
+                                || currentMudWorldCode.trim().isEmpty()) {
+
+                        return;
                 }
+
+                /*
+                 * 保存当前正在编辑的 Trigger。
+                 */
+                saveCurrentTrigger();
 
                 List<TriggerConfigEntry> configs = new ArrayList<>();
 
                 for (int i = 0; i < listModel.size(); i++) {
+
                         configs.add(
                                         listModel.getElementAt(i));
                 }
@@ -964,7 +1365,122 @@ public class Trigger extends AbsZmMudDialog {
                 TriggerFactory factory = SpringBeanUtil.getBean(
                                 TriggerFactory.class);
 
-                factory.save(configs);
+                factory.save(this.currentMudWorldCode, configs);
+        }
+
+        // =========================================================
+        // 根据 mudWorldCode 加载 Trigger
+        // =========================================================
+
+        private void loadTriggerConfigData(
+                        String mudWorldCode) {
+
+                /*
+                 * 先清空旧 World 的 Trigger。
+                 */
+                listModel.clear();
+
+                currentTrigger = null;
+
+                /*
+                 * 根据 mudWorldCode 加载。
+                 */
+                List<TriggerConfigEntry> configs = TriggerService.getTriggerConfigEntries(
+                                mudWorldCode);
+
+                if (configs == null
+                                || configs.isEmpty()) {
+
+                        clearForm();
+
+                        return;
+                }
+
+                /*
+                 * 加入列表。
+                 */
+                for (TriggerConfigEntry entry : configs) {
+
+                        listModel.addElement(
+                                        entry);
+                }
+
+                /*
+                 * 默认选中第一个。
+                 */
+                triggerList.setSelectedIndex(
+                                0);
+        }
+
+        // =========================================================
+        // 清空右侧 Form
+        // =========================================================
+
+        private void clearForm() {
+
+                currentTrigger = null;
+
+                // -----------------------------------------------------
+                // Basic
+                // -----------------------------------------------------
+
+                txtName.setText("");
+
+                if (cbTriggerType.getItemCount() > 0) {
+
+                        cbTriggerType.setSelectedIndex(
+                                        0);
+                }
+
+                spRemainingCount.setValue(
+                                0);
+
+                // -----------------------------------------------------
+                // Options
+                // -----------------------------------------------------
+
+                chkSync.setSelected(
+                                false);
+
+                chkUnique.setSelected(
+                                false);
+
+                chkAutoRegister.setSelected(
+                                false);
+
+                // -----------------------------------------------------
+                // Matcher
+                // -----------------------------------------------------
+
+                if (cbMatcherType.getItemCount() > 0) {
+
+                        cbMatcherType.setSelectedIndex(
+                                        0);
+                }
+
+                taMatcherExpression.setText(
+                                "");
+
+                // -----------------------------------------------------
+                // Action
+                // -----------------------------------------------------
+
+                if (cbActionType.getItemCount() > 0) {
+
+                        cbActionType.setSelectedIndex(
+                                        0);
+                }
+
+                taActionExpression.setText(
+                                "");
+
+                // -----------------------------------------------------
+                // Params
+                // -----------------------------------------------------
+
+                rebuildMatcherParams();
+
+                rebuildActionParams();
         }
 
         // =========================================================
@@ -975,7 +1491,11 @@ public class Trigger extends AbsZmMudDialog {
 
                 GridBagConstraints gbc = new GridBagConstraints();
 
-                gbc.insets = new Insets(4, 6, 4, 6);
+                gbc.insets = new Insets(
+                                4,
+                                6,
+                                4,
+                                6);
 
                 gbc.fill = GridBagConstraints.HORIZONTAL;
 
@@ -990,6 +1510,7 @@ public class Trigger extends AbsZmMudDialog {
                         String text) {
 
                 gbc.gridx = x;
+
                 gbc.gridy = y;
 
                 gbc.weightx = 0;
@@ -1007,6 +1528,7 @@ public class Trigger extends AbsZmMudDialog {
                         Component component) {
 
                 gbc.gridx = x;
+
                 gbc.gridy = y;
 
                 gbc.weightx = 1.0;
@@ -1022,19 +1544,5 @@ public class Trigger extends AbsZmMudDialog {
                 return value == null
                                 ? ""
                                 : value;
-        }
-
-        // =========================================================
-        // Demo
-        // =========================================================
-
-        private void loadTriggerConfigData() {
-                for (TriggerConfigEntry entry : TriggerService.getTriggerConfigEntries()) {
-                        listModel.addElement( entry);
-                }
-                // 默认选中第一个
-                if (!listModel.isEmpty()) {
-                        triggerList.setSelectedIndex(0);
-                }
         }
 }
