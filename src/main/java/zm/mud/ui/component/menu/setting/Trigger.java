@@ -78,6 +78,7 @@ public class Trigger extends AbsZmMudDialog {
 
         public Trigger(Frame owner, String title) {
                 super(owner, title);
+                 this.setSize(1100, 500);     
 
         }
 
