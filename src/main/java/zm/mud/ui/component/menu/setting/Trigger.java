@@ -15,1097 +15,1025 @@ import org.apache.logging.log4j.Logger;
 import zm.mud.core.automation.trigger.TriggerFactory;
 import zm.mud.core.automation.trigger.cfg.MatcherAndActionConfigEntry;
 import zm.mud.core.automation.trigger.cfg.TriggerConfigEntry;
+import zm.mud.core.automation.trigger.cfg.TriggerType;
 import zm.mud.ui.component.menu.AbsZmMudDialog;
 import zm.mud.ui.component.menu.KeyValuePair;
 import zm.mud.utils.SpringBeanUtil;
 
 public class Trigger extends AbsZmMudDialog {
 
-    private static final Logger logger = LogManager.getLogger(Trigger.class);
+        private static final Logger logger = LogManager.getLogger(Trigger.class);
 
-    // =========================================================
-    // 左侧 Trigger
-    // =========================================================
+        // =========================================================
+        // 左侧 Trigger
+        // =========================================================
 
-    private JList<TriggerConfigEntry> triggerList;
-    private DefaultListModel<TriggerConfigEntry> listModel;
+        private JList<TriggerConfigEntry> triggerList;
+        private DefaultListModel<TriggerConfigEntry> listModel;
 
-    private JButton btnAdd;
-    private JButton btnDelete;
+        private JButton btnAdd;
+        private JButton btnDelete;
 
-    private TriggerConfigEntry currentTrigger;
+        private TriggerConfigEntry currentTrigger;
 
-    // =========================================================
-    // Trigger 基础配置
-    // =========================================================
+        // =========================================================
+        // Trigger 基础配置
+        // =========================================================
 
-    private JTextField txtName;
+        private JTextField txtName;
 
-    private JComboBox<String> cbTriggerType;
+        private JComboBox<KeyValuePair<String, String>> cbTriggerType;
 
-    private JSpinner spRemainingCount;
+        private JSpinner spRemainingCount;
 
-    // =========================================================
-    // Matcher
-    // =========================================================
-
-    private JComboBox<KeyValuePair<String, String>> cbMatcherType;
-
-    private JTextArea taMatcherExpression;
-
-    private JPanel matcherParamsPanel;
-
-    // =========================================================
-    // Action
-    // =========================================================
-
-    private JComboBox<String> cbActionType;
-
-    private JTextArea taActionExpression;
-
-    private JPanel actionParamsPanel;
-
-    // =========================================================
-    // Trigger 选项
-    // =========================================================
-
-    private JCheckBox chkSync;
-
-    private JCheckBox chkUnique;
-
-    private JCheckBox chkAutoRegister;
-
-
-    public Trigger(Frame owner, String title) {
-        super(owner, title);
-        
-    }
-
-    @Override
-    protected JPanel getContentPanelUi() {
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-
-        mainPanel.setBorder(
-                BorderFactory.createEmptyBorder(
-                        10, 10, 10, 10));
-
-        mainPanel.add(
-                createLeftPanel(),
-                BorderLayout.WEST);
-
-        mainPanel.add(
-                createRightPanel(),
-                BorderLayout.CENTER);
-
-        loadDemoData();
-
-        return mainPanel;
-    }
-
-    // =========================================================
-    // 左侧
-    // =========================================================
-
-    private JPanel createLeftPanel() {
-
-        JPanel panel = new JPanel(new BorderLayout(5, 5));
-
-        panel.setPreferredSize(
-                new Dimension(220, 0));
-
-        listModel = new DefaultListModel<>();
-
-        triggerList = new JList<>(listModel);
-
-        triggerList.setSelectionMode(
-                ListSelectionModel.SINGLE_SELECTION);
-
-        triggerList.setCellRenderer(
-                new DefaultListCellRenderer() {
-
-                    @Override
-                    public Component getListCellRendererComponent(
-                            JList<?> list,
-                            Object value,
-                            int index,
-                            boolean isSelected,
-                            boolean cellHasFocus) {
-
-                        super.getListCellRendererComponent(
-                                list,
-                                value,
-                                index,
-                                isSelected,
-                                cellHasFocus);
-
-                        if (value instanceof TriggerConfigEntry) {
-
-                            TriggerConfigEntry config = (TriggerConfigEntry) value;
-
-                            String name = config.getName();
-
-                            setText(
-                                    name == null
-                                            ? "(未命名)"
-                                            : name);
-                        }
-
-                        return this;
-                    }
-                });
-
-        triggerList.addListSelectionListener(
-                this::onTriggerSelected);
-
-        panel.add(
-                new JScrollPane(triggerList),
-                BorderLayout.CENTER);
-
-        JPanel buttonPanel = new JPanel(
-                new GridLayout(1, 2, 5, 5));
-
-        btnAdd = new JButton("添加");
-
-        btnDelete = new JButton("删除");
-
-        btnAdd.addActionListener(
-                e -> addTrigger());
-
-        btnDelete.addActionListener(
-                e -> deleteTrigger());
-
-        buttonPanel.add(btnAdd);
-        buttonPanel.add(btnDelete);
-
-        panel.add(
-                buttonPanel,
-                BorderLayout.SOUTH);
-
-        return panel;
-    }
-
-    // =========================================================
-    // 右侧
-    // =========================================================
-
-    private JPanel createRightPanel() {
-
-        JPanel panel = new JPanel(new BorderLayout(8, 8));
-
-        // -----------------------------------------------------
-        // 基础配置
-        // -----------------------------------------------------
-
-        JPanel basicPanel = new JPanel(new GridBagLayout());
-
-        basicPanel.setBorder(
-                BorderFactory.createTitledBorder(
-                        "Trigger 基础配置"));
-
-        GridBagConstraints gbc = createGbc();
-
-        // Name
-
-        addLabel(
-                basicPanel,
-                gbc,
-                0,
-                0,
-                "名称:");
-
-        txtName = new JTextField();
-
-        addComponent(
-                basicPanel,
-                gbc,
-                1,
-                0,
-                txtName);
-
-        // Trigger Type
-
-        addLabel(
-                basicPanel,
-                gbc,
-                0,
-                1,
-                "Trigger 类型:");
-
-        cbTriggerType = new JComboBox<>(
-                new String[] {
-                        "Inbound",
-                        "Outbound"
-                });
-
-        addComponent(
-                basicPanel,
-                gbc,
-                1,
-                1,
-                cbTriggerType);
-
-        // Remaining Count
-
-        addLabel(
-                basicPanel,
-                gbc,
-                0,
-                2,
-                "执行次数:");
-
-        spRemainingCount = new JSpinner(
-                new SpinnerNumberModel(
-                        0,
-                        0,
-                        Integer.MAX_VALUE,
-                        1));
-
-        addComponent(
-                basicPanel,
-                gbc,
-                1,
-                2,
-                spRemainingCount);
-
-        // -----------------------------------------------------
+        // =========================================================
         // Matcher
-        // -----------------------------------------------------
+        // =========================================================
 
-        JPanel matcherPanel = createMatcherPanel();
+        private JComboBox<KeyValuePair<String, String>> cbMatcherType;
 
-        // -----------------------------------------------------
+        private JTextArea taMatcherExpression;
+
+        private JPanel matcherParamsPanel;
+
+        // =========================================================
         // Action
-        // -----------------------------------------------------
+        // =========================================================
 
-        JPanel actionPanel = createActionPanel();
+        private JComboBox<KeyValuePair<String, String>> cbActionType;
 
-        // -----------------------------------------------------
-        // 顶部
-        // -----------------------------------------------------
+        private JTextArea taActionExpression;
 
-        JPanel topPanel = new JPanel(
-                new GridLayout(1, 2, 8, 8));
+        private JPanel actionParamsPanel;
 
-        topPanel.add(basicPanel);
-        topPanel.add(matcherPanel);
+        // =========================================================
+        // Trigger 选项
+        // =========================================================
 
-        panel.add(
-                topPanel,
-                BorderLayout.NORTH);
+        private JCheckBox chkSync;
 
-        // -----------------------------------------------------
-        // 中间 Action
-        // -----------------------------------------------------
+        private JCheckBox chkUnique;
 
-        panel.add(
-                actionPanel,
-                BorderLayout.CENTER);
+        private JCheckBox chkAutoRegister;
 
-        // -----------------------------------------------------
-        // 底部 Options
-        // -----------------------------------------------------
+        public Trigger(Frame owner, String title) {
+                super(owner, title);
 
-        JPanel optionPanel = createOptionPanel();
-
-        panel.add(
-                optionPanel,
-                BorderLayout.SOUTH);
-
-        return panel;
-    }
-
-    // =========================================================
-    // Matcher UI
-    // =========================================================
-
-    private JPanel createMatcherPanel() {
-
-        JPanel panel = new JPanel(new BorderLayout(5, 5));
-
-        panel.setBorder(
-                BorderFactory.createTitledBorder(
-                        "Matcher"));
-
-        JPanel top = new JPanel(new GridBagLayout());
-
-        GridBagConstraints gbc = createGbc();
-
-        addLabel(
-                top,
-                gbc,
-                0,
-                0,
-                "类型:");
-
-        cbMatcherType = new JComboBox<>();
-
-        for(KeyValuePair<String,String> matcherItem: TriggerService.getMathers()){
-            cbMatcherType.addItem(matcherItem);
         }
 
-        addComponent(
-                top,
-                gbc,
-                1,
-                0,
-                cbMatcherType);
+        @Override
+        protected JPanel getContentPanelUi() {
+                JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
 
-        panel.add(
-                top,
-                BorderLayout.NORTH);
+                mainPanel.setBorder(
+                                BorderFactory.createEmptyBorder(
+                                                10, 10, 10, 10));
 
-        JPanel expressionPanel = new JPanel(new BorderLayout(5, 5));
+                mainPanel.add(
+                                createLeftPanel(),
+                                BorderLayout.WEST);
 
-        expressionPanel.add(
-                new JLabel("Expression:"),
-                BorderLayout.NORTH);
+                mainPanel.add(
+                                createRightPanel(),
+                                BorderLayout.CENTER);
 
-        taMatcherExpression = new JTextArea(4, 30);
+                loadTriggerConfigData();
 
-        taMatcherExpression.setLineWrap(false);
-
-        taMatcherExpression.setFont(
-                new Font(
-                        "Consolas",
-                        Font.PLAIN,
-                        13));
-
-        expressionPanel.add(
-                new JScrollPane(
-                        taMatcherExpression),
-                BorderLayout.CENTER);
-
-        panel.add(
-                expressionPanel,
-                BorderLayout.CENTER);
-
-        matcherParamsPanel = new JPanel();
-
-        matcherParamsPanel.setLayout(
-                new BoxLayout(
-                        matcherParamsPanel,
-                        BoxLayout.Y_AXIS));
-
-        matcherParamsPanel.setBorder(
-                BorderFactory.createTitledBorder(
-                        "Params"));
-
-        panel.add(
-                matcherParamsPanel,
-                BorderLayout.SOUTH);
-
-        cbMatcherType.addActionListener(
-                e -> rebuildMatcherParams());
-
-        return panel;
-    }
-
-    // =========================================================
-    // Action UI
-    // =========================================================
-
-    private JPanel createActionPanel() {
-
-        JPanel panel = new JPanel(new BorderLayout(5, 5));
-
-        panel.setBorder(
-                BorderFactory.createTitledBorder(
-                        "Action"));
-
-        JPanel top = new JPanel(new BorderLayout(5, 5));
-
-        top.add(
-                new JLabel("类型:"),
-                BorderLayout.WEST);
-
-        cbActionType = new JComboBox<>(
-                new String[] {
-                        "Command",
-                        "Lua",
-                        "Java"
-                });
-
-        top.add(
-                cbActionType,
-                BorderLayout.CENTER);
-
-        panel.add(
-                top,
-                BorderLayout.NORTH);
-
-        JPanel expressionPanel = new JPanel(new BorderLayout(5, 5));
-
-        expressionPanel.add(
-                new JLabel("Expression:"),
-                BorderLayout.NORTH);
-
-        taActionExpression = new JTextArea();
-
-        taActionExpression.setLineWrap(false);
-
-        taActionExpression.setFont(
-                new Font(
-                        "Consolas",
-                        Font.PLAIN,
-                        14));
-
-        expressionPanel.add(
-                new JScrollPane(
-                        taActionExpression),
-                BorderLayout.CENTER);
-
-        panel.add(
-                expressionPanel,
-                BorderLayout.CENTER);
-
-        actionParamsPanel = new JPanel();
-
-        actionParamsPanel.setLayout(
-                new BoxLayout(
-                        actionParamsPanel,
-                        BoxLayout.Y_AXIS));
-
-        actionParamsPanel.setBorder(
-                BorderFactory.createTitledBorder(
-                        "Params"));
-
-        panel.add(
-                actionParamsPanel,
-                BorderLayout.SOUTH);
-
-        cbActionType.addActionListener(
-                e -> rebuildActionParams());
-
-        return panel;
-    }
-
-    // =========================================================
-    // Options
-    // =========================================================
-
-    private JPanel createOptionPanel() {
-
-        JPanel panel = new JPanel(
-                new FlowLayout(
-                        FlowLayout.LEFT));
-
-        panel.setBorder(
-                BorderFactory.createTitledBorder(
-                        "Trigger 选项"));
-
-        chkSync = new JCheckBox("Sync");
-
-        chkUnique = new JCheckBox("Unique");
-
-        chkAutoRegister = new JCheckBox("Auto Register");
-
-        panel.add(chkSync);
-        panel.add(chkUnique);
-        panel.add(chkAutoRegister);
-
-        return panel;
-    }
-
-    // =========================================================
-    // Matcher Params
-    // =========================================================
-
-    private void rebuildMatcherParams() {
-
-        matcherParamsPanel.removeAll();
-
-        KeyValuePair<String,String> selectedItem= (KeyValuePair<String,String>) cbMatcherType.getSelectedItem();
-        String type = selectedItem.getKey();
-        /*
-         * 这里根据你的 Matcher 实际实现继续扩展。
-         *
-         * 例如：
-         *
-         * Regex:
-         * ignoreCase
-         *
-         * Include:
-         * ignoreCase
-         *
-         * 其他 Matcher:
-         * 暂时没有参数
-         */
-
-        if ("Regex".equals(type)) {
-
-            JCheckBox ignoreCase = new JCheckBox("ignoreCase");
-
-            matcherParamsPanel.add(
-                    ignoreCase);
+                return mainPanel;
         }
 
-        matcherParamsPanel.revalidate();
+        // =========================================================
+        // 左侧
+        // =========================================================
 
-        matcherParamsPanel.repaint();
-    }
+        private JPanel createLeftPanel() {
 
-    // =========================================================
-    // Action Params
-    // =========================================================
+                JPanel panel = new JPanel(new BorderLayout(5, 5));
 
-    private void rebuildActionParams() {
+                panel.setPreferredSize(
+                                new Dimension(220, 0));
 
-        actionParamsPanel.removeAll();
+                listModel = new DefaultListModel<>();
 
-        String type = (String) cbActionType.getSelectedItem();
+                triggerList = new JList<>(listModel);
 
-        /*
-         * 根据 Action 实现动态生成参数。
-         *
-         * 例如：
-         *
-         * Lua:
-         * timeout
-         *
-         * Command:
-         * delay
-         *
-         * Java:
-         * class
-         */
+                triggerList.setSelectionMode(
+                                ListSelectionModel.SINGLE_SELECTION);
 
-        if ("Lua".equals(type)) {
+                triggerList.setCellRenderer(
+                                new DefaultListCellRenderer() {
 
-            JTextField timeout = new JTextField();
+                                        @Override
+                                        public Component getListCellRendererComponent(
+                                                        JList<?> list,
+                                                        Object value,
+                                                        int index,
+                                                        boolean isSelected,
+                                                        boolean cellHasFocus) {
 
-            JPanel row = new JPanel(
-                    new BorderLayout(5, 5));
+                                                super.getListCellRendererComponent(
+                                                                list,
+                                                                value,
+                                                                index,
+                                                                isSelected,
+                                                                cellHasFocus);
 
-            row.add(
-                    new JLabel("timeout:"),
-                    BorderLayout.WEST);
+                                                if (value instanceof TriggerConfigEntry) {
 
-            row.add(
-                    timeout,
-                    BorderLayout.CENTER);
+                                                        TriggerConfigEntry config = (TriggerConfigEntry) value;
 
-            actionParamsPanel.add(row);
+                                                        String name = config.getName();
+
+                                                        setText(
+                                                                        name == null
+                                                                                        ? "(未命名)"
+                                                                                        : name);
+                                                }
+
+                                                return this;
+                                        }
+                                });
+
+                triggerList.addListSelectionListener(
+                                this::onTriggerSelected);
+
+                panel.add(
+                                new JScrollPane(triggerList),
+                                BorderLayout.CENTER);
+
+                JPanel buttonPanel = new JPanel(
+                                new GridLayout(1, 2, 5, 5));
+
+                btnAdd = new JButton("添加");
+
+                btnDelete = new JButton("删除");
+
+                btnAdd.addActionListener(
+                                e -> addTrigger());
+
+                btnDelete.addActionListener(
+                                e -> deleteTrigger());
+
+                buttonPanel.add(btnAdd);
+                buttonPanel.add(btnDelete);
+
+                panel.add(
+                                buttonPanel,
+                                BorderLayout.SOUTH);
+
+                return panel;
         }
 
-        actionParamsPanel.revalidate();
+        // =========================================================
+        // 右侧
+        // =========================================================
 
-        actionParamsPanel.repaint();
-    }
+        private JPanel createRightPanel() {
 
-    // =========================================================
-    // Trigger 选择
-    // =========================================================
+                JPanel panel = new JPanel(new BorderLayout(8, 8));
 
-    private void onTriggerSelected(
-            ListSelectionEvent e) {
+                // -----------------------------------------------------
+                // 基础配置
+                // -----------------------------------------------------
 
-        if (e.getValueIsAdjusting()) {
-            return;
+                JPanel basicPanel = new JPanel(new GridBagLayout());
+
+                basicPanel.setBorder(
+                                BorderFactory.createTitledBorder(
+                                                "Trigger 基础配置"));
+
+                GridBagConstraints gbc = createGbc();
+
+                // Name
+
+                addLabel(
+                                basicPanel,
+                                gbc,
+                                0,
+                                0,
+                                "名称:");
+
+                txtName = new JTextField();
+
+                addComponent(
+                                basicPanel,
+                                gbc,
+                                1,
+                                0,
+                                txtName);
+
+                // Trigger Type
+
+                addLabel(
+                                basicPanel,
+                                gbc,
+                                0,
+                                1,
+                                "Trigger 类型:");
+
+                cbTriggerType = new JComboBox<>();
+                for(KeyValuePair<String,String> tirggerType: TriggerService.getTriggerTypes()){
+                        cbTriggerType.addItem(tirggerType);
+                }
+
+                addComponent(
+                                basicPanel,
+                                gbc,
+                                1,
+                                1,
+                                cbTriggerType);
+
+                // Remaining Count
+
+                addLabel(
+                                basicPanel,
+                                gbc,
+                                0,
+                                2,
+                                "执行次数:");
+
+                spRemainingCount = new JSpinner(
+                                new SpinnerNumberModel(
+                                                0,
+                                                0,
+                                                Integer.MAX_VALUE,
+                                                1));
+
+                addComponent(
+                                basicPanel,
+                                gbc,
+                                1,
+                                2,
+                                spRemainingCount);
+
+                // -----------------------------------------------------
+                // Trigger Options
+                // -----------------------------------------------------
+
+                addLabel(
+                                basicPanel,
+                                gbc,
+                                0,
+                                3,
+                                "选项:");
+
+                JPanel optionsPanel = new JPanel(
+                                new FlowLayout(
+                                                FlowLayout.LEFT,
+                                                5,
+                                                0));
+
+                chkSync = new JCheckBox("Sync");
+
+                chkUnique = new JCheckBox("Unique");
+
+                chkAutoRegister = new JCheckBox("Auto Register");
+
+                optionsPanel.add(chkSync);
+                optionsPanel.add(chkUnique);
+                optionsPanel.add(chkAutoRegister);
+
+                addComponent(
+                                basicPanel,
+                                gbc,
+                                1,
+                                3,
+                                optionsPanel);
+
+                // -----------------------------------------------------
+                // Matcher
+                // -----------------------------------------------------
+
+                JPanel matcherPanel = createMatcherPanel();
+
+                // -----------------------------------------------------
+                // Action
+                // -----------------------------------------------------
+
+                JPanel actionPanel = createActionPanel();
+
+                // -----------------------------------------------------
+                // 顶部
+                // -----------------------------------------------------
+
+                JPanel topPanel = new JPanel(
+                                new GridLayout(1, 2, 8, 8));
+
+                topPanel.add(basicPanel);
+                topPanel.add(matcherPanel);
+
+                panel.add(
+                                topPanel,
+                                BorderLayout.NORTH);
+
+                // -----------------------------------------------------
+                // 中间 Action
+                // -----------------------------------------------------
+
+                panel.add(
+                                actionPanel,
+                                BorderLayout.CENTER);
+
+                // -----------------------------------------------------
+                // 底部 Options
+                // -----------------------------------------------------
+
+                // JPanel optionPanel = createOptionPanel();
+
+                // panel.add(
+                // optionPanel,
+                // BorderLayout.SOUTH);
+
+                return panel;
         }
 
-        TriggerConfigEntry selected = triggerList.getSelectedValue();
+        // =========================================================
+        // Matcher UI
+        // =========================================================
 
-        if (selected == null) {
-            return;
+        private JPanel createMatcherPanel() {
+
+                JPanel panel = new JPanel(new BorderLayout(5, 5));
+
+                panel.setBorder(
+                                BorderFactory.createTitledBorder(
+                                                "Matcher"));
+
+                JPanel top = new JPanel(new GridBagLayout());
+
+                GridBagConstraints gbc = createGbc();
+
+                addLabel(
+                                top,
+                                gbc,
+                                0,
+                                0,
+                                "类型:");
+
+                cbMatcherType = new JComboBox<>();
+
+                for (KeyValuePair<String, String> matcherItem : TriggerService.getMathers()) {
+                        cbMatcherType.addItem(matcherItem);
+                }
+
+                addComponent(
+                                top,
+                                gbc,
+                                1,
+                                0,
+                                cbMatcherType);
+
+                panel.add(
+                                top,
+                                BorderLayout.NORTH);
+
+                JPanel expressionPanel = new JPanel(new BorderLayout(5, 5));
+
+                expressionPanel.add(
+                                new JLabel("Expression:"),
+                                BorderLayout.NORTH);
+
+                taMatcherExpression = new JTextArea(4, 30);
+
+                taMatcherExpression.setLineWrap(false);
+
+                taMatcherExpression.setFont(
+                                new Font(
+                                                "Consolas",
+                                                Font.PLAIN,
+                                                13));
+
+                expressionPanel.add(
+                                new JScrollPane(
+                                                taMatcherExpression),
+                                BorderLayout.CENTER);
+
+                panel.add(
+                                expressionPanel,
+                                BorderLayout.CENTER);
+
+                matcherParamsPanel = new JPanel();
+
+                matcherParamsPanel.setLayout(
+                                new BoxLayout(
+                                                matcherParamsPanel,
+                                                BoxLayout.Y_AXIS));
+
+                matcherParamsPanel.setBorder(
+                                BorderFactory.createTitledBorder(
+                                                "Params"));
+
+                panel.add(
+                                matcherParamsPanel,
+                                BorderLayout.SOUTH);
+
+                cbMatcherType.addActionListener(
+                                e -> rebuildMatcherParams());
+
+                return panel;
         }
 
-        // 保存之前正在编辑的 Trigger
+        // =========================================================
+        // Action UI
+        // =========================================================
 
-        if (currentTrigger != null) {
+        private JPanel createActionPanel() {
 
-            saveFormToConfig(
-                    currentTrigger);
+                JPanel panel = new JPanel(new BorderLayout(5, 5));
+
+                panel.setBorder(
+                                BorderFactory.createTitledBorder(
+                                                "Action"));
+
+                JPanel top = new JPanel(new BorderLayout(5, 5));
+
+                top.add(
+                                new JLabel("类型:"),
+                                BorderLayout.WEST);
+                
+                List<KeyValuePair<String, String>> actionTeypes = TriggerService.getActionTypes();
+                cbActionType = new JComboBox<>();
+                for(KeyValuePair<String, String> actionType : actionTeypes ){
+                        cbActionType.addItem(actionType);
+                }
+
+                top.add(
+                                cbActionType,
+                                BorderLayout.CENTER);
+
+                panel.add(
+                                top,
+                                BorderLayout.NORTH);
+
+                JPanel expressionPanel = new JPanel(new BorderLayout(5, 5));
+
+                expressionPanel.add(
+                                new JLabel("Expression:"),
+                                BorderLayout.NORTH);
+
+                taActionExpression = new JTextArea();
+
+                taActionExpression.setLineWrap(false);
+
+                taActionExpression.setFont(
+                                new Font(
+                                                "Consolas",
+                                                Font.PLAIN,
+                                                14));
+
+                expressionPanel.add(
+                                new JScrollPane(
+                                                taActionExpression),
+                                BorderLayout.CENTER);
+
+                panel.add(
+                                expressionPanel,
+                                BorderLayout.CENTER);
+
+                actionParamsPanel = new JPanel();
+
+                actionParamsPanel.setLayout(
+                                new BoxLayout(
+                                                actionParamsPanel,
+                                                BoxLayout.Y_AXIS));
+
+                actionParamsPanel.setBorder(
+                                BorderFactory.createTitledBorder(
+                                                "Params"));
+
+                panel.add(
+                                actionParamsPanel,
+                                BorderLayout.SOUTH);
+
+                cbActionType.addActionListener(
+                                e -> rebuildActionParams());
+
+                return panel;
         }
 
-        currentTrigger = selected;
+        // =========================================================
+        // Matcher Params
+        // =========================================================
 
-        loadConfigToForm(
-                selected);
-    }
+        private void rebuildMatcherParams() {
 
-    // =========================================================
-    // POJO -> UI
-    // =========================================================
+                matcherParamsPanel.removeAll();
 
-    private void loadConfigToForm(
-            TriggerConfigEntry config) {
+                KeyValuePair<String, String> selectedItem = (KeyValuePair<String, String>) cbMatcherType
+                                .getSelectedItem();
+                String type = selectedItem.getKey();
+                /*
+                 * 这里根据你的 Matcher 实际实现继续扩展。
+                 *
+                 * 例如：
+                 *
+                 * Regex:
+                 * ignoreCase
+                 *
+                 * Include:
+                 * ignoreCase
+                 *
+                 * 其他 Matcher:
+                 * 暂时没有参数
+                 */
 
-        // -----------------------------------------------------
-        // 基础配置
-        // -----------------------------------------------------
+                if ("Regex".equals(type)) {
 
-        txtName.setText(
-                nullToEmpty(
-                        config.getName()));
+                        JCheckBox ignoreCase = new JCheckBox("ignoreCase");
 
-        cbTriggerType.setSelectedItem(
-                config.getType());
+                        matcherParamsPanel.add(
+                                        ignoreCase);
+                }
 
-        spRemainingCount.setValue(
-                config.getRemainingCount() == null
-                        ? 0
-                        : config.getRemainingCount());
+                matcherParamsPanel.revalidate();
 
-        // -----------------------------------------------------
-        // Options
-        // -----------------------------------------------------
-
-        chkSync.setSelected(
-                config.isSync());
-
-        chkUnique.setSelected(
-                config.isUnique());
-
-        chkAutoRegister.setSelected(
-                config.isAutoRegister());
-
-        // -----------------------------------------------------
-        // Matcher
-        // -----------------------------------------------------
-
-        MatcherAndActionConfigEntry matcher = config.getMatcher();
-
-        if (matcher != null) {
-
-            cbMatcherType.setSelectedItem(
-                    matcher.getType());
-
-            taMatcherExpression.setText(
-                    nullToEmpty(
-                            matcher.getExpression()));
-        } else {
-
-            cbMatcherType.setSelectedIndex(0);
-
-            taMatcherExpression.setText("");
+                matcherParamsPanel.repaint();
         }
 
-        // -----------------------------------------------------
-        // Action
-        // -----------------------------------------------------
+        // =========================================================
+        // Action Params
+        // =========================================================
 
-        MatcherAndActionConfigEntry action = config.getAction();
+        private void rebuildActionParams() {
 
-        if (action != null) {
+                actionParamsPanel.removeAll();
+                String type =  null;
+                KeyValuePair<String,String> selectedActionType = (KeyValuePair<String, String>) cbActionType.getSelectedItem();
+                if( selectedActionType != null){
+                        type = selectedActionType.getKey();
+                }
+               
 
-            cbActionType.setSelectedItem(
-                    action.getType());
+                /*
+                 * 根据 Action 实现动态生成参数。
+                 *
+                 * 例如：
+                 *
+                 * Lua:
+                 * timeout
+                 *
+                 * Command:
+                 * delay
+                 *
+                 * Java:
+                 * class
+                 */
 
-            taActionExpression.setText(
-                    nullToEmpty(
-                            action.getExpression()));
-        } else {
+                if ("Lua".equals(type)) {
 
-            cbActionType.setSelectedIndex(0);
+                        JTextField timeout = new JTextField();
 
-            taActionExpression.setText("");
+                        JPanel row = new JPanel(
+                                        new BorderLayout(5, 5));
+
+                        row.add(
+                                        new JLabel("timeout:"),
+                                        BorderLayout.WEST);
+
+                        row.add(
+                                        timeout,
+                                        BorderLayout.CENTER);
+
+                        actionParamsPanel.add(row);
+                }
+
+                actionParamsPanel.revalidate();
+
+                actionParamsPanel.repaint();
         }
 
-        // 重新生成参数 UI
+        // =========================================================
+        // Trigger 选择
+        // =========================================================
 
-        rebuildMatcherParams();
+        private void onTriggerSelected(
+                        ListSelectionEvent e) {
 
-        rebuildActionParams();
-    }
+                if (e.getValueIsAdjusting()) {
+                        return;
+                }
 
-    // =========================================================
-    // UI -> POJO
-    // =========================================================
+                TriggerConfigEntry selected = triggerList.getSelectedValue();
 
-    private void saveFormToConfig(
-            TriggerConfigEntry config) {
+                if (selected == null) {
+                        return;
+                }
 
-        // -----------------------------------------------------
-        // 基础配置
-        // -----------------------------------------------------
+                // 保存之前正在编辑的 Trigger
 
-        config.setName(
-                txtName.getText().trim());
+                if (currentTrigger != null) {
 
-        config.setType(
-                (String) cbTriggerType.getSelectedItem());
+                        saveFormToConfig(
+                                        currentTrigger);
+                }
 
-        config.setRemainingCount(
-                (Integer) spRemainingCount.getValue());
+                currentTrigger = selected;
 
-        // -----------------------------------------------------
-        // Options
-        // -----------------------------------------------------
-
-        config.setSync(
-                chkSync.isSelected());
-
-        config.setUnique(
-                chkUnique.isSelected());
-
-        config.setAutoRegister(
-                chkAutoRegister.isSelected());
-
-        // -----------------------------------------------------
-        // Matcher
-        // -----------------------------------------------------
-
-        MatcherAndActionConfigEntry matcher = config.getMatcher();
-
-        if (matcher == null) {
-
-            matcher = new MatcherAndActionConfigEntry();
-
-            config.setMatcher(matcher);
+                loadConfigToForm(
+                                selected);
         }
 
-        matcher.setType(
-                (String) cbMatcherType.getSelectedItem());
+        // =========================================================
+        // POJO -> UI
+        // =========================================================
 
-        matcher.setExpression(
-                taMatcherExpression.getText());
+        private void loadConfigToForm(
+                        TriggerConfigEntry config) {
 
-        matcher.setParams(
-                collectMatcherParams());
+                // -----------------------------------------------------
+                // 基础配置
+                // -----------------------------------------------------
 
-        // -----------------------------------------------------
-        // Action
-        // -----------------------------------------------------
+                txtName.setText(
+                                nullToEmpty(
+                                                config.getName()));
 
-        MatcherAndActionConfigEntry action = config.getAction();
+                cbTriggerType.setSelectedItem(TriggerService.getTriggerType(config.getType()));
 
-        if (action == null) {
+                spRemainingCount.setValue(
+                                config.getRemainingCount() == null
+                                                ? 0
+                                                : config.getRemainingCount());
 
-            action = new MatcherAndActionConfigEntry();
+                // -----------------------------------------------------
+                // Options
+                // -----------------------------------------------------
 
-            config.setAction(action);
+                chkSync.setSelected(
+                                config.isSync());
+
+                chkUnique.setSelected(
+                                config.isUnique());
+
+                chkAutoRegister.setSelected(
+                                config.isAutoRegister());
+
+                // -----------------------------------------------------
+                // Matcher
+                // -----------------------------------------------------
+
+                MatcherAndActionConfigEntry matcher = config.getMatcher();
+
+                if (matcher != null) {
+
+                        cbMatcherType.setSelectedItem(TriggerService.getMatcherType(matcher.getType()) );
+
+                        taMatcherExpression.setText(
+                                        nullToEmpty(
+                                                        matcher.getExpression()));
+                } else {
+
+                        cbMatcherType.setSelectedIndex(0);
+
+                        taMatcherExpression.setText("");
+                }
+
+                // -----------------------------------------------------
+                // Action
+                // -----------------------------------------------------
+
+                MatcherAndActionConfigEntry action = config.getAction();
+
+                if (action != null) {
+
+                        cbActionType.setSelectedItem(TriggerService.getActionType(action.getType()));
+
+                        taActionExpression.setText(
+                                        nullToEmpty(
+                                                        action.getExpression()));
+                } else {
+
+                        cbActionType.setSelectedIndex(0);
+
+                        taActionExpression.setText("");
+                }
+
+                // 重新生成参数 UI
+
+                rebuildMatcherParams();
+
+                rebuildActionParams();
         }
 
-        action.setType(
-                (String) cbActionType.getSelectedItem());
+        // =========================================================
+        // UI -> POJO
+        // =========================================================
 
-        action.setExpression(
-                taActionExpression.getText());
+        private void saveFormToConfig(
+                        TriggerConfigEntry config) {
 
-        action.setParams(
-                collectActionParams());
-    }
+                // -----------------------------------------------------
+                // 基础配置
+                // -----------------------------------------------------
 
-    // =========================================================
-    // Params
-    // =========================================================
+                config.setName(txtName.getText().trim());
 
-    private Map<String, Object> collectMatcherParams() {
+                KeyValuePair<String,String> selectedTriggerType = (KeyValuePair<String, String>) cbTriggerType.getSelectedItem();
+                if(selectedTriggerType != null ){
+                        config.setType(selectedTriggerType.getKey());
+                }
 
-        Map<String, Object> params = new LinkedHashMap<>();
+                config.setRemainingCount(
+                                (Integer) spRemainingCount.getValue());
 
-        String type = (String) cbMatcherType.getSelectedItem();
+                // -----------------------------------------------------
+                // Options
+                // -----------------------------------------------------
 
-        /*
-         * 这里暂时只是演示。
-         *
-         * 真正项目中应该根据你的 Matcher
-         * 实现类定义参数。
-         */
+                config.setSync(
+                                chkSync.isSelected());
 
-        if ("Regex".equals(type)) {
+                config.setUnique(
+                                chkUnique.isSelected());
 
-            /*
-             * TODO:
-             *
-             * 从 matcherParamsPanel 中
-             * 找到 ignoreCase checkbox。
-             */
+                config.setAutoRegister(
+                                chkAutoRegister.isSelected());
+
+                // -----------------------------------------------------
+                // Matcher
+                // -----------------------------------------------------
+
+                MatcherAndActionConfigEntry matcher = config.getMatcher();
+
+                if (matcher == null) {
+
+                        matcher = new MatcherAndActionConfigEntry();
+
+                        config.setMatcher(matcher);
+                }
+
+                KeyValuePair<String, String> selectedItem = (KeyValuePair<String, String>) cbMatcherType
+                                .getSelectedItem();
+                matcher.setType(selectedItem.getKey());
+
+                matcher.setExpression(
+                                taMatcherExpression.getText());
+
+                matcher.setParams(
+                                collectMatcherParams());
+
+                // -----------------------------------------------------
+                // Action
+                // -----------------------------------------------------
+
+                MatcherAndActionConfigEntry action = config.getAction();
+
+                if (action == null) {
+
+                        action = new MatcherAndActionConfigEntry();
+
+                        config.setAction(action);
+                }
+                KeyValuePair<String,String> selectedActionType = (KeyValuePair<String, String>) cbActionType.getSelectedItem();
+                if( selectedActionType != null){
+                action.setType(selectedActionType.getKey());
+                }
+                
+
+                action.setExpression(
+                                taActionExpression.getText());
+
+                action.setParams(
+                                collectActionParams());
         }
 
-        return params;
-    }
+        // =========================================================
+        // Params
+        // =========================================================
 
-    private Map<String, Object> collectActionParams() {
+        private Map<String, Object> collectMatcherParams() {
 
-        Map<String, Object> params = new LinkedHashMap<>();
+                Map<String, Object> params = new LinkedHashMap<>();
 
-        String type = (String) cbActionType.getSelectedItem();
+                KeyValuePair<String, String> selectedItem = (KeyValuePair<String, String>) cbMatcherType
+                                .getSelectedItem();
 
-        if ("Lua".equals(type)) {
+                String type = (String) selectedItem.getKey();
 
-            /*
-             * TODO:
-             *
-             * 从 actionParamsPanel 中
-             * 读取 timeout。
-             */
+                /*
+                 * 这里暂时只是演示。
+                 *
+                 * 真正项目中应该根据你的 Matcher
+                 * 实现类定义参数。
+                 */
+
+                if ("Regex".equals(type)) {
+
+                        /*
+                         * TODO:
+                         *
+                         * 从 matcherParamsPanel 中
+                         * 找到 ignoreCase checkbox。
+                         */
+                }
+
+                return params;
         }
 
-        return params;
-    }
+        private Map<String, Object> collectActionParams() {
 
-    // =========================================================
-    // 添加
-    // =========================================================
+                Map<String, Object> params = new LinkedHashMap<>();
+                KeyValuePair<String,String> selecteActionType = (KeyValuePair<String, String>) cbActionType.getSelectedItem();
+                String type = selecteActionType == null ? null : selecteActionType.getKey();
 
-    private void addTrigger() {
+                if ("Lua".equals(type)) {
 
-        TriggerConfigEntry config = new TriggerConfigEntry();
+                        /*
+                         * TODO:
+                         *
+                         * 从 actionParamsPanel 中
+                         * 读取 timeout。
+                         */
+                }
 
-        config.setName(
-                "新 Trigger");
-
-        config.setType(
-                "Inbound");
-
-        config.setRemainingCount(0);
-
-        config.setSync(false);
-
-        config.setUnique(false);
-
-        config.setAutoRegister(false);
-
-        // 默认 Matcher
-
-        MatcherAndActionConfigEntry matcher = new MatcherAndActionConfigEntry();
-
-        matcher.setType("Regex");
-
-        matcher.setExpression("");
-
-        matcher.setParams(
-                new LinkedHashMap<>());
-
-        config.setMatcher(matcher);
-
-        // 默认 Action
-
-        MatcherAndActionConfigEntry action = new MatcherAndActionConfigEntry();
-
-        action.setType("Command");
-
-        action.setExpression("");
-
-        action.setParams(
-                new LinkedHashMap<>());
-
-        config.setAction(action);
-
-        listModel.addElement(config);
-
-        triggerList.setSelectedValue(
-                config,
-                true);
-    }
-
-    // =========================================================
-    // 删除
-    // =========================================================
-
-    private void deleteTrigger() {
-
-        int index = triggerList.getSelectedIndex();
-
-        if (index < 0) {
-            return;
+                return params;
         }
 
-        TriggerConfigEntry config = listModel.getElementAt(index);
+        // =========================================================
+        // 添加
+        // =========================================================
 
-        int result = JOptionPane.showConfirmDialog(
-                this,
-                "确定删除 Trigger「"
-                        + config.getName()
-                        + "」吗？",
-                "确认删除",
-                JOptionPane.YES_NO_OPTION);
+        private void addTrigger() {
 
-        if (result != JOptionPane.YES_OPTION) {
-            return;
+                TriggerConfigEntry config = new TriggerConfigEntry();
+
+                config.setName(
+                                "新 Trigger");
+
+                config.setType(TriggerType.INBOUNG_TRIGGER.getType());
+
+                config.setRemainingCount(0);
+
+                config.setSync(false);
+
+                config.setUnique(false);
+
+                config.setAutoRegister(false);
+
+                // 默认 Matcher
+
+                MatcherAndActionConfigEntry matcher = new MatcherAndActionConfigEntry();
+
+                matcher.setType("Regex");
+
+                matcher.setExpression("");
+
+                matcher.setParams(
+                                new LinkedHashMap<>());
+
+                config.setMatcher(matcher);
+
+                // 默认 Action
+
+                MatcherAndActionConfigEntry action = new MatcherAndActionConfigEntry();
+
+                action.setType("Command");
+
+                action.setExpression("");
+
+                action.setParams(
+                                new LinkedHashMap<>());
+
+                config.setAction(action);
+
+                listModel.addElement(config);
+
+                triggerList.setSelectedValue(
+                                config,
+                                true);
         }
 
-        listModel.remove(index);
+        // =========================================================
+        // 删除
+        // =========================================================
 
-        currentTrigger = null;
+        private void deleteTrigger() {
 
-        if (!listModel.isEmpty()) {
+                int index = triggerList.getSelectedIndex();
 
-            triggerList.setSelectedIndex(
-                    Math.min(
-                            index,
-                            listModel.size() - 1));
+                if (index < 0) {
+                        return;
+                }
+
+                TriggerConfigEntry config = listModel.getElementAt(index);
+
+                int result = JOptionPane.showConfirmDialog(
+                                this,
+                                "确定删除 Trigger「"
+                                                + config.getName()
+                                                + "」吗？",
+                                "确认删除",
+                                JOptionPane.YES_NO_OPTION);
+
+                if (result != JOptionPane.YES_OPTION) {
+                        return;
+                }
+
+                listModel.remove(index);
+
+                currentTrigger = null;
+
+                if (!listModel.isEmpty()) {
+
+                        triggerList.setSelectedIndex(
+                                        Math.min(
+                                                        index,
+                                                        listModel.size() - 1));
+                }
         }
-    }
 
-    // =========================================================
-    // OK
-    // =========================================================
+        // =========================================================
+        // OK
+        // =========================================================
 
-    @Override
-    protected void ok() {
+        @Override
+        protected void ok() {
 
-        if (currentTrigger != null) {
-            saveFormToConfig(currentTrigger);
+                if (currentTrigger != null) {
+                        saveFormToConfig(currentTrigger);
+                }
+
+                List<TriggerConfigEntry> configs = new ArrayList<>();
+
+                for (int i = 0; i < listModel.size(); i++) {
+                        configs.add(
+                                        listModel.getElementAt(i));
+                }
+
+                TriggerFactory factory = SpringBeanUtil.getBean(
+                                TriggerFactory.class);
+
+                factory.save(configs);
         }
 
-        List<TriggerConfigEntry> configs = new ArrayList<>();
+        // =========================================================
+        // Utils
+        // =========================================================
 
-        for (int i = 0; i < listModel.size(); i++) {
-            configs.add(
-                    listModel.getElementAt(i));
+        private GridBagConstraints createGbc() {
+
+                GridBagConstraints gbc = new GridBagConstraints();
+
+                gbc.insets = new Insets(4, 6, 4, 6);
+
+                gbc.fill = GridBagConstraints.HORIZONTAL;
+
+                return gbc;
         }
 
-        TriggerFactory factory = SpringBeanUtil.getBean(
-                TriggerFactory.class);
+        private void addLabel(
+                        JPanel panel,
+                        GridBagConstraints gbc,
+                        int x,
+                        int y,
+                        String text) {
 
-        factory.save(configs);
-    }
+                gbc.gridx = x;
+                gbc.gridy = y;
 
-    // =========================================================
-    // Utils
-    // =========================================================
+                gbc.weightx = 0;
 
-    private GridBagConstraints createGbc() {
-
-        GridBagConstraints gbc = new GridBagConstraints();
-
-        gbc.insets = new Insets(4, 6, 4, 6);
-
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        return gbc;
-    }
-
-    private void addLabel(
-            JPanel panel,
-            GridBagConstraints gbc,
-            int x,
-            int y,
-            String text) {
-
-        gbc.gridx = x;
-        gbc.gridy = y;
-
-        gbc.weightx = 0;
-
-        panel.add(
-                new JLabel(text),
-                gbc);
-    }
-
-    private void addComponent(
-            JPanel panel,
-            GridBagConstraints gbc,
-            int x,
-            int y,
-            Component component) {
-
-        gbc.gridx = x;
-        gbc.gridy = y;
-
-        gbc.weightx = 1.0;
-
-        panel.add(
-                component,
-                gbc);
-    }
-
-    private String nullToEmpty(
-            String value) {
-
-        return value == null
-                ? ""
-                : value;
-    }
-
-    // =========================================================
-    // Demo
-    // =========================================================
-
-    private void loadDemoData() {
-
-        // -----------------------------------------------------
-        // 自动吃药
-        // -----------------------------------------------------
-
-        TriggerConfigEntry eatMedicine = new TriggerConfigEntry();
-
-        eatMedicine.setName("自动吃药");
-        eatMedicine.setType("Inbound");
-        eatMedicine.setRemainingCount(0);
-
-        eatMedicine.setSync(false);
-        eatMedicine.setUnique(true);
-        eatMedicine.setAutoRegister(true);
-
-        MatcherAndActionConfigEntry matcher = new MatcherAndActionConfigEntry();
-
-        matcher.setType("Regex");
-
-        matcher.setExpression(
-                "^你的气血发生危险");
-
-        matcher.setParams(
-                new LinkedHashMap<>());
-
-        eatMedicine.setMatcher(matcher);
-
-        MatcherAndActionConfigEntry action = new MatcherAndActionConfigEntry();
-
-        action.setType("Command");
-
-        action.setExpression(
-                "eat yao\n"
-                        + "drink shui");
-
-        action.setParams(
-                new LinkedHashMap<>());
-
-        eatMedicine.setAction(action);
-
-        listModel.addElement(
-                eatMedicine);
-
-        // -----------------------------------------------------
-        // Fullme
-        // -----------------------------------------------------
-
-        TriggerConfigEntry fullme = new TriggerConfigEntry();
-
-        fullme.setName("Fullme 验证码");
-        fullme.setType("Inbound");
-        fullme.setRemainingCount(1);
-
-        fullme.setSync(false);
-        fullme.setUnique(true);
-        fullme.setAutoRegister(true);
-
-        MatcherAndActionConfigEntry fullmeMatcher = new MatcherAndActionConfigEntry();
-
-        fullmeMatcher.setType("Include");
-
-        fullmeMatcher.setExpression(
-                "请点击以下链接或者输入验证码");
-
-        fullmeMatcher.setParams(
-                new LinkedHashMap<>());
-
-        fullme.setMatcher(
-                fullmeMatcher);
-
-        MatcherAndActionConfigEntry fullmeAction = new MatcherAndActionConfigEntry();
-
-        fullmeAction.setType("Java");
-
-        fullmeAction.setExpression(
-                "FullmeShowAction");
-
-        fullmeAction.setParams(
-                new LinkedHashMap<>());
-
-        fullme.setAction(
-                fullmeAction);
-
-        listModel.addElement(
-                fullme);
-
-        // 默认选中第一个
-
-        if (!listModel.isEmpty()) {
-
-            triggerList.setSelectedIndex(0);
+                panel.add(
+                                new JLabel(text),
+                                gbc);
         }
-    }
+
+        private void addComponent(
+                        JPanel panel,
+                        GridBagConstraints gbc,
+                        int x,
+                        int y,
+                        Component component) {
+
+                gbc.gridx = x;
+                gbc.gridy = y;
+
+                gbc.weightx = 1.0;
+
+                panel.add(
+                                component,
+                                gbc);
+        }
+
+        private String nullToEmpty(
+                        String value) {
+
+                return value == null
+                                ? ""
+                                : value;
+        }
+
+        // =========================================================
+        // Demo
+        // =========================================================
+
+        private void loadTriggerConfigData() {
+                for (TriggerConfigEntry entry : TriggerService.getTriggerConfigEntries()) {
+                        listModel.addElement( entry);
+                }
+                // 默认选中第一个
+                if (!listModel.isEmpty()) {
+                        triggerList.setSelectedIndex(0);
+                }
+        }
 }

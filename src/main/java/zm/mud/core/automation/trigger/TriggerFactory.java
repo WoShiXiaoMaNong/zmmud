@@ -3,7 +3,6 @@ package zm.mud.core.automation.trigger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
@@ -113,6 +112,10 @@ public class TriggerFactory {
     }
 
     public List<TriggerConfigEntry> getTriggers(MudSession session) {
+        if(session == null){
+            return (List<TriggerConfigEntry> ) CustomCfgLoader.loadUIConfig("pkuxkx", "triggers",
+                    new TypeReference<List<TriggerConfigEntry>>(){});
+        }
         return triggers.get(session.getSessionId());
     }
 

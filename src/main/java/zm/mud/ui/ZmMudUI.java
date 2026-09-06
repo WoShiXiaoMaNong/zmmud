@@ -48,7 +48,6 @@ public class ZmMudUI {
             },
             new ThreadPoolExecutor.CallerRunsPolicy());
 
-    @PostConstruct
     public void init() {
         mudMain = new MudMainScreen(globleCfg, this);
         FontUtil.registerFont();
@@ -63,6 +62,7 @@ public class ZmMudUI {
     }
 
     public void start() {
+        this.init();
         SwingUtilities.invokeLater(() -> {
             mudMain.setShow();
         });
