@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import com.alibaba.fastjson2.TypeReference;
 
 import zm.mud.core.cfg.CustomCfgLoader;
+import zm.mud.core.consts.ConfigConsts;
 import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.ui.component.MudMainScreen;
 
@@ -53,7 +54,7 @@ public class MudMenuBar extends JMenuBar {
      * 构建具体的菜单项
      */
     private void createMenus() {
-        List<ZmudMenuNode> menuNodes = (List<ZmudMenuNode>) CustomCfgLoader.loadUIConfig("menu", "menus", new TypeReference<List<ZmudMenuNode>>() {});
+        List<ZmudMenuNode> menuNodes = (List<ZmudMenuNode>) CustomCfgLoader.loadUIConfig(ConfigConsts.MENU_CONFG_PATH,"menu", "menus", new TypeReference<List<ZmudMenuNode>>() {});
         
         List<JMenu> topMenus = new ArrayList<>();
         for(ZmudMenuNode node : menuNodes) {

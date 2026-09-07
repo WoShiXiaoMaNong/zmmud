@@ -1,27 +1,23 @@
 package zm.mud.ui.component.menu.setting;
 
 import java.awt.*;
-import java.util.ArrayList;
-
 import javax.swing.*;
-
-import zm.mud.core.automation.trigger.TriggerFactory;
-import zm.mud.core.automation.trigger.cfg.TriggerConfigEntry;
 import zm.mud.ui.component.menu.AbsZmMudDialog;
+import zm.mud.ui.component.menu.KeyValuePair;
 import zm.mud.ui.component.menu.setting.trigger.TriggerPresenter;
-import zm.mud.utils.SpringBeanUtil;
+import zm.mud.ui.component.menu.setting.trigger.TriggerService;
 import zm.mud.ui.component.menu.setting.trigger.ActionConfigView;
 import zm.mud.ui.component.menu.setting.trigger.BaseConfigView;
 import zm.mud.ui.component.menu.setting.trigger.MatcherConfigView;
 import zm.mud.ui.component.menu.setting.trigger.TriggerListView;
 
+import java.util.List;
 /**
  * 触发器配置主对话框窗口
- * 职责：通过全局 GridBagLayout 强行锁死左侧列表与右侧 Action 的底边对齐，极度压缩行间距
  */
-public class Trigger extends AbsZmMudDialog {
+public class TriggerConfigMenu extends AbsZmMudDialog {
 
-    private JComboBox<String> mudConfigCombo; // 对应顶部的“选择配置”下拉框
+    private JComboBox<KeyValuePair<String,String>> mudConfigCombo; // 对应顶部的“选择配置”下拉框
 
     private TriggerListView listView;
     private BaseConfigView baseConfigView;
@@ -32,7 +28,7 @@ public class Trigger extends AbsZmMudDialog {
     /**
      * 严格对齐基类与原始 Trigger 的构造函数签名
      */
-    public Trigger(Frame owner, String title) {
+    public TriggerConfigMenu(Frame owner, String title) {
         super(owner, title);
         // 遵循截图标准：拉宽窗口以容纳横向并排的 BaseConfig 和 MatcherConfig 大文本域
         this.setSize(950, 700);
@@ -43,7 +39,6 @@ public class Trigger extends AbsZmMudDialog {
 
     /**
      * 核心内容面板拼装（由父类构造函数自发回调）
-     * 全局引入 GridBag 约束，消除全部冗余空隙，确保列表底部与 Action 底部像素级绝对齐平
      */
     @Override
     protected JPanel getContentPanelUi() {
@@ -64,8 +59,14 @@ public class Trigger extends AbsZmMudDialog {
         topConfigPanel.setBorder(BorderFactory.createTitledBorder("MUD 配置"));
         topConfigPanel.add(new JLabel("选择配置:"));
 
-        mudConfigCombo = new JComboBox<>(new String[] { "北大侠客行" });
-        mudConfigCombo.setSelectedIndex(-1); // 默认不选中
+        mudConfigCombo = new JComboBox<>();
+        List<KeyValuePair<String,String>> mudWorldList = TriggerService.getMudWorlds();
+
+        if( mudWorldList != null){
+            for( KeyValuePair<String,String> mudWorld : mudWorldList){
+                mudConfigCombo.addItem(mudWorld);
+            }
+        }
         topConfigPanel.add(mudConfigCombo);
 
         gbc.gridx = 0;
@@ -139,12 +140,28 @@ public class Trigger extends AbsZmMudDialog {
         // 3. 初始化控制中枢 Presenter
         this.presenter = new TriggerPresenter(listView, baseConfigView, matcherConfigView, actionConfigView);
 
+        // 默认选中第一条
+        mainPanel.addHierarchyListener(new java.awt.event.HierarchyListener() {
+            @Override
+            public void hierarchyChanged(java.awt.event.HierarchyEvent e) {
+                // 当窗口被 setVisible(true) 显示出来时
+                if ((e.getChangeFlags() & java.awt.event.HierarchyEvent.SHOWING_CHANGED) != 0 && mainPanel.isShowing()) {
+                    if (mudConfigCombo.getItemCount() > 0 && mudConfigCombo.getItemAt(0) != null) {
+                        mudConfigCombo.setSelectedIndex(0);
+                        KeyValuePair<String,String> firstItem = mudConfigCombo.getItemAt(0);
+                        presenter.loadWorldTriggers(firstItem.getKey());
+                    }
+                    // 刷新一次后即可移除监听器，避免后续重复触发
+                    mainPanel.removeHierarchyListener(this);
+                }
+            }
+        });
+
         // 联动顶栏
         mudConfigCombo.addActionListener(e -> {
-            String selectedWorld = (String) mudConfigCombo.getSelectedItem();
-            if ("北大侠客行".equals(selectedWorld)) {
-                presenter.loadWorldTriggers("pkuxkx");
-            }
+            KeyValuePair<String,String> mudWorld = (KeyValuePair<String,String>) mudConfigCombo.getSelectedItem();
+            presenter.loadWorldTriggers(mudWorld.getKey());
+            
         });
 
         return mainPanel;
@@ -159,4 +176,6 @@ public class Trigger extends AbsZmMudDialog {
             presenter.saveCurrentTrigger();
         }
     }
+
+
 }

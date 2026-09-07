@@ -38,6 +38,11 @@ public class TriggerRegister {
         }
     }
 
+    public void cleanAllTrigger(MudSession session){
+        this.inbMsgService.cleanTrigger(session);
+        this.oubMsgService.cleanTrigger(session);
+    }
+
 
 
 

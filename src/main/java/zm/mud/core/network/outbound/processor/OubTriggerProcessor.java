@@ -122,5 +122,20 @@ public class OubTriggerProcessor extends AbSessionValidatingOubMsgProcessor {
         return 2;
     }
 
+ public void cleanTrigger(MudSession session) {
+        this.lock.lock();
+        try {
+            String sessionId = session.getSessionId();
+            if( this.triggerMap.containsKey(sessionId)){
+                this.triggerMap.get(sessionId).clear();
+            }
+            if( this.triggers.containsKey(sessionId)){
+                this.triggers.get(sessionId).clear();
+            }
+        } finally {
+            this.lock.unlock();
+        }
+    }
+
   
 }

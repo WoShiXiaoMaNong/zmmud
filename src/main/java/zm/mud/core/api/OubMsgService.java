@@ -33,4 +33,8 @@ public class OubMsgService {
         }
         triggerProcessor.register(session,trigger);
     }
+
+    public void cleanTrigger(MudSession session) {
+        triggerProcessor.cleanTrigger(session);
+    }
 }

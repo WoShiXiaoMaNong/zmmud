@@ -8,7 +8,7 @@ public class BaseConfigView extends JPanel {
     private JTextField nameField = new JTextField();
     private JComboBox<KeyValuePair<String, String>> typeCombo = new JComboBox<>();
     private JSpinner countSpinner = new JSpinner(new SpinnerNumberModel(-1, -1, 999999, 1));
-    private JCheckBox cbSync = new JCheckBox("Sync"), cbUnique = new JCheckBox("Unique"), cbAutoRegister = new JCheckBox("Auto Register");
+    private JCheckBox cbSync , cbUnique , cbAutoRegister;
 
     public BaseConfigView() {
         setLayout(new GridBagLayout());
@@ -17,6 +17,19 @@ public class BaseConfigView extends JPanel {
     }
 
     private void initViews() {
+        // 1. Sync
+        cbSync = new JCheckBox("同步阻塞");
+        cbSync.setToolTipText("触发器将在主线程中同步运行，完成后才处理下一步的输入输出消息。当需要严格顺序是，开启");
+
+        // 2. Unique
+        cbUnique = new JCheckBox("全局唯一");
+        cbUnique.setToolTipText("当前会话下全局唯一，同一时间最多只允许出现一个相同的触发器。");
+
+        // 3. Auto Register
+        cbAutoRegister = new JCheckBox("自动注册");
+        cbAutoRegister.setToolTipText("会话（Session）启动时，自动将该触发器注册到运行时环境中。");
+
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(6, 8, 6, 8); gbc.fill = GridBagConstraints.HORIZONTAL;
 

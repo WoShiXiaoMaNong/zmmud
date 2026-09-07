@@ -4,7 +4,7 @@
     "title": "设置(S)",
     "type": "menu",
     "children": [
-      { "title": "触发器 (Trigger)", "type": "menuItem", "menuDialog": "zm.mud.ui.component.menu.setting.Trigger" },
+      { "title": "触发器 (Trigger)", "type": "menuItem", "menuDialog": "zm.mud.ui.component.menu.setting.TriggerConfigMenu" },
       { "title": "别名 (Alias)", "type": "menuItem", "menuDialog": "zm.mud.ui.component.menu.TBDMenu" },
       { "title": "宏设置 (Macro)", "type": "menuItem", "menuDialog":  "zm.mud.ui.component.menu.TBDMenu" },
       { "title": "", "type": "separator", "itemWindow": "" },

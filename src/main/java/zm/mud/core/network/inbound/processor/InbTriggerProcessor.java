@@ -115,4 +115,19 @@ public class InbTriggerProcessor extends AbsSessionValidatingInbMsgProcessor {
         return 3;
     }
 
+    public void cleanTrigger(MudSession session) {
+        this.lock.lock();
+        try {
+            String sessionId = session.getSessionId();
+            if( this.triggerMap.containsKey(sessionId)){
+                this.triggerMap.get(sessionId).clear();
+            }
+            if( this.triggers.containsKey(sessionId)){
+                this.triggers.get(sessionId).clear();
+            }
+        } finally {
+            this.lock.unlock();
+        }
+    }
+
 }

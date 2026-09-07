@@ -88,4 +88,10 @@ public class TriggerService {
         mudWorlds.add(new KeyValuePair<String, String>("pkuxkx", "北大侠客行"));
         return mudWorlds;
     }
+
+    public static void save(String mudWorldCode, List<TriggerConfigEntry> configs){
+        TriggerFactory factory = SpringBeanUtil.getBean(
+                TriggerFactory.class);
+         factory.save(mudWorldCode, configs);
+    }
 }

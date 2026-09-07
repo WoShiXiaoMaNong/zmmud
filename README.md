@@ -65,6 +65,9 @@ mud:
 # 编译
 mvn clean install
 
+# 复制配置文件
+复制 conf-temp 并重命名为 conf
+
 # 运行
 java -jar zm-mud.jar
 ```

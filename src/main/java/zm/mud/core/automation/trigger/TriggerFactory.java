@@ -16,6 +16,7 @@ import zm.mud.core.automation.trigger.cfg.TriggerConfigEntry;
 import zm.mud.core.automation.trigger.cfg.TriggerType;
 import zm.mud.core.automation.trigger.matcher.IMatcher;
 import zm.mud.core.cfg.CustomCfgLoader;
+import zm.mud.core.consts.ConfigConsts;
 import zm.mud.core.session.MudSession;
 import zm.mud.utils.SpringBeanUtil;
 
@@ -84,8 +85,8 @@ public class TriggerFactory {
     public synchronized void reload(MudSession session) {
         
         logger.info("Trigger init start....");
-        List<TriggerConfigEntry> triggersForCurrentWorld = (List<TriggerConfigEntry> ) CustomCfgLoader.loadUIConfig(session.getMudWorldCode(), "triggers",
-                    new TypeReference<List<TriggerConfigEntry>>(){});
+         List<TriggerConfigEntry> triggersForCurrentWorld = (List<TriggerConfigEntry> ) CustomCfgLoader.loadUIConfig(ConfigConsts.TRIGGER_CONFG_PATH,session.getMudWorldCode(), "triggers",
+                        new TypeReference<List<TriggerConfigEntry>>(){});
         this.worldTriggers.put(session.getMudWorldCode(),triggersForCurrentWorld);
 
         this.sessionTriggers.remove(session.getSessionId());
@@ -102,6 +103,9 @@ public class TriggerFactory {
             triggerMapForCurentSession.put(cfgEntry.getName(),cfgEntry);
         }
         logger.info("Trigger init finished");
+
+        logger.info("Clean trgger!");
+        triggerRegister.cleanAllTrigger(session);
 
         logger.info("Register triggers");
         for(TriggerConfigEntry cfgEntry :  triggersForCurrentWorld){
@@ -127,7 +131,8 @@ public class TriggerFactory {
 
         // 1. 保存配置文件
 
-        CustomCfgLoader.saveUIConfig(
+        CustomCfgLoader.saveConfig(
+                ConfigConsts.TRIGGER_CONFG_PATH,
                 mudWorldCode,
                 "triggers",
                 configs

@@ -1,8 +1,6 @@
 package zm.mud.ui.component.menu.setting.trigger;
 
 import zm.mud.core.automation.trigger.cfg.TriggerConfigEntry;
-import zm.mud.utils.SpringBeanUtil;
-import zm.mud.core.automation.trigger.TriggerFactory;
 import zm.mud.core.automation.trigger.cfg.MatcherAndActionConfigEntry;
 
 import javax.swing.JOptionPane;
@@ -47,8 +45,8 @@ public class TriggerPresenter {
         
         // 默认选中第一行（如果有数据的话）
         if (!configEntries.isEmpty()) {
-            // 这里会自动触发 SelectionListener 回显数据
-            // 若 listView 内部未实现此方法，可通过底层 listComponent 或手动回显第一条
+            // 手动回显第一条
+            listView.select(0);
         } else {
             clearAllViews();
         }
@@ -80,6 +78,8 @@ public class TriggerPresenter {
             newEntry.setName(""); // 留空，列表刷新时会显示你定义的 "[未命名触发器]"
             newEntry.setMatcher(new MatcherAndActionConfigEntry());
             newEntry.setAction(new MatcherAndActionConfigEntry());
+            newEntry.setAutoRegister(true);
+            newEntry.setUnique(true);
             
             // 2. 追加到内存缓存中
             configEntries.add(newEntry);
@@ -178,9 +178,7 @@ public class TriggerPresenter {
             return; 
         }
 
-        TriggerFactory factory = SpringBeanUtil.getBean(
-                TriggerFactory.class);
-         factory.save(currentMudWorld, configEntries);
+        TriggerService.save(currentMudWorld, configEntries);
 
         // 刷新左侧面板显示
         listView.refreshList(configEntries);

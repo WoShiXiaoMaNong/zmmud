@@ -34,4 +34,8 @@ public class InbMsgService {
         }
         triggerProcessor.register(session, trigger);
     }
+
+    public void cleanTrigger(MudSession session) {
+        triggerProcessor.cleanTrigger(session);
+    }
 }
