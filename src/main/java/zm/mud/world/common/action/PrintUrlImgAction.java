@@ -1,4 +1,4 @@
-package zm.mud.world.common.trigger.action;
+package zm.mud.world.common.action;
 
 
 

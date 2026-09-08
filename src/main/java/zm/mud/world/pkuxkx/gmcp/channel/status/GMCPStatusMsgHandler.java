@@ -10,7 +10,7 @@ import com.alibaba.fastjson2.JSON;
 import zm.mud.core.session.MudSession;
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.util.AnsiTextUtil;
-import zm.mud.world.pkuxkx.gmcp.GMCPContext;
+import zm.mud.world.common.gmcp.GMCPContext;
 import zm.mud.world.pkuxkx.gmcp.channel.IGMCPMsgHandler;
 
 

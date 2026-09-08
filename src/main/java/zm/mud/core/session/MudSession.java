@@ -15,7 +15,7 @@ import zm.mud.core.client.MudClient;
 import zm.mud.core.network.threads.ThreadPoolService;
 import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.utils.SpringBeanUtil;
-import zm.mud.world.pkuxkx.gmcp.GMCPContext;
+import zm.mud.world.common.gmcp.GMCPContext;
 
 public class MudSession {
     private static final Logger logger = LogManager.getLogger(MudSession.class);

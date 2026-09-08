@@ -10,7 +10,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 
 import zm.mud.core.session.MudSession;
-import zm.mud.world.pkuxkx.gmcp.GMCPContext;
+import zm.mud.world.common.gmcp.GMCPContext;
 import zm.mud.world.pkuxkx.gmcp.channel.IGMCPMsgHandler;
 
 @Component("GMCP.Move")

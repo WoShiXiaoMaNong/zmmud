@@ -33,7 +33,7 @@ import zm.mud.ui.component.image.MudImgIcon;
 import zm.mud.ui.component.menu.MudMenuBar;
 import zm.mud.ui.processor.MsgPrintProcessor;
 import zm.mud.utils.SpringBeanUtil;
-import zm.mud.world.pkuxkx.gmcp.GMCPContext;
+import zm.mud.world.common.gmcp.GMCPContext;
 
 public class MudMainScreen extends JFrame {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager

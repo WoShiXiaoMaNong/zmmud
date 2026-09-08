@@ -1,4 +1,4 @@
-package zm.mud.world.pkuxkx.gmcp;
+package zm.mud.world.common.gmcp;
 
 import java.util.HashMap;
 import java.util.Map;

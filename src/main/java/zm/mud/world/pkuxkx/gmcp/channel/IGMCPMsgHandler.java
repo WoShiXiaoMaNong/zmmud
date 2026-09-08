@@ -1,7 +1,7 @@
 package zm.mud.world.pkuxkx.gmcp.channel;
 
 import zm.mud.core.session.MudSession;
-import zm.mud.world.pkuxkx.gmcp.GMCPContext;
+import zm.mud.world.common.gmcp.GMCPContext;
 
 public interface IGMCPMsgHandler {
     /**
