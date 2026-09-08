@@ -44,7 +44,8 @@ public class BaseConfigView extends JPanel {
         gbc.gridx = 1; gbc.weightx = 1.0; add(typeCombo, gbc);
 
         // 3. 执行次数 (第 2 行)
-        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0.0; add(new JLabel("执行次数:"), gbc);
+        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0.0; add(new JLabel("可触发次数:"), gbc);
+        countSpinner.setToolTipText("负数表示无限次数");
         gbc.gridx = 1; gbc.weightx = 1.0; add(countSpinner, gbc);
 
         // 4. 选项复选框 (第 3 行)

@@ -51,6 +51,7 @@ public class PrintUrlImgAction implements IAction {
         String fullmeUrl = ret.getOriginMsg();
         List<ImageInfo> imgUrls = new ArrayList<>();
         int fetchTimes = this.getFetchTimes(session);
+        boolean enableDoubleClickPopup = this.getClickPopup(session);
         for(int i = 0 ; i < fetchTimes; i ++){
             boolean insertMode = false;
             boolean needBeforeNewLine = false;
@@ -67,8 +68,30 @@ public class PrintUrlImgAction implements IAction {
         int fullmeUrlOffset = ui.getMsgOffset(session,fullmeUrl);
         logger.debug("Fullme URL offset:" + fullmeUrlOffset);
         //北侠的fullme验证码图片是通过一个网页来展示的，最多允许刷新四次，都在客户端做掉了，所以这里不传入onDoubleClick事件，避免用户双击图片后又去刷新fullme网页
-        ui.printImg(session,imgUrls,fullmeUrlOffset,null); 
+        
+        if(enableDoubleClickPopup){
+            ui.printImg(session,imgUrls,fullmeUrlOffset); 
+        }else{
+            ui.printImg(session,imgUrls,fullmeUrlOffset,null); 
+        }
         logger.info(">>>>>>>>>> url:" + imgUrls);
+    }
+
+    private boolean getClickPopup(MudSession session) {
+         Object enableDoubleClickPopupObj = this.params.get("ClickPopup");
+        if (enableDoubleClickPopupObj == null) {
+            uiLogger.warn(session, "未获取到 ClickPopup 参数，默认双击不弹框！");
+            return false;
+        }
+        
+        try {
+            String strVal = enableDoubleClickPopupObj.toString().trim();
+            return Boolean.parseBoolean(strVal);
+        } catch (Exception e) {
+            // 如果用户在 UI 输入了非数字（比如 "abc"），会进到这里
+            logger.error("Get ClickPopup error. Invalid format: " + enableDoubleClickPopupObj, e);
+        }
+        return false;
     }
 
     private int getFetchTimes(MudSession session) {

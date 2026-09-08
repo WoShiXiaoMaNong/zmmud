@@ -29,7 +29,8 @@
                 "type": "PrintUrlImgAction",
                 "expression": "",
                 "params": {
-                    "FetchTimes": 4
+                    "FetchTimes": 4,
+                    "ClickPopup": true
                 }
             },
             "type": "inbound",
