@@ -1,4 +1,4 @@
-package zm.mud.pkuxkx.gmcp;
+package zm.mud.world.pkuxkx.gmcp;
 
 
 
@@ -10,7 +10,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import zm.mud.core.protocol.gmcp.IGMCPOnMessage;
 import zm.mud.core.session.MudSession;
-import zm.mud.pkuxkx.gmcp.channel.IGMCPMsgHandler;
+import zm.mud.world.pkuxkx.gmcp.channel.IGMCPMsgHandler;
 
 
 @Component

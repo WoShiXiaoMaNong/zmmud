@@ -1,7 +1,6 @@
 package zm.mud.ui;
 
 import zm.mud.core.session.MudSession;
-import zm.mud.core.thread.ZmmudThreadPools;
 import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.ui.component.MudMainScreen;
 import zm.mud.ui.component.MudTextArea;

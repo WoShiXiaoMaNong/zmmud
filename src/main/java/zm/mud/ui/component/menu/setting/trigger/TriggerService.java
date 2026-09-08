@@ -32,7 +32,7 @@ public class TriggerService {
         actionTypes.add(new KeyValuePair<String, String>("RegisterAction", "动态激活触发器"));
         actionTypes.add(new KeyValuePair<String, String>("SendCommand", "发送指令"));
         actionTypes.add(new KeyValuePair<String, String>("LuaScriptAction", "调用Lua脚本"));
-        actionTypes.add(new KeyValuePair<String, String>("FullmeShowAction", "北侠Fullme动作器"));
+        actionTypes.add(new KeyValuePair<String, String>("PrintUrlImgAction", "网络图片打印动作器"));
 
     }
 
@@ -80,7 +80,7 @@ public class TriggerService {
 
     public static List<TriggerConfigEntry> getTriggerConfigEntries(String mudWorldCode) {
         TriggerFactory triggerFactory = SpringBeanUtil.getBean(TriggerFactory.class);
-        return triggerFactory.getWorldTriggers("pkuxkx");
+        return triggerFactory.getWorldTriggers(mudWorldCode);
     }
 
     public static List<KeyValuePair<String, String>> getMudWorlds() {

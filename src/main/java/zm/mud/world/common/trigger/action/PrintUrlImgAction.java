@@ -1,4 +1,4 @@
-package zm.mud.pkuxkx.trigger.action;
+package zm.mud.world.common.trigger.action;
 
 
 
@@ -15,47 +15,42 @@ import zm.mud.core.automation.trigger.cfg.MatchResult;
 import zm.mud.core.session.MudSession;
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.component.image.ImageInfo;
+import zm.mud.ui.logger.UiLogger;
 import zm.mud.utils.HttpUtil;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 
-@Component("ACTION_FullmeShowAction")
+@Component("ACTION_PrintUrlImgAction")
 @Scope("prototype")
-public class FullmeShowAction implements IAction {
-    private static final Logger logger = LogManager.getLogger(FullmeShowAction.class);
+public class PrintUrlImgAction implements IAction {
+    private static final Logger logger = LogManager.getLogger(PrintUrlImgAction.class);
+
     private String actionCfgJsonStr;
-
-
     @Autowired
     private ZmMudUI ui;
+
+    @Autowired 
+    private UiLogger uiLogger;
 
     @Autowired
     private HttpUtil httpUtil;
 
-    @Override
-    public void setExpression(String expression) {
-        actionCfgJsonStr = expression;
-    }
+    private Map<String,Object> params;
 
-
-
-    @Override
-    public String getExpression() {
-        return this.actionCfgJsonStr;
+    public PrintUrlImgAction(){
+        this.params = new HashMap<>();
     }
 
     @Override
     public void execute(MudSession session,Trigger trigger, MatchResult ret) {
         String fullmeUrl = ret.getOriginMsg();
-       
-        
-        
         List<ImageInfo> imgUrls = new ArrayList<>();
-
-        int fetchTimes = 4;
+        int fetchTimes = this.getFetchTimes(session);
         for(int i = 0 ; i < fetchTimes; i ++){
             boolean insertMode = false;
             boolean needBeforeNewLine = false;
@@ -76,6 +71,22 @@ public class FullmeShowAction implements IAction {
         logger.info(">>>>>>>>>> url:" + imgUrls);
     }
 
+    private int getFetchTimes(MudSession session) {
+        Object fetchTimesObj = this.params.get("FetchTimes");
+        if (fetchTimesObj == null) {
+            uiLogger.warn(session, "未获取到 FetchTimes 参数，默认打印一次网络图片！");
+            return 1;
+        }
+        
+        try {
+            String strVal = fetchTimesObj.toString().trim();
+            return Integer.parseInt(strVal);
+        } catch (Exception e) {
+            // 如果用户在 UI 输入了非数字（比如 "abc"），会进到这里
+            logger.error("Get Fetch times error. Invalid number format: " + fetchTimesObj, e);
+        }
+        return 1;
+    }
     private String fetchImgUrl(String fullmeUrl){
         return httpUtil.download(fullmeUrl, new Function<InputStream,String>(){
             String imgUrl = null;
@@ -130,5 +141,30 @@ public class FullmeShowAction implements IAction {
         }, String.class);
     }
 
+        @Override
+    public void setExpression(String expression) {
+        actionCfgJsonStr = expression;
+    }
+
+
+
+    @Override
+    public Object getParam(String paramKey) {
+       return this.params.get(paramKey);
+    }
+
+
+
+    @Override
+    public void setParams(Map<String, Object> params) {
+        this.params.putAll(params);
+    }
+
+
+
+    @Override
+    public String getExpression() {
+        return this.actionCfgJsonStr;
+    }
 
 }

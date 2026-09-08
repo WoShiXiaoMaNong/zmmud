@@ -26,7 +26,6 @@ import zm.mud.core.api.ClientService;
 import zm.mud.core.api.InbMsgService;
 import zm.mud.core.session.MudSession;
 import zm.mud.core.thread.ZmmudThreadPools;
-import zm.mud.pkuxkx.gmcp.GMCPContext;
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.ui.component.image.ImageInfo;
@@ -34,6 +33,7 @@ import zm.mud.ui.component.image.MudImgIcon;
 import zm.mud.ui.component.menu.MudMenuBar;
 import zm.mud.ui.processor.MsgPrintProcessor;
 import zm.mud.utils.SpringBeanUtil;
+import zm.mud.world.pkuxkx.gmcp.GMCPContext;
 
 public class MudMainScreen extends JFrame {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager

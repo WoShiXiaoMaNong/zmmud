@@ -11,13 +11,13 @@
             },
             "action": {
                 "type": "RegisterAction",
-                "expression": "fullme-url"
+                "expression": "PrintUrlImgAction"
             },
             "type": "outbound",
             "remainingCount": -1
         },
         {
-            "name": "fullme-url",
+            "name": "PrintUrlImgAction",
             "sync": false,
             "unique": true,
             "autoRegister": false,
@@ -26,10 +26,10 @@
                 "expression": "http://fullme.pkuxkx.net/"
             },
             "action": {
-                "type": "FullmeShowAction",
-                "expression": "l",
+                "type": "PrintUrlImgAction",
+                "expression": "",
                 "params": {
-                    "baseUrl": "http://fullme.pkuxkx.net/"
+                    "FetchTimes": 4
                 }
             },
             "type": "inbound",

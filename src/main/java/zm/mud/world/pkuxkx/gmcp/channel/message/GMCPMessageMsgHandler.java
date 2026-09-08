@@ -1,4 +1,4 @@
-package zm.mud.pkuxkx.gmcp.channel.message;
+package zm.mud.world.pkuxkx.gmcp.channel.message;
 
 
 
@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson2.JSON;
 
 import zm.mud.core.session.MudSession;
-import zm.mud.pkuxkx.gmcp.channel.IGMCPMsgHandler;
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.component.image.ImageInfo;
+import zm.mud.world.pkuxkx.gmcp.channel.IGMCPMsgHandler;
 
 @Component("GMCP.Message")
 public class GMCPMessageMsgHandler implements IGMCPMsgHandler {

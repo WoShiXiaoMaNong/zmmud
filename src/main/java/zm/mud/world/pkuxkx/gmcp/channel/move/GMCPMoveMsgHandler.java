@@ -1,4 +1,4 @@
-package zm.mud.pkuxkx.gmcp.channel.move;
+package zm.mud.world.pkuxkx.gmcp.channel.move;
 
 import java.util.List;
 import java.util.Map;
@@ -10,8 +10,8 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 
 import zm.mud.core.session.MudSession;
-import zm.mud.pkuxkx.gmcp.GMCPContext;
-import zm.mud.pkuxkx.gmcp.channel.IGMCPMsgHandler;
+import zm.mud.world.pkuxkx.gmcp.GMCPContext;
+import zm.mud.world.pkuxkx.gmcp.channel.IGMCPMsgHandler;
 
 @Component("GMCP.Move")
 public class GMCPMoveMsgHandler implements IGMCPMsgHandler {

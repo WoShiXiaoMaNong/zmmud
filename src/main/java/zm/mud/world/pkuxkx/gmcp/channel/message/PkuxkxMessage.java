@@ -1,4 +1,4 @@
-package zm.mud.pkuxkx.gmcp.channel.message;
+package zm.mud.world.pkuxkx.gmcp.channel.message;
 
 public class PkuxkxMessage {
 
