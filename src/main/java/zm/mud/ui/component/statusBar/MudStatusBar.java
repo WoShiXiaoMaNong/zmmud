@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import zm.mud.core.cfg.CustomCfgLoader;
+import zm.mud.core.consts.ConfigConsts;
 import zm.mud.core.session.MudSession;
 import zm.mud.ui.component.IMudUiComponent;
 import zm.mud.ui.theme.ITheme;
@@ -162,7 +163,7 @@ public class MudStatusBar extends JPanel implements IMudUiComponent{
     }
 
     private void load() {
-        List<List<StatusBarLabelInfo>> config = (List<List<StatusBarLabelInfo>>) CustomCfgLoader.loadUIConfig("pkuxkx", "status_bar",new TypeReference<List<List<StatusBarLabelInfo>>>(){});
+        List<List<StatusBarLabelInfo>> config = (List<List<StatusBarLabelInfo>>) CustomCfgLoader.loadUIConfig(ConfigConsts.CUSTOM_CONFG_PATH,  this.session.getMudWorldCode(), "status_bar",new TypeReference<List<List<StatusBarLabelInfo>>>(){});
         
         for(List<StatusBarLabelInfo> infos : config ){
             List<StatusBarLabel> row = new ArrayList<>();

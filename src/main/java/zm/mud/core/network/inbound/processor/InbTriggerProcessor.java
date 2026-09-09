@@ -49,7 +49,7 @@ public class InbTriggerProcessor extends AbsSessionValidatingInbMsgProcessor {
             while (iterator.hasNext()) {
                 Trigger trigger = iterator.next();
                 // 1. 检查调用前是否已死亡（例如被其他线程或之前的逻辑改变了状态）
-                if (trigger.died()) {
+                if (trigger.died() || !trigger.isEnable()) {
                     iterator.remove(); // 安全删除
                     this.triggerMap.remove(trigger.getUniqueKey());
                     logger.debug(trigger.getTriggerName() + " : removed !");
@@ -113,6 +113,21 @@ public class InbTriggerProcessor extends AbsSessionValidatingInbMsgProcessor {
     @Override
     public int getOrder() {
         return 3;
+    }
+
+    public void cleanTrigger(MudSession session) {
+        this.lock.lock();
+        try {
+            String sessionId = session.getSessionId();
+            if( this.triggerMap.containsKey(sessionId)){
+                this.triggerMap.get(sessionId).clear();
+            }
+            if( this.triggers.containsKey(sessionId)){
+                this.triggers.get(sessionId).clear();
+            }
+        } finally {
+            this.lock.unlock();
+        }
     }
 
 }

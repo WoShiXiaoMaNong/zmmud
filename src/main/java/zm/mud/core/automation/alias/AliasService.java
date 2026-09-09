@@ -12,6 +12,7 @@ import com.alibaba.fastjson2.TypeReference;
 import jakarta.annotation.PostConstruct;
 import zm.mud.core.api.OubMsgService;
 import zm.mud.core.cfg.CustomCfgLoader;
+import zm.mud.core.consts.ConfigConsts;
 import zm.mud.core.session.MudSession;
 
 
@@ -46,7 +47,7 @@ public class AliasService {
 
     @PostConstruct
     public void reload() {
-        List<Alias> aliasList = (List<Alias>) CustomCfgLoader.loadUIConfig("pkuxkx", "alias",
+        List<Alias> aliasList = (List<Alias>) CustomCfgLoader.loadUIConfig(ConfigConsts.ALIAS_CONFG_PATH,"pkuxkx", "alias",
                     new TypeReference<List<Alias>>(){});
         
         if(aliasList == null || aliasList.isEmpty()){

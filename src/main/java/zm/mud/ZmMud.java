@@ -13,7 +13,7 @@ import zm.mud.ui.ZmMudUI;
 public class ZmMud {
     private static final Logger logger = org.apache.logging.log4j.LogManager.getLogger(ZmMud.class);
 
-    public static final ApplicationContext  context = new AnnotationConfigApplicationContext("zm.mud");
+    public static ApplicationContext context = new AnnotationConfigApplicationContext("zm.mud");
 
     public static void main(String[] args) throws UnknownHostException, IOException {
         ZmMud app = new ZmMud();

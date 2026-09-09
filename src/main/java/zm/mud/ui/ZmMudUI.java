@@ -1,7 +1,6 @@
 package zm.mud.ui;
 
 import zm.mud.core.session.MudSession;
-import zm.mud.core.thread.ZmmudThreadPools;
 import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.ui.component.MudMainScreen;
 import zm.mud.ui.component.MudTextArea;
@@ -21,8 +20,6 @@ import javax.swing.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-
-import jakarta.annotation.PostConstruct;
 
 @Service
 public class ZmMudUI {
@@ -48,7 +45,6 @@ public class ZmMudUI {
             },
             new ThreadPoolExecutor.CallerRunsPolicy());
 
-    @PostConstruct
     public void init() {
         mudMain = new MudMainScreen(globleCfg, this);
         FontUtil.registerFont();
@@ -63,6 +59,7 @@ public class ZmMudUI {
     }
 
     public void start() {
+        this.init();
         SwingUtilities.invokeLater(() -> {
             mudMain.setShow();
         });
@@ -90,9 +87,9 @@ public class ZmMudUI {
     }
 
     public void printImg(MudSession session, List<ImageInfo> imgUrls, int offset,
-            BiConsumer<MouseEvent, MudImgIcon> onDoubleClick) {
+            BiConsumer<MouseEvent, MudImgIcon> onClick) {
         uiThreadPool.execute(() -> {
-            mudMain.printImg(session, imgUrls, offset, onDoubleClick);
+            mudMain.printImg(session, imgUrls, offset, onClick);
         });
     }
 
@@ -101,9 +98,9 @@ public class ZmMudUI {
     }
 
     public void printImg(MudSession session, List<ImageInfo> imgUrls,
-            BiConsumer<MouseEvent, MudImgIcon> onDoubleClick) {
+            BiConsumer<MouseEvent, MudImgIcon> onClick) {
         uiThreadPool.execute(() -> {
-            mudMain.printImg(session, imgUrls, onDoubleClick);
+            mudMain.printImg(session, imgUrls, onClick);
         });
     }
 

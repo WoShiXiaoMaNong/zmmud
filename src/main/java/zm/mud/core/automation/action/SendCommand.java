@@ -5,11 +5,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import zm.mud.core.api.OubMsgService;
 import zm.mud.core.automation.trigger.Trigger;
 import zm.mud.core.automation.trigger.cfg.MatchResult;
 import zm.mud.core.session.MudSession;
-import zm.mud.utils.SpringBeanUtil;
 
 @Component("ACTION_SendCommand")
 @Scope("prototype")
@@ -20,8 +18,7 @@ public class SendCommand implements IAction{
 
     @Override
     public void execute(MudSession session,Trigger tirgger, MatchResult ret) {
-        OubMsgService oubMsgService = SpringBeanUtil.getBean(OubMsgService.class);
-        oubMsgService.send(session,this.getExpression());
+        session.send(this.getExpression());
     }
     @Override
     public void setExpression(String expression) {

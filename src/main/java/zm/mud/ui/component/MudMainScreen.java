@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -27,23 +26,28 @@ import zm.mud.core.api.ClientService;
 import zm.mud.core.api.InbMsgService;
 import zm.mud.core.session.MudSession;
 import zm.mud.core.thread.ZmmudThreadPools;
-import zm.mud.pkuxkx.gmcp.GMCPContext;
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.ui.component.image.ImageInfo;
 import zm.mud.ui.component.image.MudImgIcon;
+import zm.mud.ui.component.menu.MudMenuBar;
 import zm.mud.ui.processor.MsgPrintProcessor;
 import zm.mud.utils.SpringBeanUtil;
+import zm.mud.world.common.gmcp.GMCPContext;
 
 public class MudMainScreen extends JFrame {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(MudMainScreen.class);
+
+    private static final String CURRENT_MUD_WORLD_CODE = "pkuxkx";
 
     private GlobalCfg globleCfg;
 
     private ZmMudUI ui;
 
     private JTabbedPane tabbedPane;
+
+    private MudMenuBar mudMenuBar;
 
     private volatile String selectedSession;
 
@@ -112,7 +116,7 @@ public class MudMainScreen extends JFrame {
     }
 
     private void createNewSession(String title,String host,int port) {
-        MudSession session = MudSession.newSession(host,port);
+        MudSession session = MudSession.newSession(host,port,CURRENT_MUD_WORLD_CODE);
         session.setSessionName(title);
         this.addNewTab(session);
         session.start();
@@ -136,6 +140,7 @@ public class MudMainScreen extends JFrame {
         this.setLayout(new BorderLayout());
 
         // 1. 最上面：预留的 menu bar 留空
+        this.mudMenuBar = new MudMenuBar(this,this.globleCfg);
 
         // 2. 中间：Tab 管理组件（贴在顶部一行）
         tabbedPane = new javax.swing.JTabbedPane(javax.swing.JTabbedPane.TOP) {
@@ -175,6 +180,7 @@ public class MudMainScreen extends JFrame {
         tabbedPane.setPreferredSize(new Dimension(dimension));
         tabbedPane.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
 
+        this.add(mudMenuBar, BorderLayout.NORTH);
         this.add(tabbedPane, BorderLayout.CENTER);
     }
 
@@ -373,16 +379,16 @@ private void showConnectDialog() {
      * @param imgUrl
      * @param offset
      */
-    public void printImg(MudSession session, List<ImageInfo> imgUrls, int offset,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
+    public void printImg(MudSession session, List<ImageInfo> imgUrls, int offset,BiConsumer<MouseEvent,MudImgIcon> onClick) {
         String sessionId = session.getSessionId();
         MudTabPanel mudTabPanel = this.tabPanels.get(sessionId);
-        mudTabPanel.printImg(imgUrls, offset, onDoubleClick);
+        mudTabPanel.printImg(imgUrls, offset, onClick);
     }
 
-    public void printImg(MudSession session, List<ImageInfo> imgUrls,BiConsumer<MouseEvent,MudImgIcon> onDoubleClick) {
+    public void printImg(MudSession session, List<ImageInfo> imgUrls,BiConsumer<MouseEvent,MudImgIcon> onClick) {
         String sessionId = session.getSessionId();
         MudTabPanel mudTabPanel = this.tabPanels.get(sessionId);
-        mudTabPanel.printImg(imgUrls, onDoubleClick);
+        mudTabPanel.printImg(imgUrls, onClick);
     }
 
     public void setTitle(MudSession session, String title) {
@@ -459,6 +465,7 @@ private void showConnectDialog() {
         mudTabPanel.setUserName(userName);
     }
 
+    
 
 
 }
