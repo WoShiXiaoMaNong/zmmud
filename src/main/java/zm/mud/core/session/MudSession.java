@@ -184,4 +184,10 @@ public class MudSession {
     public boolean isAvailable() {
         return SessionStatus.isAvailable(this.status);
     }
+
+    public static void closeAll() {
+        for(MudSession session : allSessionMap.values()){
+            session.close();
+        }
+    }
 }

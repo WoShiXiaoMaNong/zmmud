@@ -26,7 +26,11 @@ public enum ZmmudThreadPools {
         this.poolSize = poolSize;
     }
 
-
+    public static void shutdownAll(){
+        for(ZmmudThreadPools thread: ZmmudThreadPools.values()){
+            thread.getExecutor().shutdown();
+        }
+    }
     public void execute(Runnable task){
         this.executor.execute(task);
     }
