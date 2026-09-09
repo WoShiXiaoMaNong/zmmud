@@ -80,6 +80,7 @@ public class TriggerPresenter {
             newEntry.setAction(new MatcherAndActionConfigEntry());
             newEntry.setAutoRegister(true);
             newEntry.setUnique(true);
+            newEntry.setEnable(false);
             
             // 2. 追加到内存缓存中
             configEntries.add(newEntry);
