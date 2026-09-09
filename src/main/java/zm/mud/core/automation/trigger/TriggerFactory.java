@@ -9,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.alibaba.fastjson2.TypeReference;
-import jakarta.annotation.PostConstruct;
 import zm.mud.core.automation.action.IAction;
 import zm.mud.core.automation.trigger.cfg.MatcherAndActionConfigEntry;
 import zm.mud.core.automation.trigger.cfg.TriggerConfigEntry;
@@ -78,6 +77,7 @@ public class TriggerFactory {
         trigger.setSync(cfgEntry.isSync());
         trigger.setUnique(cfgEntry.isUnique());
         trigger.setAutoRegister(cfgEntry.isAutoRegister());
+        trigger.setEnable(cfgEntry.isEnable());
         return trigger;
 
     }

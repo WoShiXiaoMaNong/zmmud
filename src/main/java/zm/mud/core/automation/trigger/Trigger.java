@@ -18,6 +18,7 @@ public class Trigger {
     private String triggerName;
     private IMatcher matcher;
     private IAction action;
+ 
     
 
     /**
@@ -41,6 +42,7 @@ public class Trigger {
      */
     private Boolean autoRegister;
 
+    private Boolean enable;
     
     /*
        1. 用于记录触发器还可以被触发几次。
@@ -149,6 +151,18 @@ public class Trigger {
     public boolean isUnique(){
         return this.unique;
     }
+
+
+    public Boolean isEnable() {
+        return enable;
+    }
+
+
+    public void setEnable(Boolean enable) {
+        this.enable = enable;
+    }
+
+    
 
     
 }   

@@ -5,6 +5,7 @@
             "sync": true,
             "unique": true,
             "autoRegister": true,
+            "enable": true,
             "matcher": {
                 "type": "Equals",
                 "expression": "fullme"
@@ -21,6 +22,7 @@
             "sync": false,
             "unique": true,
             "autoRegister": false,
+            "enable": true,
             "matcher": {
                 "type": "StartWith",
                 "expression": "http://fullme.pkuxkx.net/"
@@ -30,7 +32,7 @@
                 "expression": "",
                 "params": {
                     "FetchTimes": 4,
-                    "ClickPopup": true
+                    "ClickPopup": false
                 }
             },
             "type": "inbound",
@@ -41,6 +43,7 @@
             "sync": true,
             "unique": true,
             "autoRegister": true,
+            "enable": true,
             "matcher": {
                 "type": "Equals",
                 "expression": "hpbrief"
@@ -57,6 +60,7 @@
             "sync": false,
             "unique": true,
             "autoRegister": false,
+            "enable": true,
             "matcher": {
                 "type": "Regex",
                 "expression": "^#(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)$"

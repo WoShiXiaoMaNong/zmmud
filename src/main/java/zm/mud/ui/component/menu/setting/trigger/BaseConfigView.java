@@ -8,7 +8,7 @@ public class BaseConfigView extends JPanel {
     private JTextField nameField = new JTextField();
     private JComboBox<KeyValuePair<String, String>> typeCombo = new JComboBox<>();
     private JSpinner countSpinner = new JSpinner(new SpinnerNumberModel(-1, -1, 999999, 1));
-    private JCheckBox cbSync , cbUnique , cbAutoRegister;
+    private JCheckBox cbSync , cbUnique , cbAutoRegister, cbEnable;
 
     public BaseConfigView() {
         setLayout(new GridBagLayout());
@@ -28,6 +28,10 @@ public class BaseConfigView extends JPanel {
         // 3. Auto Register
         cbAutoRegister = new JCheckBox("自动注册");
         cbAutoRegister.setToolTipText("会话（Session）启动时，自动将该触发器注册到运行时环境中。");
+        
+        cbEnable = new JCheckBox("启用");
+
+        
 
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -50,7 +54,7 @@ public class BaseConfigView extends JPanel {
 
         // 4. 选项复选框 (第 3 行)
         JPanel pnl = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        pnl.add(cbSync); pnl.add(cbUnique); pnl.add(cbAutoRegister);
+        pnl.add(cbSync); pnl.add(cbUnique); pnl.add(cbAutoRegister);pnl.add(cbEnable);
         gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2; gbc.weightx = 1.0; gbc.insets = new Insets(10, 4, 4, 4);
         add(pnl, gbc);
     }
@@ -74,6 +78,7 @@ public class BaseConfigView extends JPanel {
         entry.setSync(cbSync.isSelected());
         entry.setUnique(cbUnique.isSelected());
         entry.setAutoRegister(cbAutoRegister.isSelected());
+        entry.setEnable(cbEnable.isSelected());
     }
 
     public void setBaseData(TriggerConfigEntry entry) {
@@ -83,6 +88,7 @@ public class BaseConfigView extends JPanel {
         cbSync.setSelected(!isNull && entry.isSync());
         cbUnique.setSelected(!isNull && entry.isUnique());
         cbAutoRegister.setSelected(!isNull && entry.isAutoRegister());
+        cbEnable.setSelected(!isNull && entry.isEnable());
         
         typeCombo.setSelectedIndex(0);
         if (!isNull) {

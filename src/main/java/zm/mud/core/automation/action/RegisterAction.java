@@ -39,6 +39,12 @@ public class RegisterAction implements IAction{
             logger.debug("new tirgger is null : " + trigger.getTriggerName());
             return;
         }
+
+        if( !newTrigger.isEnable()){
+            logger.debug("Trigger disabled!" + trigger.getTriggerName());
+            return;
+        }
+
         if(TriggerType.INBOUNG_TRIGGER.equals(newTrigger.getTriggerType())){
             InbMsgService is = SpringBeanUtil.getBean(InbMsgService.class);
             is.registerTrigger(session,newTrigger);

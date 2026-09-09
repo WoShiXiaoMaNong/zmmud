@@ -4,6 +4,7 @@ public class TriggerConfigEntry {
     private String name;
     private String type;
     private Integer remainingCount;
+    private Boolean enable;
     private MatcherAndActionConfigEntry matcher;
     private MatcherAndActionConfigEntry action;
 
@@ -85,6 +86,15 @@ public class TriggerConfigEntry {
     
     public void setSync(Boolean sync) {
         this.sync = sync;
+    }
+
+
+    public Boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(Boolean enable) {
+        this.enable = enable;
     }
 
     @Override
