@@ -74,7 +74,7 @@ public class PrintUrlImgAction implements IAction {
         }else{
             ui.printImg(session,imgUrls,fullmeUrlOffset,null); 
         }
-        logger.info(">>>>>>>>>> url:" + imgUrls);
+        logger.debug(">>>>>>>>>> url:" + imgUrls);
     }
 
     private boolean getClickPopup(MudSession session) {
