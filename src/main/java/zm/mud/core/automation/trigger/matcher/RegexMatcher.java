@@ -1,6 +1,5 @@
 package zm.mud.core.automation.trigger.matcher;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import java.util.ArrayList;
@@ -9,25 +8,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import zm.mud.core.automation.trigger.cfg.MatchResult;
-import zm.mud.ui.util.AnsiTextUtil;
 
 @Component("MATCHER_Regex")
 @Scope("prototype")
-public class RegexMatcher implements IMatcher {
+public class RegexMatcher extends AbsMatcher{
 
-    private String expression;
     private Pattern pattern;
 
-    @Autowired
-    private AnsiTextUtil ansiTextUtil;
-
     @Override
-    public MatchResult match(String msg) {
+    public MatchResult doMatch(String msg) {
         if (msg == null || this.pattern == null) {
             return MatchResult.UNMATCHED(msg);
         }
-        String cleanMsg = ansiTextUtil.cleanStartsWith(msg);
-        Matcher matcher = this.pattern.matcher(cleanMsg);
+        Matcher matcher = this.pattern.matcher(msg);
 
         if (matcher.find()) {
             List<String> matchedRet = new ArrayList<>();
@@ -46,16 +39,12 @@ public class RegexMatcher implements IMatcher {
 
     @Override
     public void setExpression(String expression) {
-        this.expression = expression;
         if (expression != null) {
             this.pattern = Pattern.compile(expression);
         } else {
             this.pattern = null;
         }
+        super.setExpression(expression);
     }
 
-    @Override
-    public String getExpression() {
-        return this.expression;
-    }
 }

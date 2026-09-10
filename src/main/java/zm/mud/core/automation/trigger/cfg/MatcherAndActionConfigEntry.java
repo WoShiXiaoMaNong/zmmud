@@ -3,7 +3,8 @@ package zm.mud.core.automation.trigger.cfg;
 import java.util.Map;
 
 public class MatcherAndActionConfigEntry {
-     private String type;
+    private String type;
+    private Boolean matchRawMsg;
     private String expression;
     private Map<String,Object> params;
 
@@ -18,9 +19,17 @@ public class MatcherAndActionConfigEntry {
     public void setParams(Map<String, Object> params) {
         this.params = params;
     }
+
+    public Boolean getMatchRawMsg() {
+        return matchRawMsg;
+    }
+    public void setMatchRawMsg(Boolean matchRawMsg) {
+        this.matchRawMsg = matchRawMsg;
+    }
     @Override
     public String toString() {
-        return "MatcherAndActionConfigEntry [type=" + type + ", expression=" + expression + ", params=" + params + "]";
+        return "MatcherAndActionConfigEntry [type=" + type + ", matchRawMsg=" + matchRawMsg + ", expression="
+                + expression + ", params=" + params + "]";
     }
 
     

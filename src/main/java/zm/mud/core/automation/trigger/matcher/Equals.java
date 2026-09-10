@@ -8,13 +8,10 @@ import zm.mud.core.automation.trigger.cfg.MatchResult;
 
 @Component("MATCHER_Equals")
 @Scope("prototype")
-public class Equals implements IMatcher{
-
-    private String expression;
-
+public class Equals extends AbsMatcher{
 
     @Override
-    public MatchResult match(String msg) {
+    public MatchResult doMatch(String msg) {
    
         boolean isMatched = msg != null && msg.equals(this.getExpression());
 
@@ -26,16 +23,5 @@ public class Equals implements IMatcher{
 
     }
 
-
-    @Override
-    public void setExpression(String expression) {
-        this.expression = expression;
-    }
-
-    @Override
-    public String getExpression() {
-       return this.expression;
-    }
-    
     
 }

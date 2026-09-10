@@ -13,6 +13,7 @@ import zm.mud.core.automation.action.IAction;
 import zm.mud.core.automation.trigger.cfg.MatcherAndActionConfigEntry;
 import zm.mud.core.automation.trigger.cfg.TriggerConfigEntry;
 import zm.mud.core.automation.trigger.cfg.TriggerType;
+import zm.mud.core.automation.trigger.matcher.AbsMatcher;
 import zm.mud.core.automation.trigger.matcher.IMatcher;
 import zm.mud.core.cfg.CustomCfgLoader;
 import zm.mud.core.consts.ConfigConsts;
@@ -55,8 +56,9 @@ public class TriggerFactory {
         Integer remainingCount = cfgEntry.getRemainingCount();
 
 
-        IMatcher matcher =  SpringBeanUtil.getBean("MATCHER_" + matcherEntry.getType(),IMatcher.class);
+        AbsMatcher matcher =  SpringBeanUtil.getBean("MATCHER_" + matcherEntry.getType(),AbsMatcher.class);
         matcher.setExpression(matcherEntry.getExpression());
+        matcher.setMatchRawMsg(matcherEntry.getMatchRawMsg());
 
         IAction action = SpringBeanUtil.getBean("ACTION_" + actionEntry.getType(),IAction.class);
         action.setExpression(actionEntry.getExpression());

@@ -8,13 +8,10 @@ import zm.mud.core.automation.trigger.cfg.MatchResult;
 
 @Component("MATCHER_EndWith")
 @Scope("prototype")
-public class EndWith implements IMatcher{
-
-    private String expression;
-
+public class EndWith extends AbsMatcher{
 
     @Override
-    public MatchResult match(String msg) {
+    public MatchResult doMatch(String msg) {
    
         boolean isMatched = msg != null && msg.endsWith(this.getExpression());
 
@@ -27,15 +24,6 @@ public class EndWith implements IMatcher{
     }
 
 
-    @Override
-    public void setExpression(String expression) {
-        this.expression = expression;
-    }
-
-    @Override
-    public String getExpression() {
-       return this.expression;
-    }
     
     
 }
