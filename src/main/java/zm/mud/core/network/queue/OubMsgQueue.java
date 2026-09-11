@@ -28,7 +28,7 @@ public class OubMsgQueue implements IZmmudQueue<OubMsg> {
     }
 
     @Override
-    public OubMsg take(MudSession session) {
+    public OubMsg take() {
         try {
             return msgQueue.take();
         } catch (InterruptedException e) {

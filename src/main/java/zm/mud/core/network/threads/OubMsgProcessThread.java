@@ -27,7 +27,7 @@ public class OubMsgProcessThread extends IZmmudThread {
     @Override
     public boolean doRun() {
         try {
-            OubMsg msg = oubMsgQueue.take(this.getSession());
+            OubMsg msg = oubMsgQueue.take();
             for (IOubMsgProcessor processor : oubMsgProcessors) {
                 if (processor.processMessage(msg)) {
                     break; // Message processed, move to next message

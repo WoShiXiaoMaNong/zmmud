@@ -51,7 +51,9 @@ public class InbTriggerProcessor extends AbsSessionValidatingInbMsgProcessor {
                 // 1. 检查调用前是否已死亡（例如被其他线程或之前的逻辑改变了状态）
                 if (trigger.died() || !trigger.isEnable()) {
                     iterator.remove(); // 安全删除
-                    this.triggerMap.remove(trigger.getUniqueKey());
+                    if(this.triggerMap.containsKey(session.getSessionId())){
+                        this.triggerMap.get(session.getSessionId()).remove(trigger.getUniqueKey());
+                    }
                     logger.debug(trigger.getTriggerName() + " : removed !");
                     continue;
                 }

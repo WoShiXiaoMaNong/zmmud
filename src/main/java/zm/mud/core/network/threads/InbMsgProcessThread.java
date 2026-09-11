@@ -30,7 +30,7 @@ public class InbMsgProcessThread extends IZmmudThread {
     @Override
     public boolean doRun() {
         try {
-            InbMsg msg = msgQueue.take(this.getSession());
+            InbMsg msg = msgQueue.take();
             for (IInbMsgProcessor inbMsgProcessor : inbProcessor) {
                 boolean shouldContinue = inbMsgProcessor.processMessage(msg);
                 if (!shouldContinue) {
