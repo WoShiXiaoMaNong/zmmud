@@ -21,6 +21,10 @@ public abstract class AbsOubCommand implements IOubCommand{
         if( transferedMsgs == null || transferedMsgs.isEmpty()){
             return;
         }
+
+        //特别注意，这里是把转换过的指令插入到 待发送队列的头部
+        //因为这一堆转换过的指令是当前待发送队列头部这个指令转换而来的，
+        //也就是用来替换当前的队列头的指令
         session.pushCommand(transferedMsgs);
         
     }
