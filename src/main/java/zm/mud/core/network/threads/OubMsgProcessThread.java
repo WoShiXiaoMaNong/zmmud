@@ -33,6 +33,7 @@ public class OubMsgProcessThread extends IZmmudThread {
                     break; // Message processed, move to next message
                 }
             }
+            Thread.sleep(500);//避免不小心快速发送消息
             return true;
         } catch (Exception e) {
             logger.error("Error occurred in OutboundMessageProcessThread", e);

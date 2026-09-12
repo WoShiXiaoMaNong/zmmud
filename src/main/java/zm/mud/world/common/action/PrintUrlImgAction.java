@@ -74,7 +74,7 @@ public class PrintUrlImgAction implements IAction {
         }else{
             ui.printImg(session,imgUrls,fullmeUrlOffset,null); 
         }
-        logger.debug(">>>>>>>>>> url:" + imgUrls);
+        logger.info(">>>>>>>>>> url:" + imgUrls);
     }
 
     private boolean getClickPopup(MudSession session) {
@@ -124,7 +124,9 @@ public class PrintUrlImgAction implements IAction {
 
                     char[] buffer = new char[64];
                     int charsRead;
-
+                    // 1. 定义最大允许的读取耗时（10 秒）
+                    long maxWaitTimeMs = 10000; 
+                    long startTime = System.currentTimeMillis();
                     // 绝对不要用 readLine()！用 read(buffer) 块读取
                     while ((charsRead = reader.read(buffer)) != -1) {
                         htmlBuilder.append(buffer, 0, charsRead);
@@ -133,6 +135,12 @@ public class PrintUrlImgAction implements IAction {
                         // 发现包含 .jpg" 或 <br>，说明图片地址已经成功进入内存
                         if (currentContent.contains(".jpg\"") || currentContent.contains("<br>")) {
                             break; // 强行阻断、立即退出循环，不给服务器挂起超时的机会！
+                        }
+                        // 2. 超时检测：判断当前时间是否超过了设定的最大等待时间
+                        if ((System.currentTimeMillis() - startTime) > maxWaitTimeMs) {
+                            // 可以选择直接 break，或者抛出异常以便上层捕获处理
+                            // throw new java.net.SocketTimeoutException("读取 HTML 内容超时");
+                            break; 
                         }
                     }
 

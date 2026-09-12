@@ -1,10 +1,10 @@
 package zm.mud.core.network.outbound.processor;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -15,7 +15,7 @@ import zm.mud.core.automation.trigger.cfg.MatchResult;
 import zm.mud.core.network.inbound.message.IACConfirmInbMsg;
 import zm.mud.core.network.outbound.message.OubMsg;
 import zm.mud.core.session.MudSession;
-import zm.mud.core.thread.ZmmudThreadPools;
+import zm.mud.core.thread.ZmmudThreadPool;
 
 @Service
 public class OubTriggerProcessor extends AbSessionValidatingOubMsgProcessor {
@@ -37,10 +37,12 @@ public class OubTriggerProcessor extends AbSessionValidatingOubMsgProcessor {
         if (msg instanceof IACConfirmInbMsg) {
             return false;
         }
-        this.lock.lock();
+        
        try {
+            this.lock.lock();
             MudSession session = msg.getSession();
             String sessionId = session.getSessionId();
+        
             List<Trigger> triggersForCurrentSession = this.triggers.get(sessionId);
             if(triggersForCurrentSession ==null){
                 return true;
@@ -51,7 +53,9 @@ public class OubTriggerProcessor extends AbSessionValidatingOubMsgProcessor {
                 // 1. 检查调用前是否已死亡（例如被其他线程或之前的逻辑改变了状态）
                 if (trigger.died() || !trigger.isEnable()) {
                     iterator.remove(); // 安全删除
-                    this.triggerMap.remove(trigger.getUniqueKey());
+                    if(this.triggerMap.containsKey(session.getSessionId())){
+                        this.triggerMap.get(session.getSessionId()).remove(trigger.getUniqueKey());
+                    }
                     logger.debug(trigger.getTriggerName() + " : removed !");
                     continue;
                 }
@@ -82,7 +86,7 @@ public class OubTriggerProcessor extends AbSessionValidatingOubMsgProcessor {
     }
 
    private void tryInvokeTriggerWithThreadPool(Trigger trigger, OubMsg msg) {
-        ZmmudThreadPools.MUD_TRRIGER.execute(
+        ZmmudThreadPool.execute(
                 () -> {
                    tryInvokeTrigger(trigger,msg);
                 });
@@ -106,7 +110,7 @@ public class OubTriggerProcessor extends AbSessionValidatingOubMsgProcessor {
             }
             List<Trigger> triggersForCurrentSession = this.triggers.get(sessionId);
             if( triggersForCurrentSession == null){
-                triggersForCurrentSession = new ArrayList<>();
+                triggersForCurrentSession = new CopyOnWriteArrayList<>();
                 this.triggers.put(sessionId,triggersForCurrentSession);
             }
 

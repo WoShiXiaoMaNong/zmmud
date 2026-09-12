@@ -1,10 +1,11 @@
 package zm.mud.core.network.inbound.processor;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -15,7 +16,7 @@ import zm.mud.core.automation.trigger.cfg.MatchResult;
 import zm.mud.core.network.inbound.message.IACConfirmInbMsg;
 import zm.mud.core.network.inbound.message.InbMsg;
 import zm.mud.core.session.MudSession;
-import zm.mud.core.thread.ZmmudThreadPools;
+import zm.mud.core.thread.ZmmudThreadPool;
 
 @Service
 public class InbTriggerProcessor extends AbsSessionValidatingInbMsgProcessor {
@@ -72,13 +73,13 @@ public class InbTriggerProcessor extends AbsSessionValidatingInbMsgProcessor {
     }
 
     private void tryInvokeTrigger(Trigger trigger, InbMsg msg) {
-        ZmmudThreadPools.MUD_TRRIGER.execute(
+        ZmmudThreadPool.executeWithTimeout(
                 () -> {
                     MatchResult ret = trigger.match(msg.getContent());
                     if (ret.isMatched()) {
                         trigger.fire(ret);
                     }
-                });
+                },3,TimeUnit.MINUTES);
 
     }
 
@@ -102,7 +103,7 @@ public class InbTriggerProcessor extends AbsSessionValidatingInbMsgProcessor {
 
             List<Trigger> triggerForCurrentSession = this.triggers.get(sessionId);
             if( triggerForCurrentSession == null){
-                triggerForCurrentSession = new ArrayList<>();
+                triggerForCurrentSession = new CopyOnWriteArrayList<>();
                 this.triggers.put(sessionId,triggerForCurrentSession);
             }
             triggerForCurrentSession.add(trigger);

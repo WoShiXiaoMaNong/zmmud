@@ -96,7 +96,7 @@ public class ThreadPoolService implements DisposableBean {
         }
         for(IZmmudThread t : threads){
             t.shutdown();
-            logger.info("IZmmudThread(%s) shutdown,Session ID:%s",t.getClass().getSimpleName(),session.getSessionId());
+            logger.info(String.format("IZmmudThread(%s) shutdown,Session ID:%s",t.getClass().getSimpleName(),session.getSessionId()));
         }
 
         ExecutorService executor = this.executorMap.get(session.getSessionId());

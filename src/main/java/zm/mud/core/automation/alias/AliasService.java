@@ -32,7 +32,7 @@ public class AliasService {
         if( params != null){
             aliasCommand = aliasCommand + " " + String.join(" ",params);
         }
-        oubMsgService.send(session,aliasCommand );
+        session.send(aliasCommand );
     }
 
     /**

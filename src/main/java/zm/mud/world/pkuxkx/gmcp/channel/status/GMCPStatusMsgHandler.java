@@ -44,7 +44,9 @@ public class GMCPStatusMsgHandler implements IGMCPMsgHandler {
             }
             Object name = packageDataMap.get("name");
             Object id = packageDataMap.get("id");
-            if( name != null && id != null){
+            if( name != null && id != null && session.getUserId() == null){
+                session.setUserId((String)id);
+                session.setUserName((String)name);
                 this.ui.setTitle(session, String.format(" >%s(%s)<", name,id));
                 this.ui.setCurrentUserName(session, String.format(" [%s]: ", name));
                 this.uiLogger.info(session, String.format("GMCP.Status:  %s(%s)",packageName,jsonPayload));

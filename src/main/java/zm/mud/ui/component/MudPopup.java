@@ -9,7 +9,7 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import zm.mud.core.session.MudSession;
-import zm.mud.core.thread.ZmmudThreadPools;
+import zm.mud.core.thread.ZmmudThreadPool;
 import zm.mud.ui.component.image.MudImgIcon;
 
 public class MudPopup extends JFrame {
@@ -74,7 +74,7 @@ public class MudPopup extends JFrame {
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
-        }, ZmmudThreadPools.MUD_UI_IMG_DOWNLOAD.getExecutor()).thenAcceptAsync(component -> {
+        }, ZmmudThreadPool.getExecutor()).thenAcceptAsync(component -> {
             // --- 3. 异步回调：下载成功，回到 EDT 线程更新 UI ---
 
             // 检查窗口是否已经被用户提前关闭，如果关闭了就不处理

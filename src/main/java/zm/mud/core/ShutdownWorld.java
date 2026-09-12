@@ -12,7 +12,7 @@ import zm.mud.core.network.inbound.message.NormalInbMsg;
 import zm.mud.core.network.queue.InbMsgQueue;
 import zm.mud.core.network.threads.ThreadPoolService;
 import zm.mud.core.session.MudSession;
-import zm.mud.core.thread.ZmmudThreadPools;
+import zm.mud.core.thread.ZmmudThreadPool;
 
 @Service
 public class ShutdownWorld extends Thread {
@@ -60,7 +60,7 @@ public class ShutdownWorld extends Thread {
             }
 
             try {
-                ZmmudThreadPools.shutdownAll();
+                ZmmudThreadPool.shutdown();
             } catch (Exception e) {
                 logger.error("Error occurred while executing shutdown", e);
             }

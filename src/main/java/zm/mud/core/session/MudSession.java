@@ -1,7 +1,13 @@
 package zm.mud.core.session;
 
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.Lock;
 import org.apache.logging.log4j.LogManager;
@@ -9,7 +15,9 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.util.UuidUtil;
 
 import zm.mud.ZmMud;
+import zm.mud.core.IUiLogger;
 import zm.mud.core.api.OubMsgService;
+import zm.mud.core.api.oub.IOubCommand;
 import zm.mud.core.automation.trigger.TriggerFactory;
 import zm.mud.core.client.MudClient;
 import zm.mud.core.network.threads.ThreadPoolService;
@@ -20,6 +28,12 @@ import zm.mud.world.common.gmcp.GMCPContext;
 public class MudSession {
     private static final Logger logger = LogManager.getLogger(MudSession.class);
 
+    // 玩家特有的出站命令队列
+    private final Deque<IOubCommand> oubCommandQueue = new LinkedList<>();
+    // 标记当前是否有命令正在执行/等待中，防止并发冲突
+    private volatile boolean isExecuting = false;
+    private Lock commandLock = new ReentrantLock();
+
     private String mudWorldCode;
 
     private String host;
@@ -27,6 +41,11 @@ public class MudSession {
 
     private String sessionId;
     private String sessionName;
+
+    /**
+     * 不需要走命令解析，直接发送
+     */
+    private Set<String> directlySendMsgPrefix;
 
     private MudClient client;
     private OubMsgService oubMsgService;
@@ -41,6 +60,13 @@ public class MudSession {
 
     private GlobalCfg globalCfg ;
 
+
+    private IUiLogger uiLogger;
+
+
+    private String userName;
+    private String userId;
+
     private static final Map<String, MudSession> allSessionMap = new HashMap<>();
     private static final Lock sessionMapLock = new ReentrantLock();
 
@@ -53,12 +79,15 @@ public class MudSession {
      * @param mudWorldCode
      * @return
      */
-    public static MudSession newSession(String host,int port,String mudWorldCode) {
+    public static MudSession newSession(String host,int port,String mudWorldCode,IUiLogger uiLogger) {
         try {
             sessionMapLock.tryLock();
             MudSession session = new MudSession(UuidUtil.getTimeBasedUuid().toString(),host,port,mudWorldCode);
+            session.setUiLogger(uiLogger);
+            session.addDirectlySendMsgPrefix("qq");
+            session.addDirectlySendMsgPrefix("chat");
             allSessionMap.put(session.getSessionId(), session);
-            
+
             return session;
         } catch (Exception e) {
             logger.error("Session start error!", e);
@@ -66,6 +95,23 @@ public class MudSession {
             sessionMapLock.unlock();
         }
         return null;
+    }
+
+    public void setUiLogger(IUiLogger uiLogger){
+        this.uiLogger = uiLogger;
+    }
+
+    /**
+     * <pre>
+     * 指定一些不需要走命令解析，直接发送的消息，例如：
+     * 1. chat 开头，这是一条聊天消息，不需走客户端这边的命令解析，直接外发
+     * 
+     * 避免chat之类的消息被客户端的命令解析器拆分为多段往外法。
+     * </pre>
+     * @param prefix
+     */
+    public void addDirectlySendMsgPrefix(String prefix){
+        this.directlySendMsgPrefix.add(prefix);
     }
 
     public static Map<String, MudSession> allSession() {
@@ -83,9 +129,26 @@ public class MudSession {
         this.mudWorldCode = mudWorldCode;
         this.status = SessionStatus.CREATED;
         this.globalCfg = SpringBeanUtil.getBean(GlobalCfg.class);
+        this.directlySendMsgPrefix = new HashSet<>();
     }
 
         
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public String getMudWorldCode() {
         return mudWorldCode;
@@ -177,8 +240,40 @@ public class MudSession {
 
     }
 
-    public void send(String input) {
-        this.oubMsgService.send(this, input);
+    /**
+     * 只用于命令回显
+     * @param msg
+     */
+    public void echoCommandToUI(String msg){
+        if(this.globalCfg.echoCommand()){
+            this.printToUI("> " + msg);
+        }  
+    }
+
+    public void printToUI(String msg){
+        if(this.uiLogger != null){
+            this.uiLogger.info(this, msg);
+        }
+    }
+
+    /**
+     * 
+     * @param input
+     */
+    public void send(String commandStr) {
+        boolean shouldSendDirectly = false;
+        for(String prefix : this.directlySendMsgPrefix){
+            if( commandStr.startsWith(prefix)){
+                shouldSendDirectly = true;
+                break;
+            }
+        }
+        if( shouldSendDirectly ){
+            this.oubMsgService.senddirectly(this, commandStr);
+        }else{
+            this.oubMsgService.sendCommand(this, commandStr);
+        }
+        
     }
 
     public boolean isAvailable() {
@@ -190,4 +285,60 @@ public class MudSession {
             session.close();
         }
     }
+
+    public void addCommands(List<IOubCommand> cmds) {
+        try{
+            commandLock.lock();
+            this.oubCommandQueue.addAll(cmds);
+        }finally{
+            commandLock.unlock();
+        }
+        
+    }
+
+    public synchronized IOubCommand pollCommand() {
+        return this.oubCommandQueue.poll();
+    }
+
+    public synchronized void pushCommand(List<IOubCommand> cmds) {
+        if(cmds == null || cmds.isEmpty()){
+            return;
+        }
+        for(int i = cmds.size() - 1; i >=0 ; i--){
+            this.oubCommandQueue.push(cmds.get(i));
+        }
+
+        
+    }
+
+
+    public boolean isCommandExecuting() {
+        try{
+            commandLock.lock();
+            return isExecuting;
+        }finally{
+            commandLock.unlock();
+        }
+    }
+
+    public void setCommandExecuting(boolean executing) {
+        try{
+            commandLock.lock();
+            this.isExecuting = executing;
+        }finally{
+            commandLock.unlock();
+        }
+    }
+    
+    public void clearCommands() {
+        try{
+            commandLock.lock();
+            this.oubCommandQueue.clear();
+            this.isExecuting = false;
+        }finally{
+            commandLock.unlock();
+        }
+    }
+
+    
 }

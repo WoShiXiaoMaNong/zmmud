@@ -35,15 +35,16 @@ public class ZmMudUI {
 
     private MudMainScreen mudMain;
 
-    private static final ThreadPoolExecutor uiThreadPool = new ThreadPoolExecutor(
-            1, 3, 60L, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(1024),
-            r -> {
-                Thread t = new Thread(r, "fullme-thread");
-                t.setDaemon(true); // 强烈建议：客户端退出时，这些线程会自动销毁
-                return t;
-            },
-            new ThreadPoolExecutor.CallerRunsPolicy());
+    private ThreadPoolExecutor executor  = new ThreadPoolExecutor(
+                                    1, 5, 60L, TimeUnit.SECONDS,
+                                    new LinkedBlockingQueue<>(1),
+                                    r -> {
+                                        Thread t = new Thread(r, "UI-PRINT-thread");
+                                        t.setDaemon(true); // 强烈建议：客户端退出时，这些线程会自动销毁
+                                        return t;
+                                    },
+                                    new ThreadPoolExecutor.CallerRunsPolicy()
+                            );
 
     public void init() {
         mudMain = new MudMainScreen(globleCfg, this);
@@ -88,7 +89,7 @@ public class ZmMudUI {
 
     public void printImg(MudSession session, List<ImageInfo> imgUrls, int offset,
             BiConsumer<MouseEvent, MudImgIcon> onClick) {
-        uiThreadPool.execute(() -> {
+        executor.execute(() -> {
             mudMain.printImg(session, imgUrls, offset, onClick);
         });
     }
@@ -99,7 +100,7 @@ public class ZmMudUI {
 
     public void printImg(MudSession session, List<ImageInfo> imgUrls,
             BiConsumer<MouseEvent, MudImgIcon> onClick) {
-        uiThreadPool.execute(() -> {
+        executor.execute(() -> {
             mudMain.printImg(session, imgUrls, onClick);
         });
     }
