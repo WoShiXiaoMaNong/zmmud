@@ -52,7 +52,9 @@ public class OubTriggerProcessor extends AbSessionValidatingOubMsgProcessor {
                 Trigger trigger = iterator.next();
                 // 1. 检查调用前是否已死亡（例如被其他线程或之前的逻辑改变了状态）
                 if (trigger.died() || !trigger.isEnable()) {
-                    iterator.remove(); // 安全删除
+                    triggersForCurrentSession.removeIf((t)->{
+                        return t.getUniqueKey().equals(trigger.getUniqueKey());
+                    }); // 安全删除
                     if(this.triggerMap.containsKey(session.getSessionId())){
                         this.triggerMap.get(session.getSessionId()).remove(trigger.getUniqueKey());
                     }
