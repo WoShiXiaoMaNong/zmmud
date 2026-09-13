@@ -1,4 +1,4 @@
-package zm.mud.core.api.oub.func;
+package zm.mud.core.command.func;
 
 import java.util.Collections;
 import java.util.List;
@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import zm.mud.core.api.oub.IOubCommand;
+import zm.mud.core.command.IOubCommand;
 import zm.mud.core.session.MudSession;
 
 @Component(value = IFuncCommand.FUNC_CMD_SPRING_BEAN_PREFIX + "wa")

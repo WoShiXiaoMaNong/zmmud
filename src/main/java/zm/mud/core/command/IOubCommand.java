@@ -1,4 +1,4 @@
-package zm.mud.core.api.oub;
+package zm.mud.core.command;
 
 
 public interface IOubCommand {

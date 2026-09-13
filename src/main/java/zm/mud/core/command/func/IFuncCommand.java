@@ -1,8 +1,8 @@
-package zm.mud.core.api.oub.func;
+package zm.mud.core.command.func;
 
 import java.util.List;
 
-import zm.mud.core.api.oub.IOubCommand;
+import zm.mud.core.command.IOubCommand;
 import zm.mud.core.session.MudSession;
 import zm.mud.utils.SpringBeanUtil;
 

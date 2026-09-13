@@ -1,12 +1,12 @@
-package zm.mud.core.api.oub.cmd;
+package zm.mud.core.command.cmd;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import zm.mud.core.api.oub.IOubCommand;
-import zm.mud.core.api.oub.func.FuncInfo;
-import zm.mud.core.api.oub.func.IFuncCommand;
+import zm.mud.core.command.IOubCommand;
+import zm.mud.core.command.func.FuncInfo;
+import zm.mud.core.command.func.IFuncCommand;
 import zm.mud.core.session.MudSession;
 
 public class FunctionalOubCommand extends AbsOubCommand{

@@ -17,6 +17,9 @@ public class CommandQue <T> {
 
 
     public void addCommands(List<T> cmds) {
+        if(cmds == null || cmds.isEmpty()){
+            return;
+        }
         try{
             commandLock.lock();
             this.oubCommandQueue.addAll(cmds);

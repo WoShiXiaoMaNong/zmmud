@@ -1,4 +1,4 @@
-package zm.mud.core.api.oub.func;
+package zm.mud.core.command.func;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import zm.mud.core.api.oub.IOubCommand;
-import zm.mud.core.api.oub.OubCommandParser;
+import zm.mud.core.command.IOubCommand;
+import zm.mud.core.command.OubCommandParser;
 import zm.mud.core.session.MudSession;
 
 @Component(value = IFuncCommand.FUNC_CMD_SPRING_BEAN_PREFIX + "Repeat")

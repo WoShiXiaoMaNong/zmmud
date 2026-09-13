@@ -1,4 +1,4 @@
-package zm.mud.core.api.oub;
+package zm.mud.core.command;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import zm.mud.core.api.oub.cmd.FunctionalOubCommand;
-import zm.mud.core.api.oub.cmd.NormalOubCommand;
+import zm.mud.core.command.cmd.FunctionalOubCommand;
+import zm.mud.core.command.cmd.NormalOubCommand;
 import zm.mud.core.session.MudSession;
 
 

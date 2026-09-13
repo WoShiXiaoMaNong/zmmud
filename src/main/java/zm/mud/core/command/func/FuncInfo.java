@@ -1,6 +1,6 @@
-package zm.mud.core.api.oub.func;
+package zm.mud.core.command.func;
 
-import zm.mud.core.api.oub.IOubCommand;
+import zm.mud.core.command.IOubCommand;
 
 public class FuncInfo {
     private String funcCode;

@@ -14,10 +14,13 @@ import org.apache.logging.log4j.core.util.UuidUtil;
 import zm.mud.ZmMud;
 import zm.mud.core.IUiLogger;
 import zm.mud.core.api.OubMsgService;
-import zm.mud.core.api.oub.IOubCommand;
 import zm.mud.core.automation.trigger.TriggerFactory;
 import zm.mud.core.client.MudClient;
+import zm.mud.core.command.IOubCommand;
+import zm.mud.core.command.OubCommandParser;
+import zm.mud.core.command.cmd.NormalOubCommand;
 import zm.mud.core.network.threads.ThreadPoolService;
+import zm.mud.core.thread.ZmmudThreadPool;
 import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.utils.SpringBeanUtil;
 import zm.mud.world.common.gmcp.GMCPContext;
@@ -60,6 +63,8 @@ public class MudSession {
 
     private String userName;
     private String userId;
+
+    private OubCommandParser oubCommandParser;
 
     private static final Map<String, MudSession> allSessionMap = new HashMap<>();
     private static final Lock sessionMapLock = new ReentrantLock();
@@ -124,6 +129,7 @@ public class MudSession {
         this.status = SessionStatus.CREATED;
         this.globalCfg = SpringBeanUtil.getBean(GlobalCfg.class);
         this.directlySendMsgPrefix = new HashSet<>();
+        this.oubCommandParser = SpringBeanUtil.getBean(OubCommandParser.class);
     }
 
         
@@ -263,11 +269,51 @@ public class MudSession {
             }
         }
         if( shouldSendDirectly ){
-            this.oubMsgService.senddirectly(this, commandStr);
+            this.oubMsgService.sendOutbound(this, commandStr);
         }else{
-            this.oubMsgService.sendCommand(this, commandStr);
+            this.sendCommand( commandStr);
         }
         
+    }
+
+    private void sendCommand(String commandStr){
+        
+        List<IOubCommand> commands = oubCommandParser.parse(this, commandStr);
+       
+       ZmmudThreadPool.execute(() -> {
+            // 1. 先把新命令安全地放入队列
+            oubCommandQueue.addCommands(commands);
+
+            // 2. 核心状态循环：确保新放入的命令一定会被执行
+            while (true) {
+                // 尝试抢占执行权
+                if (!oubCommandQueue.tryToExecute()) {
+                    // 如果抢占失败，说明已经有另一个线程在消费队列了。
+                    // 刚才我们通过 addCommands 放入的命令，会被那个正在执行的线程在 while 循环里顺便消费掉，
+                    // 所以当前线程可以安全地退出。
+                    return;
+                }
+
+                try {
+                    // 抢占成功，开始消费队列中的所有命令
+                    IOubCommand cmd = oubCommandQueue.pollCommand();
+                    while (cmd != null) {
+                        if (cmd instanceof NormalOubCommand) {
+                            this.oubMsgService.sendOutbound(this, cmd.getCommandStr());
+                        } else {
+                            cmd.exec();
+                        }
+                        cmd = oubCommandQueue.pollCommand();
+                    }
+                } catch(Exception e){
+                    logger.error("Excute Cmd error!",e);
+                    // 正常情况，会在 session.pollCommand();方法送，发现queue为空的时候，自动将executing设置为false
+                    // 只有异常情况，才需要手动设置，允许别的进程尝试来获取。
+                    oubCommandQueue.finishExecuting();
+                }
+
+            }
+        });
     }
 
     public boolean isAvailable() {
@@ -278,29 +324,6 @@ public class MudSession {
         for(MudSession session : allSessionMap.values()){
             session.close();
         }
-    }
-
-    public boolean tryToExecute() {
-        return this.oubCommandQueue.tryToExecute();
-    }
-
-    public void addCommands(List<IOubCommand> commands) {
-        if(commands == null || commands.isEmpty()){
-            return;
-        }
-        this.oubCommandQueue.addCommands(commands);
-    }
-
-    public IOubCommand pollCommand() {
-        return this.oubCommandQueue.pollCommand();
-    }
-
-    public void finishExecuting() {
-        this.oubCommandQueue.finishExecuting();
-    }
-
-    public int getCommandQueueSize() {
-        return this.oubCommandQueue.size();
     }
 
     public void pushCommand(List<IOubCommand> transferedMsgs) {
