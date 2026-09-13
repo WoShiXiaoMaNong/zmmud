@@ -1,12 +1,9 @@
 package zm.mud.core.session;
 
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.Lock;
@@ -29,10 +26,7 @@ public class MudSession {
     private static final Logger logger = LogManager.getLogger(MudSession.class);
 
     // 玩家特有的出站命令队列
-    private final Deque<IOubCommand> oubCommandQueue = new LinkedList<>();
-    // 标记当前是否有命令正在执行/等待中，防止并发冲突
-    private volatile boolean isExecuting = false;
-    private Lock commandLock = new ReentrantLock();
+    private final CommandQue<IOubCommand> oubCommandQueue = new CommandQue<>();
 
     private String mudWorldCode;
 
@@ -286,58 +280,31 @@ public class MudSession {
         }
     }
 
-    public void addCommands(List<IOubCommand> cmds) {
-        try{
-            commandLock.lock();
-            this.oubCommandQueue.addAll(cmds);
-        }finally{
-            commandLock.unlock();
-        }
-        
+    public boolean tryToExecute() {
+        return this.oubCommandQueue.tryToExecute();
     }
 
-    public synchronized IOubCommand pollCommand() {
-        return this.oubCommandQueue.poll();
-    }
-
-    public synchronized void pushCommand(List<IOubCommand> cmds) {
-        if(cmds == null || cmds.isEmpty()){
+    public void addCommands(List<IOubCommand> commands) {
+        if(commands == null || commands.isEmpty()){
             return;
         }
-        for(int i = cmds.size() - 1; i >=0 ; i--){
-            this.oubCommandQueue.push(cmds.get(i));
-        }
-
-        
+        this.oubCommandQueue.addCommands(commands);
     }
 
-
-    public boolean isCommandExecuting() {
-        try{
-            commandLock.lock();
-            return isExecuting;
-        }finally{
-            commandLock.unlock();
-        }
+    public IOubCommand pollCommand() {
+        return this.oubCommandQueue.pollCommand();
     }
 
-    public void setCommandExecuting(boolean executing) {
-        try{
-            commandLock.lock();
-            this.isExecuting = executing;
-        }finally{
-            commandLock.unlock();
-        }
+    public void finishExecuting() {
+        this.oubCommandQueue.finishExecuting();
     }
-    
-    public void clearCommands() {
-        try{
-            commandLock.lock();
-            this.oubCommandQueue.clear();
-            this.isExecuting = false;
-        }finally{
-            commandLock.unlock();
-        }
+
+    public int getCommandQueueSize() {
+        return this.oubCommandQueue.size();
+    }
+
+    public void pushCommand(List<IOubCommand> transferedMsgs) {
+        this.oubCommandQueue.pushCommand(transferedMsgs);
     }
 
     
