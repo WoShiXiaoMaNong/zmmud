@@ -28,7 +28,11 @@ public class ClientConfigService {
         if(entry == null){
             return;
         }
+        
+        GlobalCfg cfg = SpringBeanUtil.getBean(GlobalCfg.class);
         ZmMudUI ui = SpringBeanUtil.getBean(ZmMudUI.class);
         ui.resetFont(entry.getFontName(), entry.getFontSize());
+        cfg.setFontName(entry.getFontName());
+        cfg.setFontSize(entry.getFontSize());
     }
 }

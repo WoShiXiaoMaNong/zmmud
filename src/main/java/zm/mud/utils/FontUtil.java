@@ -64,42 +64,50 @@ public class FontUtil {
         }
     }
 
+public static List<Font> getAllMonospacedFonts() {
+    List<Font> monospacedFonts = new ArrayList<>();
+    
+    // 1. 获取系统中所有的物理字体
+    Font[] allFonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts();
+    
+    // 创建一个临时的 BufferedImage 以获取 FontMetrics 进行宽度测量
+    BufferedImage img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+    Graphics2D g2d = img.createGraphics();
 
-
-    public static List<Font> getAllMonospacedFonts() {
-        List<Font> monospacedFonts = new ArrayList<>();
-        
-        // 1. 获取系统中所有的物理字体
-        Font[] allFonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts();
-        
-        // 创建一个临时的 BufferedImage 以获取 FontMetrics 进行宽度测量
-        BufferedImage img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = img.createGraphics();
-
-        Set<String> fontName = new HashSet<>();
-        // 2. 遍历并筛选等宽字体
-        for (Font font : allFonts) {
-            if(fontName.contains(font.getFamily())){
-                continue;
-            }
-            fontName.add(font.getFamily());
-            // 使用常规样式、12号大小进行测试
-            Font deriveFont = font.deriveFont(Font.PLAIN, 12);
-            FontMetrics metrics = g2d.getFontMetrics(deriveFont);
-            
-            // 3. 核心逻辑：比较窄字符 'i' 和宽字符 'm' 的像素宽度
-            int widthI = metrics.charWidth('i');
-            int widthM = metrics.charWidth('m');
-            
-            // 如果宽度完全相同，则说明是等宽字体
-            if (widthI == widthM && widthI > 0) {
-                monospacedFonts.add(font);
-            }
+    // 🛠️ 统一基于 Family 级别去重（防止同一家族的粗体/斜体重复加入）
+    Set<String> familyNames = new HashSet<>();
+    
+    // 2. 遍历并筛选等宽字体
+    for (Font font : allFonts) {
+        String family = font.getFamily();
+        if (familyNames.contains(family)) {
+            continue;
         }
         
-        g2d.dispose();
-        return monospacedFonts;
+        // 使用常规样式、16号大小进行测试（16号字在测量中英文字体比例时比12号更稳定，规避像素舍入误差）
+        Font deriveFont = font.deriveFont(Font.PLAIN, 16);
+        FontMetrics metrics = g2d.getFontMetrics(deriveFont);
+        
+        // 3. 西文等宽校验：比较窄字符 'i' 和宽字符 'm' 的像素宽度
+        int widthI = metrics.charWidth('i');
+        int widthM = metrics.charWidth('m');
+        
+        // 🛠️ 4. 中文等宽与双字节对齐校验：
+        // 选取高频常用汉字 '中'（或 '猹' 等复杂字）进行测量
+        int widthChinese = metrics.charWidth('中');
+        
+        // 核心筛选条件：
+        // a. 英文部分本身等宽 (widthI == widthM)
+        // b. 🛠️ 中文部分的宽度严格等于英文宽度的 2 倍 (widthChinese == widthM * 2)
+        if (widthI == widthM && widthI > 0 && widthChinese == widthM * 2) {
+            familyNames.add(family);
+            monospacedFonts.add(font);
+        }
     }
+    
+    g2d.dispose();
+    return monospacedFonts;
+}
 
 
     public static void refreshHistoricalTextFont(JTextPane textPane, String newFontName, int newFontSize) {
