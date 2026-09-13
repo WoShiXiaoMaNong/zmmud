@@ -32,6 +32,7 @@ import zm.mud.ui.component.image.ImageInfo;
 import zm.mud.ui.component.image.MudImgIcon;
 import zm.mud.ui.component.statusBar.MudStatusBar;
 import zm.mud.ui.theme.ITheme;
+import zm.mud.utils.FontUtil;
 
 public class MudTabPanel implements IMudUiComponent{
     private static final Logger logger = LogManager.getLogger(MudTabPanel.class);
@@ -266,6 +267,7 @@ public class MudTabPanel implements IMudUiComponent{
 
     public void resetFont(String font, int size) {
         this.textArea.setFont(new Font(font, Font.PLAIN, size));
+        FontUtil.refreshHistoricalTextFont(textArea, font, size);
     }
 
     public void setTitle(String title) {

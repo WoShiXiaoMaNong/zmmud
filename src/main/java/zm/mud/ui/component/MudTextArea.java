@@ -157,7 +157,7 @@ public class MudTextArea extends JTextPane {
     public void printlnToScreen(String text, boolean enableBlod) {
         SwingUtilities.invokeLater(() -> {
             try {
-                ansiToStyleDocUtil.parseAnsiToStyledDocument(text + "\r\n", doc, this.globleCfg.getFont(),
+                ansiToStyleDocUtil.parseAnsiToStyledDocument(text + "\r\n", doc, this.getFont(),
                         this.globleCfg.getThemeType().getTheme(), enableBlod);
                 trimLines();
                 this.setCaretPosition(doc.getLength());
@@ -402,4 +402,6 @@ public class MudTextArea extends JTextPane {
         return -1;
     }
 
+    
+    
 }

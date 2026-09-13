@@ -361,6 +361,12 @@ private void showConnectDialog() {
         mudTabPanel.resetFont(font, size);
     }
 
+    public void resetFont(String font,int size){
+        for(MudSession session : MudSession.allSession().values()){
+            this.resetFont(session,font, size);
+        }
+    }
+
     public void printlnToScreen(MudSession session, String msg, boolean enableBlod) {
         String sessionId = session.getSessionId();
         MudTabPanel mudTabPanel = this.tabPanels.get(sessionId);

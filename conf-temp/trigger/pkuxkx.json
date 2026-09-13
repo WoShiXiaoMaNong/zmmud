@@ -1,83 +1,124 @@
 {
-    "triggers": [
-        {
-            "name": "fullme",
-            "sync": true,
-            "unique": true,
-            "autoRegister": true,
-            "enable": true,
-            "matcher": {
-                "type": "Equals",
+	"triggers":[
+		{
+			"action":{
+				"expression":"PrintUrlImgAction",
+				"matchRawMsg":null,
+				"params":{
+					
+				},
+				"type":"RegisterAction"
+			},
+			"autoRegister":true,
+			"enable":true,
+			"matcher":{
+				"expression":"fullme",
 				"matchRawMsg":false,
-                "expression": "fullme"
-            },
-            "action": {
-                "type": "RegisterAction",
-                "expression": "PrintUrlImgAction"
-            },
-            "type": "outbound",
-            "remainingCount": -1
-        },
-        {
-            "name": "PrintUrlImgAction",
-            "sync": false,
-            "unique": true,
-            "autoRegister": false,
-            "enable": true,
-            "matcher": {
-                "type": "StartWith",
+				"params":{
+					
+				},
+				"type":"Equals"
+			},
+			"name":"fullme",
+			"remainingCount":-1,
+			"sync":true,
+			"type":"outbound",
+			"unique":true
+		},
+		{
+			"action":{
+				"expression":"",
+				"matchRawMsg":null,
+				"params":{
+					"FetchTimes":"4",
+					"ClickPopup":"false"
+				},
+				"type":"PrintUrlImgAction"
+			},
+			"autoRegister":false,
+			"enable":true,
+			"matcher":{
+				"expression":"http://fullme.pkuxkx.net",
 				"matchRawMsg":false,
-                "expression": "http://fullme.pkuxkx.net/"
-            },
-            "action": {
-                "type": "PrintUrlImgAction",
-                "expression": "",
-                "params": {
-                    "FetchTimes": 4,
-                    "ClickPopup": false
-                }
-            },
-            "type": "inbound",
-            "remainingCount": 1
-        },
-        {
-            "name": "hpbrief-oub-trigger",
-            "sync": true,
-            "unique": true,
-            "autoRegister": true,
-            "enable": true,
-            "matcher": {
-                "type": "Equals",
+				"params":{
+					
+				},
+				"type":"StartWith"
+			},
+			"name":"PrintUrlImgAction",
+			"remainingCount":-1,
+			"sync":false,
+			"type":"inbound",
+			"unique":true
+		},
+		{
+			"action":{
+				"expression":"hpbrief-inb-trigger",
+				"matchRawMsg":null,
+				"params":null,
+				"type":"RegisterAction"
+			},
+			"autoRegister":true,
+			"enable":true,
+			"matcher":{
+				"expression":"hpbrief",
 				"matchRawMsg":false,
-                "expression": "hpbrief"
-            },
-            "action": {
-                "type": "RegisterAction",
-                "expression": "hpbrief-inb-trigger"
-            },
-            "type": "outbound",
-            "remainingCount": -1
-        },
-        {
-            "name": "hpbrief-inb-trigger",
-            "sync": false,
-            "unique": true,
-            "autoRegister": false,
-            "enable": true,
-            "matcher": {
-                "type": "Regex",
+				"params":null,
+				"type":"Equals"
+			},
+			"name":"hpbrief-oub-trigger",
+			"remainingCount":-1,
+			"sync":true,
+			"type":"outbound",
+			"unique":true
+		},
+		{
+			"action":{
+				"expression":"C:\\Users\\zhong\\Desktop\\dev\\zmmud2\\Lua-Scirpts\\hp_handler.lua",
+				"matchRawMsg":null,
+				"params":{
+					"baseUrl":"test"
+				},
+				"type":"LuaScriptAction"
+			},
+			"autoRegister":false,
+			"enable":true,
+			"matcher":{
+				"expression":"^#(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)$",
 				"matchRawMsg":false,
-                "expression": "^#(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)$"
-            },
-            "action": {
-                "type": "LuaScriptAction",
-                "expression": "C:\\Users\\zhong\\Desktop\\dev\\zmmud2\\Lua-Scirpts\\hp_handler.lua",
-                "params": {
-                    "baseUrl": "test"
-                }
-            },
-            "type": "inbound",
-            "remainingCount": 3
-        }
-    ]
+				"params":null,
+				"type":"Regex"
+			},
+			"name":"hpbrief-inb-trigger",
+			"remainingCount":3,
+			"sync":false,
+			"type":"inbound",
+			"unique":true
+		},
+		{
+			"action":{
+				"expression":"#wa 3000;climb tree",
+				"matchRawMsg":null,
+				"params":{
+					
+				},
+				"type":"SendCommand"
+			},
+			"autoRegister":true,
+			"enable":true,
+			"matcher":{
+				"expression":"你小心翼翼的往上爬了一点，觉得头晕眼花，就赶紧爬了下来",
+				"matchRawMsg":false,
+				"params":{
+					
+				},
+				"type":"StartWith"
+			},
+			"name":"climb_tree",
+			"remainingCount":-1,
+			"sync":false,
+			"type":"inbound",
+			"unique":true
+		}
+	]
 }

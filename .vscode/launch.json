@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "FontUtil",
+            "request": "launch",
+            "mainClass": "zm.mud.utils.FontUtil",
+            "projectName": "zmmud"
+        },
+        {
+            "type": "java",
             "name": "ZmudMenuLoader",
             "request": "launch",
             "mainClass": "zm.mud.ui.component.menu.ZmudMenuLoader",

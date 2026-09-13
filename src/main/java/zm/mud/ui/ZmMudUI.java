@@ -7,7 +7,6 @@ import zm.mud.ui.component.MudTextArea;
 import zm.mud.ui.component.image.ImageDoubleClickListener;
 import zm.mud.ui.component.image.ImageInfo;
 import zm.mud.ui.component.image.MudImgIcon;
-import zm.mud.utils.FontUtil;
 
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -48,7 +47,6 @@ public class ZmMudUI {
 
     public void init() {
         mudMain = new MudMainScreen(globleCfg, this);
-        FontUtil.registerFont();
     }
 
     public void setTitle(MudSession session, String title) {
@@ -112,6 +110,10 @@ public class ZmMudUI {
 
     public static ApplicationContext getContext() {
         return context;
+    }
+
+    public void resetFont(String font, int size){
+        this.mudMain.resetFont(font, size);
     }
 
 }
