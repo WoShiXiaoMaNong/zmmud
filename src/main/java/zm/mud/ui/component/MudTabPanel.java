@@ -249,7 +249,11 @@ public class MudTabPanel implements IMudUiComponent{
     }
 
     public void printImg(List<ImageInfo> imgUrls, int offset,BiConsumer<MouseEvent,MudImgIcon> onClick) {
-        this.textArea.printImg(imgUrls,offset,onClick);
+        if( offset < 0) {
+            this.printImg(imgUrls, onClick);
+        }else{
+            this.textArea.printImg(imgUrls,offset,onClick);
+        }
     }
 
     public void printImg(List<ImageInfo> imgUrls,BiConsumer<MouseEvent,MudImgIcon> onClick) {
