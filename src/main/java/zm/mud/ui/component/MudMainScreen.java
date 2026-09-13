@@ -25,12 +25,13 @@ import javax.swing.event.ChangeListener;
 import zm.mud.core.api.ClientService;
 import zm.mud.core.api.InbMsgService;
 import zm.mud.core.session.MudSession;
-import zm.mud.core.thread.ZmmudThreadPools;
+import zm.mud.core.thread.ZmmudThreadPool;
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.ui.component.image.ImageInfo;
 import zm.mud.ui.component.image.MudImgIcon;
 import zm.mud.ui.component.menu.MudMenuBar;
+import zm.mud.ui.logger.UiLogger;
 import zm.mud.ui.processor.MsgPrintProcessor;
 import zm.mud.utils.SpringBeanUtil;
 import zm.mud.world.common.gmcp.GMCPContext;
@@ -85,7 +86,7 @@ public class MudMainScreen extends JFrame {
         pack(); // 根据组件首选大小调整窗口
         setLocationRelativeTo(null);
 
-        ZmmudThreadPools.MUD_UI.execute(() -> {
+        Thread statusBarThread = new Thread(() -> {
             logger.info("Status bar refresh loop start");
             while (true) {
                 if (tabPanels == null || tabPanels.isEmpty()) {
@@ -112,11 +113,13 @@ public class MudMainScreen extends JFrame {
                 }
 
             }
-        });
+        }, "StatusBar-Refresh-Thread");
+        statusBarThread.setDaemon(true); // 设置为守护线程，应用退出时自动销毁
+        statusBarThread.start();
     }
 
     private void createNewSession(String title,String host,int port) {
-        MudSession session = MudSession.newSession(host,port,CURRENT_MUD_WORLD_CODE);
+        MudSession session = MudSession.newSession(host,port,CURRENT_MUD_WORLD_CODE,SpringBeanUtil.getBean(UiLogger.class));
         session.setSessionName(title);
         this.addNewTab(session);
         session.start();
@@ -464,8 +467,5 @@ private void showConnectDialog() {
         MudTabPanel mudTabPanel = this.tabPanels.get(sessionId);
         mudTabPanel.setUserName(userName);
     }
-
-    
-
 
 }

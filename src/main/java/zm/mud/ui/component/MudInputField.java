@@ -83,18 +83,9 @@ public class MudInputField extends JPanel implements IMudUiComponent {
             if (!input.isEmpty()) {
                 this.textField.setText("");
                 this.pushToHistory(input);
-                this.showCurrentInput(input);
                 handleInput(input);
             }
         });
-    }
-
-    /**
-     * 用于回显命令
-     * @param input
-     */
-    private void showCurrentInput(String input){
-        this.currentTabPanel.printlnToScreen("> " + input);
     }
 
     private void pushToHistory(String input) {

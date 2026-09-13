@@ -26,7 +26,7 @@ mud:
     theme: DARK
     showTimestamp: false
     displayBufLineNumber: 500
-  
+    echoCommand: true
   GMCP:
     # 是否启用 GMCP 协议
     enable: true

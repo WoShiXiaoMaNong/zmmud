@@ -4,5 +4,5 @@ import zm.mud.core.session.MudSession;
 
 public interface IZmmudQueue<T> {
     void put(MudSession session,T b);
-    T take(MudSession session);
+    T take();
 }

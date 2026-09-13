@@ -9,6 +9,7 @@ import com.alibaba.fastjson2.JSON;
 
 import zm.mud.core.session.MudSession;
 import zm.mud.ui.ZmMudUI;
+import zm.mud.ui.logger.UiLogger;
 import zm.mud.ui.util.AnsiTextUtil;
 import zm.mud.world.common.gmcp.GMCPContext;
 import zm.mud.world.pkuxkx.gmcp.channel.IGMCPMsgHandler;
@@ -20,6 +21,9 @@ public class GMCPStatusMsgHandler implements IGMCPMsgHandler {
             .getLogger(GMCPStatusMsgHandler.class);
     @Autowired
     private ZmMudUI ui;
+
+      @Autowired
+    private UiLogger uiLogger;
 
     @Autowired
     private AnsiTextUtil AnsiTextUtil;
@@ -40,11 +44,13 @@ public class GMCPStatusMsgHandler implements IGMCPMsgHandler {
             }
             Object name = packageDataMap.get("name");
             Object id = packageDataMap.get("id");
-            if( name != null && id != null){
+            if( name != null && id != null && session.getUserId() == null){
+                session.setUserId((String)id);
+                session.setUserName((String)name);
                 this.ui.setTitle(session, String.format(" >%s(%s)<", name,id));
                 this.ui.setCurrentUserName(session, String.format(" [%s]: ", name));
-                this.ui.printlnToScreen(session, String.format("GMCP.Status:  %s(%s)",packageName,jsonPayload));
-                logger.info("GMCP.Status: {}: {}",packageName,jsonPayload);
+                this.uiLogger.info(session, String.format("GMCP.Status:  %s(%s)",packageName,jsonPayload));
+                logger.debug("GMCP.Status: {}: {}",packageName,jsonPayload);
             }
 
           

@@ -1,10 +1,10 @@
 package zm.mud.core.api;
 
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import zm.mud.core.automation.trigger.Trigger;
 import zm.mud.core.network.outbound.message.NrmOubMsg;
 import zm.mud.core.network.outbound.processor.OubTriggerProcessor;
@@ -21,9 +21,10 @@ public class OubMsgService {
     @Autowired
     private OubTriggerProcessor triggerProcessor;
 
-    public void send(MudSession session,String msg){
-
-        this.oubMsgQueue.put(session,new NrmOubMsg(session,msg));
+    
+    public void sendOutbound(MudSession session,String msStr){
+        session.echoCommandToUI( msStr);
+         this.oubMsgQueue.put(session,new NrmOubMsg(session,msStr));
     }
 
     public void registerTrigger(MudSession session,Trigger trigger){
@@ -37,4 +38,5 @@ public class OubMsgService {
     public void cleanTrigger(MudSession session) {
         triggerProcessor.cleanTrigger(session);
     }
+
 }

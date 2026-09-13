@@ -27,12 +27,13 @@ public class OubMsgProcessThread extends IZmmudThread {
     @Override
     public boolean doRun() {
         try {
-            OubMsg msg = oubMsgQueue.take(this.getSession());
+            OubMsg msg = oubMsgQueue.take();
             for (IOubMsgProcessor processor : oubMsgProcessors) {
                 if (processor.processMessage(msg)) {
                     break; // Message processed, move to next message
                 }
             }
+            Thread.sleep(500);//避免不小心快速发送消息
             return true;
         } catch (Exception e) {
             logger.error("Error occurred in OutboundMessageProcessThread", e);

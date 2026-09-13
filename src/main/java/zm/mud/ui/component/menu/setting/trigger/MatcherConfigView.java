@@ -9,6 +9,7 @@ import zm.mud.ui.component.menu.KeyValuePair;
 public class MatcherConfigView extends JPanel {
     private JComboBox<KeyValuePair<String, String>> typeCombo;
     private JTextArea expressionArea; // 修正：改为多行文本域
+    private JCheckBox cbMatchRowMsg;
 
     public MatcherConfigView() {
         setLayout(new GridBagLayout());
@@ -17,6 +18,7 @@ public class MatcherConfigView extends JPanel {
     }
 
     private void initViews() {
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(6, 8, 6, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -32,6 +34,13 @@ public class MatcherConfigView extends JPanel {
         setupRenderer(typeCombo);
         gbc.gridx = 1; gbc.weightx = 1.0;
         add(typeCombo, gbc);
+
+        cbMatchRowMsg = new JCheckBox("匹配原始字符串");
+        cbMatchRowMsg.setToolTipText("原始字符串： 来自Mud服务器最原始的字符串，可能包含ANSI的颜色信息，不是单纯的文字信息");
+        gbc.gridx = 2;
+        gbc.gridy = 0;
+        gbc.weightx = 0.0;
+        add(cbMatchRowMsg, gbc);
 
         // 2. 表达式标签 (第 1 行)
         gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 2; gbc.weightx = 1.0;
@@ -68,6 +77,7 @@ public class MatcherConfigView extends JPanel {
         }
         entry.setExpression(expressionArea.getText()); // 获取多行文本
         entry.setParams(new HashMap<>());
+        entry.setMatchRawMsg(cbMatchRowMsg.isSelected());
         return entry;
     }
 
@@ -83,6 +93,8 @@ public class MatcherConfigView extends JPanel {
                 break;
             }
         }
+        
+        cbMatchRowMsg.setSelected(Boolean.TRUE.equals(entry.getMatchRawMsg()));
         expressionArea.setText(entry.getExpression());
     }
 }

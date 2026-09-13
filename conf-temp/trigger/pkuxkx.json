@@ -8,6 +8,7 @@
             "enable": true,
             "matcher": {
                 "type": "Equals",
+				"matchRawMsg":false,
                 "expression": "fullme"
             },
             "action": {
@@ -25,6 +26,7 @@
             "enable": true,
             "matcher": {
                 "type": "StartWith",
+				"matchRawMsg":false,
                 "expression": "http://fullme.pkuxkx.net/"
             },
             "action": {
@@ -46,6 +48,7 @@
             "enable": true,
             "matcher": {
                 "type": "Equals",
+				"matchRawMsg":false,
                 "expression": "hpbrief"
             },
             "action": {
@@ -63,6 +66,7 @@
             "enable": true,
             "matcher": {
                 "type": "Regex",
+				"matchRawMsg":false,
                 "expression": "^#(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)$"
             },
             "action": {

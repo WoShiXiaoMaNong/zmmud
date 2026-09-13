@@ -35,8 +35,7 @@ zhongming139@126.com
 
 ---
 
-<img width="1220" height="843" alt="image" src="https://github.com/user-attachments/assets/cdd0926d-8aa5-4ac1-b5e1-ed99a1e6ff76" />
-
+<img width="1199" height="831" alt="image" src="https://github.com/user-attachments/assets/b2f789c9-cc66-44a0-be51-91d5be294ba7" />
 
 ## ⚙️ 配置说明
 

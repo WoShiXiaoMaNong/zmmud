@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -30,9 +31,15 @@ public class SpringBeanUtil {
         return null;
     }
 
-    public static <T> T getBean(@NonNull String beanId,Class<T> t){
+    public static <T> T getBean(@NonNull String beanId,Class<T> t,Object ...params){
         try{
-            T bean = (T) ctx.getBean(beanId);
+            T bean = null;
+            if (params != null && params.length > 0) {
+                bean = (T) ctx.getBean(beanId, params); 
+            }else{
+                bean = (T) ctx.getBean(beanId);
+            }
+            
             return (T)bean;
         }catch(Exception e){
             logger.debug(e);
@@ -49,8 +56,12 @@ public class SpringBeanUtil {
 
     public static <T> List<T> getAllBeansByType(Class<T> type) {
         Map<String, T> beanMap = ctx.getBeansOfType(type);
+        List<T> list = new ArrayList<>(beanMap.values());
+    
+        // 恢复 Ordered 接口和 @Order 注解的排序
+        AnnotationAwareOrderComparator.sort(list);
         
-        return new ArrayList<>(beanMap.values());
+        return list;
     }
 
 }

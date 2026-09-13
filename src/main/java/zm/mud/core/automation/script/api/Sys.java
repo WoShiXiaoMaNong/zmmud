@@ -21,16 +21,12 @@ import zm.mud.core.session.MudSession;
 public class Sys implements ILuaApi{
     private static final Logger logger = LogManager.getLogger(Sys.class);
     
-    @Autowired
-    private OubMsgService oubMsgService;
-
-
     public void print(MudSession session,String msg){
         logger.info(msg);
     }
 
     public void send(MudSession session,String command){
-        oubMsgService.send(session,command);
+        session.send(command);
            
     }
 

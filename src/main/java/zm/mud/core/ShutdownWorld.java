@@ -12,6 +12,7 @@ import zm.mud.core.network.inbound.message.NormalInbMsg;
 import zm.mud.core.network.queue.InbMsgQueue;
 import zm.mud.core.network.threads.ThreadPoolService;
 import zm.mud.core.session.MudSession;
+import zm.mud.core.thread.ZmmudThreadPool;
 
 @Service
 public class ShutdownWorld extends Thread {
@@ -46,12 +47,25 @@ public class ShutdownWorld extends Thread {
                 ((AbstractApplicationContext) context).close();
             }
 
-      
+            try {
+                MudSession.closeAll();
+            } catch (Exception e) {
+                logger.error("Error occurred while executing shutdown", e);
+            }
+
             try {
                 threadPoolService.shutdownAll();
             } catch (Exception e) {
                 logger.error("Error occurred while executing shutdown", e);
             }
+
+            try {
+                ZmmudThreadPool.shutdown();
+            } catch (Exception e) {
+                logger.error("Error occurred while executing shutdown", e);
+            }
+
+            
         
         logger.info("Cleanup tasks completed. ShutdownWorld is exiting.");
     }

@@ -1,5 +1,6 @@
 package zm.mud.ui.processor;
 
+import java.awt.Color;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Function;
@@ -51,7 +52,7 @@ public class MsgPrintProcessor implements Function<InbMsg,Boolean>{
         if (showTimestamp && msg.getTimestamp() != null) {
             LocalDateTime time = msg.getTimestamp();
 
-            return "[" + TIME_FMT.format(time) + "] " + msg.getContent();
+            return ansiTextUtil.stringWithAnsiColor("[" + TIME_FMT.format(time) + "] ",Color.GREEN) + msg.getContent();
         } else {
             return msg.getContent();
         }

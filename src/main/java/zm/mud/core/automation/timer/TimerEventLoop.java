@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import zm.mud.core.thread.ZmmudThreadPools;
+
 
 @Service
 public class TimerEventLoop {
@@ -17,7 +17,7 @@ public class TimerEventLoop {
         logger.info("TimerEveentLoop start!");
         this.timerManager.reloadTimer();
 
-        ZmmudThreadPools.MUD_TIMER.execute(() -> {
+        Thread timerThread = new Thread(() -> {
             logger.info("TimerEveentLoop Thread start!");
             while (true) {
                 // 1. 驱动 Timer 执行
@@ -43,8 +43,9 @@ public class TimerEventLoop {
                 }
             }
             logger.info("TimerEveentLoop end!");
-        });
-
+        }, "Timer-Refresh-Thread");
+        timerThread.setDaemon(true); // 设置为守护线程，应用退出时自动销毁
+        timerThread.start();
     }
 
 }

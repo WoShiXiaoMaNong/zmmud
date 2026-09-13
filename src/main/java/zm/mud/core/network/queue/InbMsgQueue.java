@@ -29,7 +29,7 @@ public class InbMsgQueue implements IZmmudQueue<InbMsg> {
     }
 
     @Override
-    public InbMsg take(MudSession session) {
+    public InbMsg take() {
         try {
             return msgQueue.take();
         } catch (InterruptedException e) {

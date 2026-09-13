@@ -44,8 +44,14 @@ public class GlobalCfg {
     @Value("${mud.server.port}")
     private int defaultPost;
 
+     @Value("${mud.ui.echoCommand:false}")
+    private boolean ehcoCommand;
 
     
+    public boolean echoCommand(){
+        return this.ehcoCommand;
+    }
+
     public String getDefaultHost() {
         return defaultHost;
     }
