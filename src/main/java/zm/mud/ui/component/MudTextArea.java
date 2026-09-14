@@ -167,7 +167,6 @@ public class MudTextArea extends JTextPane {
             try {
                 ZmmudText ansiText = ansiToTokenUtil.parseAnsiToTokens(text + "\r\n", 
                         this.globleCfg.getThemeType().getTheme(), enableBlod, this.ansiCtx);
-                logger.info(ansiText.getOriginText().replace("\r\n",""));
               // 假设你从外部传入或拿到了配置信息，比如基础字体 Font
                 Font font = this.getFont(); 
 

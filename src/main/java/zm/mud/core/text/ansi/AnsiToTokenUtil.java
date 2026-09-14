@@ -28,7 +28,8 @@ public class AnsiToTokenUtil {
     public ZmmudText parseAnsiToTokens(String text, ITheme theme, boolean enableBold, AnsiContext ctx) {
         List<TextToken> tokens = new ArrayList<>();
         ZmmudText ansiText = new ZmmudText(text, tokens);
-        if (text == null || text.isEmpty()) return ansiText;
+        if (text == null || text.isEmpty())
+            return ansiText;
 
         int index = 0;
         int len = text.length();
@@ -40,8 +41,8 @@ public class AnsiToTokenUtil {
             if (nextAnsi == -1 || nextAnsi > index) {
                 int end = (nextAnsi == -1) ? len : nextAnsi;
                 String segment = text.substring(index, end)
-                                     .replace("\t", "    ")
-                                     .replace("\u3000", "  ");
+                        .replace("\t", "    ")
+                        .replace("\u3000", "  ");
 
                 if (!segment.isEmpty()) {
                     // 使用上下文中的持久颜色状态
@@ -52,11 +53,11 @@ public class AnsiToTokenUtil {
                             ctx.getLastRawBgCode(),
                             ctx.getCurrentRenderedBg().getRGB() & 0xFFFFFF,
                             ctx.isBold(),
-                            ctx.isUnderline()
-                    ));
+                            ctx.isUnderline()));
                 }
                 index = end;
-                if (index >= len) break;
+                if (index >= len)
+                    break;
             }
 
             // 2. 精准解析 ANSI 指令边界
@@ -76,52 +77,62 @@ public class AnsiToTokenUtil {
 
                 if (terminatorChar == 'm') {
                     if (codeStr.isEmpty()) {
-                        // 空参数重置：\u001B[m
+                        // 1. 空参数直接彻底重置
                         ctx.reset(theme);
                     } else {
                         String[] codes = codeStr.split(";");
 
-                        // 优先检查是否有全局重置码 0
+                        // 2. 规范判定：先检查这个序列里有没有包含重置码 "0" 或 ""(空码在某些MUD中代表0)
+                        boolean hasReset = false;
                         for (String code : codes) {
-                            if ("0".equals(code.trim())) {
-                                ctx.reset(theme);
+                            String trimmed = code.trim();
+                            if ("0".equals(trimmed) || trimmed.isEmpty()) {
+                                hasReset = true;
                                 break;
                             }
                         }
 
-                        // 逐个解析样式码
+                        // 如果包含 0，立刻强制将上下文清空恢复到当前主题的默认白底黑字（或黑底白字）
+                        if (hasReset) {
+                            ctx.reset(theme);
+                        }
+
+                        // 3. 顺序应用其余的属性（让同个序列中 0 后面的样式正确覆盖重置状态）
                         for (int i = 0; i < codes.length; i++) {
                             String code = codes[i].trim();
-                            if (code.isEmpty() || "0".equals(code)) continue;
+                            // 跳过已经处理过的重置码
+                            if (code.isEmpty() || "0".equals(code))
+                                continue;
 
-                            // 优先检测是否属于 16 色标准前景色 (直接通过 theme 接口判断)
+                            // 检测 16 色标准前景色 (30-37, 90-97)
                             if (theme.isForegroundCode(code)) {
                                 ctx.setLastRawFgCode(code);
                                 Color rawFg = theme.getForeground(code);
+                                ctx.setOriginalFgColor(rawFg); // 保存原始色
                                 ctx.setCurrentRenderedFg(theme.ensureContrast(rawFg, ctx.getCurrentRenderedBg()));
                                 continue;
                             }
 
-                            // 优先检测是否属于 16 色标准背景色 (直接通过 theme 接口判断)
+                            // 检测 16 色标准背景色 (40-47, 100-107)
                             if (theme.isBackground(code)) {
                                 ctx.setLastRawBgCode(code);
                                 Color rawBg = theme.getBackground(code);
                                 ctx.setCurrentRenderedBg(rawBg);
-                                // 当背景色改变时，重新校验当前前景色的对比度
+                                // 背景改变，必须用原始前景色和新背景重新做一次对比度降噪
                                 ctx.setCurrentRenderedFg(theme.ensureContrast(ctx.getOriginalFgColor(), rawBg));
                                 continue;
                             }
 
                             try {
                                 switch (code) {
-                                    case "1":
+                                    case "1": // 高亮 / 粗体
                                         if (enableBold) {
                                             ctx.setBold(true);
                                         } else {
                                             ctx.setCurrentRenderedFg(theme.toBrighColor(ctx.getCurrentRenderedFg()));
                                         }
                                         break;
-                                    case "2":
+                                    case "2": // 暗色
                                         ctx.setCurrentRenderedFg(theme.dimColor(ctx.getCurrentRenderedFg()));
                                         break;
                                     case "4":
@@ -135,7 +146,9 @@ public class AnsiToTokenUtil {
                                             int colorIndex = Integer.parseInt(codes[i + 2].trim());
                                             ctx.setLastRawFgCode("38;5;" + colorIndex);
                                             Color rawFgColor = theme.ansi256ToColor(colorIndex);
-                                            ctx.setCurrentRenderedFg(theme.ensureContrast(rawFgColor, ctx.getCurrentRenderedBg()));
+                                            ctx.setOriginalFgColor(rawFgColor);
+                                            ctx.setCurrentRenderedFg(
+                                                    theme.ensureContrast(rawFgColor, ctx.getCurrentRenderedBg()));
                                             i += 2;
                                         }
                                         break;
@@ -145,7 +158,8 @@ public class AnsiToTokenUtil {
                                             ctx.setLastRawBgCode("48;5;" + colorIndex);
                                             Color rawBgColor = theme.ansi256ToColor(colorIndex);
                                             ctx.setCurrentRenderedBg(rawBgColor);
-                                            ctx.setCurrentRenderedFg(theme.ensureContrast(ctx.getOriginalFgColor(), rawBgColor));
+                                            ctx.setCurrentRenderedFg(
+                                                    theme.ensureContrast(ctx.getOriginalFgColor(), rawBgColor));
                                             i += 2;
                                         }
                                         break;
@@ -153,7 +167,7 @@ public class AnsiToTokenUtil {
                                         break;
                                 }
                             } catch (Exception e) {
-                                logger.error("解析单个 ANSI 编码失败: " + code, e);
+                                logger.error("解析单个样式码失败: " + code, e);
                             }
                         }
                     }
