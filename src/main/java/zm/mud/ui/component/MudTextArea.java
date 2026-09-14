@@ -22,6 +22,7 @@ import javax.swing.text.StyledDocument;
 import zm.mud.core.session.MudSession;
 import zm.mud.core.text.ZmmudText;
 import zm.mud.core.text.TextToken;
+import zm.mud.core.text.ansi.AnsiContext;
 import zm.mud.core.text.ansi.AnsiToTokenUtil;
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.cfg.GlobalCfg;
@@ -50,6 +51,8 @@ public class MudTextArea extends JTextPane {
 
     private volatile boolean isAutoScrollEnabled = true; // 默认启用自动滚动
 
+    private AnsiContext ansiCtx ;
+
     public MudTextArea(MudSession session, GlobalCfg cfg) {
         this.session = session;
         this.globleCfg = cfg;
@@ -62,6 +65,8 @@ public class MudTextArea extends JTextPane {
         this.ansiToTokenUtil = ZmMudUI.getContext().getBean(AnsiToTokenUtil.class);
         this.errorStyle = new SimpleAttributeSet();
         StyleConstants.setForeground(errorStyle, Color.RED);
+
+        this.ansiCtx = new AnsiContext(this.globleCfg.getThemeType().getTheme());
 
         logger.info("displayBufLineNumber :" + this.displayBufLineNumber);
 
@@ -161,8 +166,8 @@ public class MudTextArea extends JTextPane {
         SwingUtilities.invokeLater(() -> {
             try {
                 ZmmudText ansiText = ansiToTokenUtil.parseAnsiToTokens(text + "\r\n", 
-                        this.globleCfg.getThemeType().getTheme(), enableBlod);
-
+                        this.globleCfg.getThemeType().getTheme(), enableBlod, this.ansiCtx);
+                logger.info(ansiText.getOriginText().replace("\r\n",""));
               // 假设你从外部传入或拿到了配置信息，比如基础字体 Font
                 Font font = this.getFont(); 
 

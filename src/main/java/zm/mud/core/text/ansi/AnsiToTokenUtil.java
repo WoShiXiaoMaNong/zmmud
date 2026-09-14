@@ -15,22 +15,20 @@ import zm.mud.ui.theme.ITheme;
 public class AnsiToTokenUtil {
     private static final Logger logger = LogManager.getLogger(AnsiToTokenUtil.class);
 
+    /**
+     * 兼容单行/单次调用方法（每次使用全新的默认上下文）
+     */
     public ZmmudText parseAnsiToTokens(String text, ITheme theme, boolean enableBold) {
-        
+        return parseAnsiToTokens(text, theme, enableBold, new AnsiContext(theme));
+    }
+
+    /**
+     * 核心多行/流式解析方法：传入持久化的 AnsiContext 跨行维持颜色
+     */
+    public ZmmudText parseAnsiToTokens(String text, ITheme theme, boolean enableBold, AnsiContext ctx) {
         List<TextToken> tokens = new ArrayList<>();
         ZmmudText ansiText = new ZmmudText(text, tokens);
         if (text == null || text.isEmpty()) return ansiText;
-
-        // 1. 记录原始的 ANSI 编码字符串
-        String lastRawFgCode = "default";
-        String lastRawBgCode = "default";
-
-        // 2. 记录theme渲染过的颜色计算
-        Color currentRenderedFg = theme.getDefaultForeground();
-        Color currentRenderedBg = theme.getDefaultBackground();
-
-        boolean isBold = false;
-        boolean isUnderline = false;
 
         int index = 0;
         int len = text.length();
@@ -38,7 +36,7 @@ public class AnsiToTokenUtil {
         while (index < len) {
             int nextAnsi = text.indexOf("\u001B[", index);
 
-            // 消费普通文本
+            // 1. 消费普通文本
             if (nextAnsi == -1 || nextAnsi > index) {
                 int end = (nextAnsi == -1) ? len : nextAnsi;
                 String segment = text.substring(index, end)
@@ -46,22 +44,22 @@ public class AnsiToTokenUtil {
                                      .replace("\u3000", "  ");
 
                 if (!segment.isEmpty()) {
-                    // 塞入 Token，raw 字段保留原始 ANSI 字符串，render 字段保留最终计算的 RGB
+                    // 使用上下文中的持久颜色状态
                     tokens.add(new TextToken(
                             segment,
-                            lastRawFgCode,
-                            currentRenderedFg.getRGB() & 0xFFFFFF,
-                            lastRawBgCode,
-                            currentRenderedBg.getRGB() & 0xFFFFFF,
-                            isBold,
-                            isUnderline
+                            ctx.getLastRawFgCode(),
+                            ctx.getCurrentRenderedFg().getRGB() & 0xFFFFFF,
+                            ctx.getLastRawBgCode(),
+                            ctx.getCurrentRenderedBg().getRGB() & 0xFFFFFF,
+                            ctx.isBold(),
+                            ctx.isUnderline()
                     ));
                 }
                 index = end;
                 if (index >= len) break;
             }
 
-            // 精准解析 ANSI 指令边界
+            // 2. 精准解析 ANSI 指令边界
             int terminatorIndex = -1;
             char terminatorChar = 0;
             for (int i = nextAnsi + 2; i < len; i++) {
@@ -78,99 +76,91 @@ public class AnsiToTokenUtil {
 
                 if (terminatorChar == 'm') {
                     if (codeStr.isEmpty()) {
-                        // 重置
-                        lastRawFgCode = "default";
-                        lastRawBgCode = "default";
-                        currentRenderedFg = theme.getDefaultForeground();
-                        currentRenderedBg = theme.getDefaultBackground();
-                        isBold = false;
-                        isUnderline = false;
+                        // 空参数重置：\u001B[m
+                        ctx.reset(theme);
                     } else {
                         String[] codes = codeStr.split(";");
 
+                        // 优先检查是否有全局重置码 0
                         for (String code : codes) {
                             if ("0".equals(code.trim())) {
-                                lastRawFgCode = "default";
-                                lastRawBgCode = "default";
-                                currentRenderedFg = theme.getDefaultForeground();
-                                currentRenderedBg = theme.getDefaultBackground();
-                                isBold = false;
-                                isUnderline = false;
+                                ctx.reset(theme);
                                 break;
                             }
                         }
 
+                        // 逐个解析样式码
                         for (int i = 0; i < codes.length; i++) {
                             String code = codes[i].trim();
                             if (code.isEmpty() || "0".equals(code)) continue;
+
+                            // 优先检测是否属于 16 色标准前景色 (直接通过 theme 接口判断)
+                            if (theme.isForegroundCode(code)) {
+                                ctx.setLastRawFgCode(code);
+                                Color rawFg = theme.getForeground(code);
+                                ctx.setCurrentRenderedFg(theme.ensureContrast(rawFg, ctx.getCurrentRenderedBg()));
+                                continue;
+                            }
+
+                            // 优先检测是否属于 16 色标准背景色 (直接通过 theme 接口判断)
+                            if (theme.isBackground(code)) {
+                                ctx.setLastRawBgCode(code);
+                                Color rawBg = theme.getBackground(code);
+                                ctx.setCurrentRenderedBg(rawBg);
+                                // 当背景色改变时，重新校验当前前景色的对比度
+                                ctx.setCurrentRenderedFg(theme.ensureContrast(ctx.getOriginalFgColor(), rawBg));
+                                continue;
+                            }
 
                             try {
                                 switch (code) {
                                     case "1":
                                         if (enableBold) {
-                                            isBold = true;
+                                            ctx.setBold(true);
                                         } else {
-                                            currentRenderedFg = theme.toBrighColor(currentRenderedFg);
+                                            ctx.setCurrentRenderedFg(theme.toBrighColor(ctx.getCurrentRenderedFg()));
                                         }
                                         break;
                                     case "2":
-                                        currentRenderedFg = theme.dimColor(currentRenderedFg);
+                                        ctx.setCurrentRenderedFg(theme.dimColor(ctx.getCurrentRenderedFg()));
                                         break;
                                     case "4":
-                                        isUnderline = true;
+                                        ctx.setUnderline(true);
                                         break;
                                     case "24":
-                                        isUnderline = false;
+                                        ctx.setUnderline(false);
                                         break;
-                                    case "38":
+                                    case "38": // 256色前景色
                                         if (i + 2 < codes.length && "5".equals(codes[i + 1].trim())) {
                                             int colorIndex = Integer.parseInt(codes[i + 2].trim());
-                                            
-                                            // 直接拼装记录原始 256色 ANSI 字符串，例如 "38;5;123"
-                                            lastRawFgCode = "38;5;" + colorIndex;
-                                            
+                                            ctx.setLastRawFgCode("38;5;" + colorIndex);
                                             Color rawFgColor = theme.ansi256ToColor(colorIndex);
-                                            currentRenderedFg = theme.ensureContrast(rawFgColor, currentRenderedBg);
+                                            ctx.setCurrentRenderedFg(theme.ensureContrast(rawFgColor, ctx.getCurrentRenderedBg()));
                                             i += 2;
                                         }
                                         break;
-                                    case "48":
+                                    case "48": // 256色背景色
                                         if (i + 2 < codes.length && "5".equals(codes[i + 1].trim())) {
                                             int colorIndex = Integer.parseInt(codes[i + 2].trim());
-                                            
-                                            // 【直接拼装记录原始 256色背景 ANSI 字符串，例如 "48;5;123"
-                                            lastRawBgCode = "48;5;" + colorIndex;
-                                            
+                                            ctx.setLastRawBgCode("48;5;" + colorIndex);
                                             Color rawBgColor = theme.ansi256ToColor(colorIndex);
-                                            currentRenderedBg = rawBgColor;
-                                            currentRenderedFg = theme.ensureContrast(currentRenderedFg, currentRenderedBg);
+                                            ctx.setCurrentRenderedBg(rawBgColor);
+                                            ctx.setCurrentRenderedFg(theme.ensureContrast(ctx.getOriginalFgColor(), rawBgColor));
                                             i += 2;
                                         }
                                         break;
                                     default:
-                                        if (theme.isForegroundCode(code)) {
-                                            // 直接记录原始基本前景 ANSI 码，如 "31"
-                                            lastRawFgCode = code;
-                                            
-                                            Color rawFgColor = theme.resolveForeground(code, currentRenderedBg);
-                                            currentRenderedFg = theme.ensureContrast(rawFgColor, currentRenderedBg);
-                                        } else if (theme.isBackground(code)) {
-                                            // 直接记录原始基本背景 ANSI 码，如 "42"
-                                            lastRawBgCode = code;
-                                            
-                                            currentRenderedBg = theme.getBackground(code);
-                                            currentRenderedFg = theme.ensureContrast(currentRenderedFg, currentRenderedBg);
-                                        }
+                                        break;
                                 }
                             } catch (Exception e) {
-                                logger.error("解析 ANSI 错误: " + code, e);
+                                logger.error("解析单个 ANSI 编码失败: " + code, e);
                             }
                         }
                     }
                 }
                 index = terminatorIndex + 1;
             } else {
-                index = nextAnsi + 1;
+                index = nextAnsi + 2; // 降级，防止死循环
             }
         }
         return ansiText;
