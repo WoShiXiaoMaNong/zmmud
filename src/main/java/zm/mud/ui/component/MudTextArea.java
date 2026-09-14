@@ -1,6 +1,7 @@
 package zm.mud.ui.component;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -19,11 +20,13 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 import zm.mud.core.session.MudSession;
+import zm.mud.core.text.ZmmudText;
+import zm.mud.core.text.TextToken;
+import zm.mud.core.text.ansi.AnsiToTokenUtil;
 import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.ui.component.image.ImageInfo;
 import zm.mud.ui.component.image.MudImgIcon;
-import zm.mud.ui.util.AnsiToStyleDocUtil;
 import zm.mud.utils.HttpUtil;
 import zm.mud.utils.SpringBeanUtil;
 
@@ -37,7 +40,7 @@ public class MudTextArea extends JTextPane {
     private final SimpleAttributeSet errorStyle;
 
     private StyledDocument doc;
-    private AnsiToStyleDocUtil ansiToStyleDocUtil;
+    private AnsiToTokenUtil  ansiToTokenUtil;
 
     private GlobalCfg globleCfg;
 
@@ -56,7 +59,7 @@ public class MudTextArea extends JTextPane {
         this.setForeground(this.globleCfg.getThemeType().getTheme().getDefaultBackground());
         this.setParagraphAttributes(this.getParagraphAttributes(), true);
         this.doc = this.getStyledDocument();
-        this.ansiToStyleDocUtil = ZmMudUI.getContext().getBean(AnsiToStyleDocUtil.class);
+        this.ansiToTokenUtil = ZmMudUI.getContext().getBean(AnsiToTokenUtil.class);
         this.errorStyle = new SimpleAttributeSet();
         StyleConstants.setForeground(errorStyle, Color.RED);
 
@@ -157,8 +160,37 @@ public class MudTextArea extends JTextPane {
     public void printlnToScreen(String text, boolean enableBlod) {
         SwingUtilities.invokeLater(() -> {
             try {
-                ansiToStyleDocUtil.parseAnsiToStyledDocument(text + "\r\n", doc, this.getFont(),
+                ZmmudText ansiText = ansiToTokenUtil.parseAnsiToTokens(text + "\r\n", 
                         this.globleCfg.getThemeType().getTheme(), enableBlod);
+
+              // 假设你从外部传入或拿到了配置信息，比如基础字体 Font
+                Font font = this.getFont(); 
+
+                // 1. 初始化并复用属性集
+                SimpleAttributeSet currentAttr = new SimpleAttributeSet(); 
+                StyleConstants.setFontFamily(currentAttr, font.getFamily());
+                StyleConstants.setFontSize(currentAttr, font.getSize());
+
+                // 2. 遍历 Token 列表进行 Swing 渲染
+                for (TextToken textToken : ansiText.getTextTokens()) {
+                    // 从 Token 纯数字 RGB 中恢复 java.awt.Color 对象
+                    // 使用 rendered 颜色来保证界面的对比度和主题正确性
+                    Color fgColor = new Color(textToken.getRenderedFgRgb());
+                    Color bgColor = new Color(textToken.getRenderedBgRgb());
+                    
+                    // 设置当前的样式属性
+                    StyleConstants.setForeground(currentAttr, fgColor);
+                    StyleConstants.setBackground(currentAttr, bgColor);
+                    StyleConstants.setBold(currentAttr, textToken.isBold());
+                    StyleConstants.setUnderline(currentAttr, textToken.isUnderline());
+                    
+                    // 3. 调用 appendString 插入到文档末尾
+                    try {
+                        doc.insertString(doc.getLength(), textToken.getText(), currentAttr);
+                    } catch (BadLocationException e) {
+                        logger.error("向 StyledDocument 插入文本失败", e);
+                    }
+                }
                 trimLines();
                 this.setCaretPosition(doc.getLength());
             } catch (BadLocationException e) {

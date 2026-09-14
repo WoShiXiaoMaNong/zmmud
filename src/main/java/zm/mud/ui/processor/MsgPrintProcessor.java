@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import zm.mud.core.network.inbound.message.InbMsg;
+import zm.mud.core.text.ansi.AnsiTextUtil;
 import zm.mud.ui.ZmMudUI;
-import zm.mud.ui.util.AnsiTextUtil;
 
 @Component
 @Scope("prototype")
