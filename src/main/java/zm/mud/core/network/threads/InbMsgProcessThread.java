@@ -33,7 +33,7 @@ public class InbMsgProcessThread extends IZmmudThread {
             InbMsg msg = msgQueue.take();
             for (IInbMsgProcessor inbMsgProcessor : inbProcessor) {
                 msg = inbMsgProcessor.processMessage(msg);
-                if (!msg.isConsumable()) {
+                if (msg == null || !msg.isConsumable()) {
                     break;
                 }
             }

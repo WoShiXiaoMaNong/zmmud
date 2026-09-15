@@ -8,15 +8,23 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import zm.mud.core.session.MudSession;
+
 
 public class GMCPContext {
-     private static final Logger logger = LogManager.getLogger(GMCPContext.class);
+    private static final Logger logger = LogManager.getLogger(GMCPContext.class);
     
-     public Map<String/* Channel Name */,Map<String,Object>> gmcpData = new HashMap<>();
+    public Map<String/* Channel Name */,Map<String,Object>> gmcpData = new HashMap<>();
     private Lock statusLock = new ReentrantLock();
 
     private Map<String,Object> currentRoom;
     private Lock roomLock = new ReentrantLock();
+
+    private MudSession session;
+
+    public GMCPContext(MudSession session){
+        this.session = session;
+    }
 
     public void setRoom(Map<String,Object> room) {
         try {
@@ -71,6 +79,12 @@ public class GMCPContext {
     public Map<String/* Channel Name */,Map<String,Object>> getGmcpData(){
         return this.gmcpData;
     }
+
+    public MudSession getSession() {
+        return session;
+    }
+
+    
 
 
 }

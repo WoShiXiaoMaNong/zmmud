@@ -122,7 +122,7 @@ public class MudSession {
         this.oubMsgService = SpringBeanUtil.getBean(OubMsgService.class);
         this.triggerFactory = SpringBeanUtil.getBean(TriggerFactory.class);
         this.threadPoolService = SpringBeanUtil.getBean(ThreadPoolService.class);
-        this.gmcpContext = new GMCPContext();
+        this.gmcpContext = new GMCPContext(this);
         this.host = host;
         this.port = port;
         this.mudWorldCode = mudWorldCode;
