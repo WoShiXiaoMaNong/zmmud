@@ -8,9 +8,13 @@ public class NormalInbMsg implements InbMsg {
     private String content;
     private LocalDateTime timestamp;
     private MudSession session;
+    private boolean consumable;
+
+
     public NormalInbMsg(MudSession session,String content) {
         this.content = content;
         this.timestamp = LocalDateTime.now();
+        this.consumable = true;
     }
 
     public String getContent() {
@@ -35,6 +39,15 @@ public class NormalInbMsg implements InbMsg {
     @Override
     public MudSession getSession() {
         return session;
+    }
+        @Override
+    public boolean isConsumable() {
+        return this.consumable;
+    }
+
+    @Override
+    public void setUnconsumable() {
+       this.consumable = false;
     }
 
 }

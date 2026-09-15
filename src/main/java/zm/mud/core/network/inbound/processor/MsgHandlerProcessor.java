@@ -25,15 +25,15 @@ public class MsgHandlerProcessor extends AbsSessionValidatingInbMsgProcessor {
     }
     
     @Override
-    protected boolean doProcess(InbMsg msg) {
+    protected InbMsg doProcess(InbMsg msg) {
         if (msg instanceof IACConfirmInbMsg) {
-            return true;
+            return msg;
         }
         MudSession session = msg.getSession();
         String sessionId = session.getSessionId();
         List<Function<InbMsg,Boolean>> handlersForCurrentSession = handlers.get(sessionId);
         if(handlersForCurrentSession == null){
-            return true;
+            return msg;
         }
         for(Function<InbMsg,Boolean> handler : handlersForCurrentSession){
             try{
@@ -42,7 +42,7 @@ public class MsgHandlerProcessor extends AbsSessionValidatingInbMsgProcessor {
                 logger.error("handing msg error!",e);
             }
         }
-        return true;
+        return msg;
     }
 
     public void register(MudSession session,Function<InbMsg,Boolean> handler){

@@ -6,8 +6,8 @@ mud:
   server:
     name: 北大侠客行
     host: mud.pkuxkx.net
-    port: 8080
-    charset: GBK
+    port: 8081
+    charset: UTF-8
   inbound:
     reader:
       buffer:

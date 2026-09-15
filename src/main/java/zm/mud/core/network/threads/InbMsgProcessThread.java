@@ -32,8 +32,8 @@ public class InbMsgProcessThread extends IZmmudThread {
         try {
             InbMsg msg = msgQueue.take();
             for (IInbMsgProcessor inbMsgProcessor : inbProcessor) {
-                boolean shouldContinue = inbMsgProcessor.processMessage(msg);
-                if (!shouldContinue) {
+                msg = inbMsgProcessor.processMessage(msg);
+                if (!msg.isConsumable()) {
                     break;
                 }
             }

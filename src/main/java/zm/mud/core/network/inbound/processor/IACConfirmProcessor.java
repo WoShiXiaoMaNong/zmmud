@@ -25,14 +25,14 @@ public class IACConfirmProcessor extends AbsSessionValidatingInbMsgProcessor {
     private HexUtil hexUtil;
 
     @Override
-    protected boolean doProcess(InbMsg msg) {
+    protected InbMsg doProcess(InbMsg msg) {
         if (msg == null || !(msg instanceof IACConfirmInbMsg)) {
-            return true; // Not an IAC confirm message, ignore
+            return msg; // Not an IAC confirm message, ignore
         }
 
         IACConfirmInbMsg iacMsg = (IACConfirmInbMsg) msg;
         if (iacMsg.getContentBytes() == null || iacMsg.getContentBytes().length < 3) {
-            return true;
+            return msg;
         }
 
         logger.debug("收到服务器指令：" + Arrays.toString(this.hexUtil.toHex(iacMsg.getContentBytes())));
@@ -45,7 +45,7 @@ public class IACConfirmProcessor extends AbsSessionValidatingInbMsgProcessor {
         }
         if (responses == null || responses.isEmpty()) {
             logger.debug("不支持当前IAC指令或者不响应：" + Arrays.toString(this.hexUtil.toHex(iacMsg.getContentBytes())));
-            return true;
+            return msg;
         }
 
         for(byte[] response : responses) {
@@ -53,7 +53,7 @@ public class IACConfirmProcessor extends AbsSessionValidatingInbMsgProcessor {
             msg.getSession().getClient().send(response);
         }
         
-        return true;
+        return msg;
     }
 
     @Override
