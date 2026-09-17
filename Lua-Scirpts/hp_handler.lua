@@ -24,7 +24,7 @@ for i = 0, size - 1 do
 end
 Sys:print(session,ssinfo .. "aaa")
 Sys:print(session,session:getSessionId().. "aaa")
-session:send("#wa 2300;climb tree")
+-- session:send("#wa 2300;climb tree")
 local cmd = "id"
 --LuaApi:sendCommand(cmd .. " ")
 -- 你可以在这里写你核心的 MUD 机器人逻辑（比如血量过低自动吃药等）

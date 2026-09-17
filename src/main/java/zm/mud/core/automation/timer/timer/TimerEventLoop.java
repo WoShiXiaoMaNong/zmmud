@@ -1,9 +1,11 @@
-package zm.mud.core.automation.timer;
+package zm.mud.core.automation.timer.timer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import jakarta.annotation.PostConstruct;
 
 
 
@@ -13,6 +15,7 @@ public class TimerEventLoop {
     @Autowired
     private TimerManager timerManager;
 
+    @PostConstruct 
     public void start() {
         logger.info("TimerEveentLoop start!");
         this.timerManager.reloadTimer();

@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Component("ACTION_SendCommand")
 @Scope("prototype")
-public class SendCommand implements IAction{
-    private static final Logger log = LogManager.getLogger(SendCommand.class);
+public class SendCommandAction implements IAction{
+    private static final Logger log = LogManager.getLogger(SendCommandAction.class);
 
     private String expression;
 
