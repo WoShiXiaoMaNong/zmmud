@@ -39,7 +39,7 @@ public class LuaService {
         LuaValue luaSession = CoerceJavaToLua.coerce(session);
         
         // 3. 执行 Lua 脚本，并将两个对象作为参数传入
-        chunk.call(actionContext, luaSession);
+        chunk.invoke(LuaValue.varargsOf(new LuaValue[]{ actionContext, luaSession }));
     }
 
    private void registerLuaApi(){
