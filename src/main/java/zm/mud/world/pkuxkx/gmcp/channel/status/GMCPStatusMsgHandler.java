@@ -56,7 +56,7 @@ public class GMCPStatusMsgHandler implements IGMCPMsgHandler {
             /**
              * 刷新状态栏
              */
-            ui.refreshStatusBar(session);
+            session.refreshStatusBar();
           
         }
       

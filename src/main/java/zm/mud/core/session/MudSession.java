@@ -21,7 +21,9 @@ import zm.mud.core.command.OubCommandParser;
 import zm.mud.core.command.cmd.NormalOubCommand;
 import zm.mud.core.network.threads.ThreadPoolService;
 import zm.mud.core.thread.ZmmudThreadPool;
+import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.cfg.GlobalCfg;
+import zm.mud.ui.component.MudMainScreen;
 import zm.mud.utils.SpringBeanUtil;
 import zm.mud.world.common.gmcp.GMCPContext;
 
@@ -330,5 +332,10 @@ public class MudSession {
         this.oubCommandQueue.pushCommand(transferedMsgs);
     }
 
+
+    public void refreshStatusBar(){
+        ZmMudUI ui = SpringBeanUtil.getBean(ZmMudUI.class);
+        ui.refreshStatusBar(this); 
+    }
     
 }
