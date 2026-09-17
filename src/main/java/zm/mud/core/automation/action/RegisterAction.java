@@ -9,7 +9,6 @@ import zm.mud.core.api.InbMsgService;
 import zm.mud.core.api.OubMsgService;
 import zm.mud.core.automation.trigger.Trigger;
 import zm.mud.core.automation.trigger.TriggerFactory;
-import zm.mud.core.automation.trigger.cfg.MatchResult;
 import zm.mud.core.automation.trigger.cfg.TriggerType;
 import zm.mud.core.session.MudSession;
 import zm.mud.utils.SpringBeanUtil;
@@ -32,16 +31,17 @@ public class RegisterAction implements IAction{
     }
 
     @Override
-    public void execute(MudSession session,Trigger trigger, MatchResult ret) {
+    public void execute(ActionContext context) {
         TriggerFactory tf = SpringBeanUtil.getBean(TriggerFactory.class);
+        MudSession session = context.getSession();
         Trigger newTrigger = tf.buildByeName(session,this.getExpression());
         if( newTrigger == null){
-            logger.debug("new tirgger is null : " + trigger.getTriggerName());
+            logger.debug("new tirgger is null : " + this.getExpression());
             return;
         }
 
         if( !newTrigger.isEnable()){
-            logger.debug("Trigger disabled!" + trigger.getTriggerName());
+            logger.debug("Trigger disabled!" + this.getExpression());
             return;
         }
 

@@ -3,10 +3,12 @@ package zm.mud.ui;
 import zm.mud.core.session.MudSession;
 import zm.mud.ui.cfg.GlobalCfg;
 import zm.mud.ui.component.MudMainScreen;
+import zm.mud.ui.component.MudTabPanel;
 import zm.mud.ui.component.MudTextArea;
 import zm.mud.ui.component.image.ImageDoubleClickListener;
 import zm.mud.ui.component.image.ImageInfo;
 import zm.mud.ui.component.image.MudImgIcon;
+import zm.mud.world.common.gmcp.GMCPContext;
 
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -114,6 +116,10 @@ public class ZmMudUI {
 
     public void resetFont(String font, int size){
         this.mudMain.resetFont(font, size);
+    }
+
+    public void refreshStatusBar(MudSession session){
+        this.mudMain.refreshStatusBar(session);
     }
 
 }

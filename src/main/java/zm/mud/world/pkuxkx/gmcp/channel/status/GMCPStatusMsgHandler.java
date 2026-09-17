@@ -53,6 +53,10 @@ public class GMCPStatusMsgHandler implements IGMCPMsgHandler {
                 logger.debug("GMCP.Status: {}: {}",packageName,jsonPayload);
             }
 
+            /**
+             * 刷新状态栏
+             */
+            ui.refreshStatusBar(session);
           
         }
       

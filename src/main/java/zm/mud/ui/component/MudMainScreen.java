@@ -85,37 +85,18 @@ public class MudMainScreen extends JFrame {
         this.init();
         pack(); // 根据组件首选大小调整窗口
         setLocationRelativeTo(null);
+    }
 
-        Thread statusBarThread = new Thread(() -> {
-            logger.info("Status bar refresh loop start");
-            while (true) {
-                if (tabPanels == null || tabPanels.isEmpty()) {
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        logger.error("Error while refreshing status bar: ", e);
-                    }
-                }
-                for (Entry<String, MudTabPanel> entry : tabPanels.entrySet()) {
-                    MudTabPanel mTabPanel = entry.getValue();
-                    String sessionId = entry.getKey();
-                    if (selectedSession == null || !selectedSession.equals(sessionId)) {
-                        continue;
-                    }
-                    MudSession session = MudSession.getSession(sessionId);
-                    GMCPContext gmcpContext = session.getGmcpContext();
-                    mTabPanel.refreshStatusBar(gmcpContext.getGmcpData());
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        logger.error("Error while refreshing status bar: ", e);
-                    }
-                }
-
-            }
-        }, "StatusBar-Refresh-Thread");
-        statusBarThread.setDaemon(true); // 设置为守护线程，应用退出时自动销毁
-        statusBarThread.start();
+    public void refreshStatusBar(MudSession session){
+        if(session == null){
+            return;
+        }
+        GMCPContext gmcpContext = session.getGmcpContext();
+        MudTabPanel mTabPanel = this.tabPanels.get(session.getSessionId());
+        if( mTabPanel == null){
+            return;
+        }
+        mTabPanel.refreshStatusBar(gmcpContext.getGmcpData());
     }
 
     private void createNewSession(String title,String host,int port) {

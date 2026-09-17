@@ -5,10 +5,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import zm.mud.core.automation.trigger.Trigger;
-import zm.mud.core.automation.trigger.cfg.MatchResult;
-import zm.mud.core.session.MudSession;
-
 @Component("ACTION_SendCommand")
 @Scope("prototype")
 public class SendCommand implements IAction{
@@ -17,8 +13,8 @@ public class SendCommand implements IAction{
     private String expression;
 
     @Override
-    public void execute(MudSession session,Trigger tirgger, MatchResult ret) {
-        session.send(this.getExpression());
+    public void execute(ActionContext context) {
+        context.getSession().send(this.getExpression());
     }
     @Override
     public void setExpression(String expression) {
