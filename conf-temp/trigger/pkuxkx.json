@@ -1,0 +1,83 @@
+{
+    "triggers": [
+        {
+            "name": "fullme",
+            "sync": true,
+            "unique": true,
+            "autoRegister": true,
+            "enable": true,
+            "matcher": {
+                "type": "Equals",
+				"matchRawMsg":false,
+                "expression": "fullme"
+            },
+            "action": {
+                "type": "RegisterAction",
+                "expression": "PrintUrlImgAction"
+            },
+            "type": "outbound",
+            "remainingCount": -1
+        },
+        {
+            "name": "PrintUrlImgAction",
+            "sync": false,
+            "unique": true,
+            "autoRegister": false,
+            "enable": true,
+            "matcher": {
+                "type": "StartWith",
+				"matchRawMsg":false,
+                "expression": "http://fullme.pkuxkx.net/"
+            },
+            "action": {
+                "type": "PrintUrlImgAction",
+                "expression": "",
+                "params": {
+                    "FetchTimes": 4,
+                    "ClickPopup": false
+                }
+            },
+            "type": "inbound",
+            "remainingCount": 1
+        },
+        {
+            "name": "hpbrief-oub-trigger",
+            "sync": true,
+            "unique": true,
+            "autoRegister": true,
+            "enable": true,
+            "matcher": {
+                "type": "Equals",
+				"matchRawMsg":false,
+                "expression": "hpbrief"
+            },
+            "action": {
+                "type": "RegisterAction",
+                "expression": "hpbrief-inb-trigger"
+            },
+            "type": "outbound",
+            "remainingCount": -1
+        },
+        {
+            "name": "hpbrief-inb-trigger",
+            "sync": false,
+            "unique": true,
+            "autoRegister": false,
+            "enable": true,
+            "matcher": {
+                "type": "Regex",
+				"matchRawMsg":false,
+                "expression": "^#(\\d+),(\\d+),(\\d+),(\\d+),(\\d+),(\\d+)$"
+            },
+            "action": {
+                "type": "LuaScriptAction",
+                "expression": "C:\\Users\\zhong\\Desktop\\dev\\zmmud2\\Lua-Scirpts\\hp_handler.lua",
+                "params": {
+                    "baseUrl": "test"
+                }
+            },
+            "type": "inbound",
+            "remainingCount": 3
+        }
+    ]
+}

@@ -1,5 +1,6 @@
 package zm.mud.ui.processor;
 
+import java.awt.Color;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Function;
@@ -8,6 +9,7 @@ import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import zm.mud.core.network.inbound.message.InbMsg;
@@ -15,6 +17,7 @@ import zm.mud.ui.ZmMudUI;
 import zm.mud.ui.util.AnsiTextUtil;
 
 @Component
+@Scope("prototype")
 public class MsgPrintProcessor implements Function<InbMsg,Boolean>{
 
     @Autowired
@@ -34,10 +37,13 @@ public class MsgPrintProcessor implements Function<InbMsg,Boolean>{
 
     @Override
     public Boolean apply(InbMsg t) {
+        if( isAnsiEmpty(t.getContent())){
+            return true;
+        }
         if(isChatMsg(t)){
-            ui.printlnToScreen(this.getMsgStr(t),true);
+            ui.printlnToScreen(t.getSession(),this.getMsgStr(t),true);
         }else{
-            ui.printlnToScreen(this.getMsgStr(t));
+            ui.printlnToScreen(t.getSession(),this.getMsgStr(t));
         }
         
         return true;
@@ -46,13 +52,25 @@ public class MsgPrintProcessor implements Function<InbMsg,Boolean>{
         if (showTimestamp && msg.getTimestamp() != null) {
             LocalDateTime time = msg.getTimestamp();
 
-            return "[" + TIME_FMT.format(time) + "] " + msg.getContent();
+            return ansiTextUtil.stringWithAnsiColor("[" + TIME_FMT.format(time) + "] ",Color.GREEN) + msg.getContent();
         } else {
             return msg.getContent();
         }
     }
 
-
+    private boolean isAnsiEmpty(String text) {
+        if (text == null) return true;
+        
+        // 正则表达式匹配标准的 ANSI 转义序列 (例如 \u001B[2;37;0m 或 \u001B[m)
+        // \u001B 是 ESC 键，后面跟随 [，然后是任意数量的数字/分号，最后以 A-Z 或 a-z 结尾
+        String cleanText = text.replaceAll("\u001B\\[[;\\d]*[A-Za-z]", "");
+        
+        // 剔除 ANSI 码后，再剔除前后空格（包括全角空格 \u3000）
+        cleanText = cleanText.replace("\u3000", "").trim();
+        
+        // 如果最后什么都不剩，说明是个纯属性控制空行
+        return cleanText.isEmpty();
+    }
     private boolean isChatMsg(InbMsg msg){
         if (msg == null){
             return false;

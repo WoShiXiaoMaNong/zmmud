@@ -7,10 +7,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import zm.mud.core.automation.trigger.Trigger;
 import zm.mud.core.network.inbound.message.InbMsg;
 import zm.mud.core.network.inbound.processor.MsgHandlerProcessor;
+import zm.mud.core.session.MudSession;
 import zm.mud.core.network.inbound.processor.InbTriggerProcessor;
-import zm.mud.core.trigger.Trigger;
 
 @Service
 public class InbMsgService {
@@ -22,15 +23,19 @@ public class InbMsgService {
     @Autowired
     private InbTriggerProcessor triggerProcessor;
 
-    public void registerMsgHandler(Function<InbMsg,Boolean> handler){
-        this.msgHandlerProcessor.register(handler);
+    public void registerMsgHandler(MudSession session,Function<InbMsg,Boolean> handler){
+        this.msgHandlerProcessor.register(session,handler);
     }
 
-    public void registerTrigger(Trigger trigger){
+    public void registerTrigger(MudSession session,Trigger trigger){
         if( trigger == null ){
             logger.warn("Trigger is null. Skip!");
             return;
         }
-        triggerProcessor.register(trigger);
+        triggerProcessor.register(session, trigger);
+    }
+
+    public void cleanTrigger(MudSession session) {
+        triggerProcessor.cleanTrigger(session);
     }
 }

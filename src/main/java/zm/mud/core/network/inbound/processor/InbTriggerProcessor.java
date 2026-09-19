@@ -1,51 +1,63 @@
 package zm.mud.core.network.inbound.processor;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
 
+import zm.mud.core.automation.trigger.Trigger;
+import zm.mud.core.automation.trigger.cfg.MatchResult;
 import zm.mud.core.network.inbound.message.IACConfirmInbMsg;
 import zm.mud.core.network.inbound.message.InbMsg;
-import zm.mud.core.thread.ZmmudThreadPools;
-import zm.mud.core.trigger.Trigger;
-import zm.mud.core.trigger.cfg.MatchResult;
+import zm.mud.core.session.MudSession;
+import zm.mud.core.thread.ZmmudThreadPool;
 
 @Service
-public class InbTriggerProcessor implements IInbMsgProcessor, Ordered {
+public class InbTriggerProcessor extends AbsSessionValidatingInbMsgProcessor {
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(InbTriggerProcessor.class);
 
     private Lock lock;
-    private List<Trigger> triggers;
-    private Map<String,Trigger> triggerMap;
+    private Map<String /*SessionId*/,List<Trigger>> triggers;
+    private Map<String /*SessionId*/,Map<String,Trigger>> triggerMap;
 
     public InbTriggerProcessor() {
-        this.triggers = new ArrayList<>();
+        this.triggers = new HashMap<>();
         this.triggerMap = new HashMap<>();
         this.lock = new ReentrantLock();
     }
 
     @Override
-    public boolean processMessage(InbMsg msg) {
+    protected boolean doProcess(InbMsg msg) {
         if (msg instanceof IACConfirmInbMsg) {
             return true;
         }
         this.lock.lock();
         try {
-            Iterator<Trigger> iterator = this.triggers.iterator();
+            MudSession session = msg.getSession();
+            String sessionId = session.getSessionId();
+            List<Trigger> triggerForCurrentSession = this.triggers.get(sessionId);
+            if( triggerForCurrentSession == null){
+                return true;
+            }
+            Iterator<Trigger> iterator = triggerForCurrentSession.iterator();
             while (iterator.hasNext()) {
                 Trigger trigger = iterator.next();
                 // 1. 检查调用前是否已死亡（例如被其他线程或之前的逻辑改变了状态）
-                if (trigger.died()) {
-                    iterator.remove(); // 安全删除
-                    this.triggerMap.remove(trigger.getUniqueKey());
+                if (trigger.died() || !trigger.isEnable()) {
+                    
+                    triggerForCurrentSession.removeIf((t)->{
+                        return t.getUniqueKey().equals(trigger.getUniqueKey());
+                    });
+                    if(this.triggerMap.containsKey(session.getSessionId())){
+                        this.triggerMap.get(session.getSessionId()).remove(trigger.getUniqueKey());
+                    }
                     logger.debug(trigger.getTriggerName() + " : removed !");
                     continue;
                 }
@@ -64,29 +76,41 @@ public class InbTriggerProcessor implements IInbMsgProcessor, Ordered {
     }
 
     private void tryInvokeTrigger(Trigger trigger, InbMsg msg) {
-        ZmmudThreadPools.MUD_TRRIGER.execute(
+        ZmmudThreadPool.executeWithTimeout(
                 () -> {
                     MatchResult ret = trigger.match(msg.getContent());
                     if (ret.isMatched()) {
                         trigger.fire(ret);
                     }
-                });
+                },3,TimeUnit.MINUTES);
 
     }
 
-    public void register(Trigger trigger) {
+    public void register(MudSession session,Trigger trigger) {
         
         this.lock.lock();
         try {
-            Trigger originalTrigger = this.triggerMap.get(trigger.getUniqueKey());
+            String sessionId = session.getSessionId();
+            Map<String,Trigger> triggerMapForCurrentSession = this.triggerMap.get(sessionId);
+            if(triggerMapForCurrentSession == null){
+                triggerMapForCurrentSession = new HashMap<>();
+                this.triggerMap.put(sessionId,triggerMapForCurrentSession);
+            }
+            Trigger originalTrigger = triggerMapForCurrentSession.get(trigger.getUniqueKey());
             
             boolean triggerExisting = originalTrigger!=null && !originalTrigger.died();
             if(trigger.isUnique() && triggerExisting){
                 logger.debug("[Skip] Unique trigger already existed:" + trigger.getUniqueKey());
                 return;
             }
-            this.triggers.add(trigger);
-            this.triggerMap.put(trigger.getUniqueKey(), trigger);
+
+            List<Trigger> triggerForCurrentSession = this.triggers.get(sessionId);
+            if( triggerForCurrentSession == null){
+                triggerForCurrentSession = new CopyOnWriteArrayList<>();
+                this.triggers.put(sessionId,triggerForCurrentSession);
+            }
+            triggerForCurrentSession.add(trigger);
+            triggerMapForCurrentSession.put(trigger.getUniqueKey(), trigger);
         } finally {
             this.lock.unlock();
         }
@@ -95,6 +119,21 @@ public class InbTriggerProcessor implements IInbMsgProcessor, Ordered {
     @Override
     public int getOrder() {
         return 3;
+    }
+
+    public void cleanTrigger(MudSession session) {
+        this.lock.lock();
+        try {
+            String sessionId = session.getSessionId();
+            if( this.triggerMap.containsKey(sessionId)){
+                this.triggerMap.get(sessionId).clear();
+            }
+            if( this.triggers.containsKey(sessionId)){
+                this.triggers.get(sessionId).clear();
+            }
+        } finally {
+            this.lock.unlock();
+        }
     }
 
 }

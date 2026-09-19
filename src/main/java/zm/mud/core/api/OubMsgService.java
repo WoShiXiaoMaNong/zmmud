@@ -1,14 +1,15 @@
 package zm.mud.core.api;
 
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import zm.mud.core.automation.trigger.Trigger;
 import zm.mud.core.network.outbound.message.NrmOubMsg;
 import zm.mud.core.network.outbound.processor.OubTriggerProcessor;
 import zm.mud.core.network.queue.OubMsgQueue;
-import zm.mud.core.trigger.Trigger;
+import zm.mud.core.session.MudSession;
 
 @Service
 public class OubMsgService {
@@ -20,16 +21,22 @@ public class OubMsgService {
     @Autowired
     private OubTriggerProcessor triggerProcessor;
 
-    public void send(String msg){
-
-        this.oubMsgQueue.put(new NrmOubMsg(msg));
+    
+    public void sendOutbound(MudSession session,String msStr){
+        session.echoCommandToUI( msStr);
+         this.oubMsgQueue.put(session,new NrmOubMsg(session,msStr));
     }
 
-    public void registerTrigger(Trigger trigger){
+    public void registerTrigger(MudSession session,Trigger trigger){
         if( trigger == null ){
             logger.warn("Trigger is null. Skip!");
             return;
         }
-        triggerProcessor.register(trigger);
+        triggerProcessor.register(session,trigger);
     }
+
+    public void cleanTrigger(MudSession session) {
+        triggerProcessor.cleanTrigger(session);
+    }
+
 }

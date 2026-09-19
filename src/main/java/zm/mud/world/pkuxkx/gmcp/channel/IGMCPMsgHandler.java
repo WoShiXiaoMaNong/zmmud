@@ -1,0 +1,13 @@
+package zm.mud.world.pkuxkx.gmcp.channel;
+
+import zm.mud.core.session.MudSession;
+import zm.mud.world.common.gmcp.GMCPContext;
+
+public interface IGMCPMsgHandler {
+    /**
+     * 解析 GMCP 消息, 并更新 GMCPContext 中的状态
+     * @param packageName GMCP 包名
+     * @param jsonPayload JSON 数据
+     */
+    void parse(MudSession session,String packageName, String jsonPayload);
+}

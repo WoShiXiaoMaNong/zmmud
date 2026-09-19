@@ -11,7 +11,7 @@
    > 游戏指令，例如开启 Status消息推送：  tune GMCP Status on
 
 
-## 📊 GMCP 数据
+## 📊 GMCP 数据  [点击查看 北大侠客行GMCP数据说明](https://www.pkuxkx.net/wiki/robot/gmcp)
 ### 1. 角色状态模块 (GMCP.Status)
 
 当玩家登录角色、跨越地图、遭遇战斗或状态发生改变时，服务器会主动推送 `GMCP.Status` 模块的数据。以下为北大侠客行（PKUXKX）服务器返回的真实字段定义。

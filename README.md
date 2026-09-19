@@ -26,11 +26,17 @@ zhongming139@126.com
 * [点击查看 触发器说明](Trigger.md)
 
 ## 界面截图
-<img width="966" height="877" alt="pkuxkx" src="https://github.com/user-attachments/assets/adec263c-05a3-48f0-90c7-afd2ba8718a2" />
+
+<img width="1206" height="811" alt="pkuxkx" src="https://github.com/user-attachments/assets/623d53bd-fd87-427f-8c2f-dcc83d371ad0" />
 
 ---
 
-<img width="972" height="814" alt="pkuxkx2" src="https://github.com/user-attachments/assets/73a41662-ffdc-4336-8921-6fa06f1b3e4c" />
+<img width="1241" height="945" alt="pkuxkx" src="https://github.com/user-attachments/assets/51275cc3-4835-46f7-9903-4e8487c5764c" />
+
+---
+
+<img width="1199" height="831" alt="image" src="https://github.com/user-attachments/assets/b2f789c9-cc66-44a0-be51-91d5be294ba7" />
+
 ## ⚙️ 配置说明
 
 项目支持 YAML 配置：
@@ -58,6 +64,9 @@ mud:
 # 编译
 mvn clean install
 
+# 复制配置文件
+复制 conf-temp 并重命名为 conf
+
 # 运行
 java -jar zm-mud.jar
 ```
@@ -68,6 +77,7 @@ java -jar zm-mud.jar
 
 ## 当前进度
 
+* [x] 多标签，即，多session多开
 * [x] 基础项目结构搭建
 * [x] 网络连接能力
 * [x] 入站/出站分层
@@ -76,8 +86,8 @@ java -jar zm-mud.jar
 * [x] 线程模型优化
 * [x] 消息模型优化以及收敛
 * [x] Trigger
-* [x] Alias 系统（进行中）
-* [x] Timer 系统（进行中）
+* [x] Alias 系统（进行中,暂停中）
+* [x] Timer 系统（进行中，暂停中）
 * [ ] 地图房间绘制
 * [x] UI 支持
 * [x] UI 人物信息（基于GMCP）

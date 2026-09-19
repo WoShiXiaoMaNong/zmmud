@@ -1,0 +1,13 @@
+{
+        "alias": [
+            {
+                "aliasName": "alm",
+                "aliasCommand": "localmaps"
+            },
+            {
+                "aliasName": "ahelp",
+                "aliasCommand": "help"
+            }
+        ]
+       
+}
