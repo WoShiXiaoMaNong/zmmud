@@ -5,6 +5,7 @@ import java.util.List;
 
 import zm.mud.core.command.IOubCommand;
 import zm.mud.core.session.MudSession;
+import zm.mud.core.utils.DirectionReversionUtil;
 
 public class NormalOubCommand extends AbsOubCommand{
 
@@ -14,6 +15,19 @@ public class NormalOubCommand extends AbsOubCommand{
 
     @Override
     protected List<IOubCommand> transferCommand(String originCommandStr) {
-        return Collections.singletonList(this);
-    } 
+        IOubCommand cmd = new NormalOubCommand(getSession(),  DirectionReversionUtil.revert(originCommandStr));
+        cmd.setOriginalCmd(false);
+        cmd.setRevertMode(this.revertMode());
+        return Collections.singletonList(cmd);        
+    }
+
+     @Override
+    public String getCommandStr() {
+        if(this.revertMode()){
+            return  DirectionReversionUtil.revert(super.getCommandStr());
+        }else{
+            return super.getCommandStr();
+        }
+    }
+
 }

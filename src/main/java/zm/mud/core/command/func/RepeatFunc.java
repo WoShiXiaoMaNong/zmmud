@@ -25,7 +25,7 @@ public class RepeatFunc implements IFuncCommand {
     }
 
     @Override
-    public List<IOubCommand> doFunc(MudSession session) {
+    public List<IOubCommand> doFunc(MudSession session,IOubCommand cmd) {
         List<IOubCommand> msgs = new ArrayList<>();
         int count = Integer.parseInt(funcInfo.getFuncCode());
         String realCmd = String.join(" ", funcInfo.getParams()); // 把切碎的参数重新用空格拼起来
@@ -37,6 +37,7 @@ public class RepeatFunc implements IFuncCommand {
         if(count > 0){
             msgs.remove(msgs.size() - 1); // 移除最后一个延迟
         }
+        msgs.forEach((m->m.setRevertMode(cmd.revertMode())));
 
         return msgs;
     }

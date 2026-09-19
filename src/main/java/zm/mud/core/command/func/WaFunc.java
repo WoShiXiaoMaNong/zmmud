@@ -22,7 +22,7 @@ public class WaFunc implements IFuncCommand {
     }
 
     @Override
-    public List<IOubCommand> doFunc(MudSession session) {
+    public List<IOubCommand> doFunc(MudSession session,IOubCommand cmd) {
         session.echoCommandToUI(this.funcInfo.getOriginCommandStr());
         if( funcInfo.getParams() == null || funcInfo.getParams().length == 0){
             return Collections.emptyList();

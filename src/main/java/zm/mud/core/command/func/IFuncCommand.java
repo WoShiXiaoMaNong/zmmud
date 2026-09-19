@@ -9,7 +9,7 @@ import zm.mud.utils.SpringBeanUtil;
 public interface IFuncCommand {
     public static final String FUNC_CMD_SPRING_BEAN_PREFIX = "FUNC_CMD_SPRING_BEAN_PREFIX_";
 
-    List<IOubCommand> doFunc(MudSession session);
+    List<IOubCommand> doFunc(MudSession session,IOubCommand cmd);
 
 
     public static IFuncCommand getBean(String beanIdWithoutPrefix,FuncInfo funcInfo){

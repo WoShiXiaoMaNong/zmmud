@@ -49,6 +49,26 @@ public class CommandQue <T> {
         }
     }
 
+    /**
+     * <pre>
+     * 当队列为空时：
+     * 1. 返回null
+     * 2. 更新isExecuting为false
+     * </pre>
+     */
+    public T pollLastCommand() {
+         try{
+            commandLock.lock();
+            T cmd =  this.oubCommandQueue.pollLast();
+            if(cmd == null){
+                this.isExecuting = false;
+            }
+            return cmd;
+        }finally{
+            commandLock.unlock();
+        }
+    }
+
     public void pushCommand(List<T> cmds) {
         if(cmds == null || cmds.isEmpty()){
             return;
@@ -58,6 +78,20 @@ public class CommandQue <T> {
             for(int i = cmds.size() - 1; i >=0 ; i--){
                 this.oubCommandQueue.push(cmds.get(i));
             }
+        }finally{
+            commandLock.unlock();
+        }
+       
+    }
+
+    public void add(T cmd) {
+        if(cmd == null ){
+            return;
+        }
+        try{
+            commandLock.lock();
+            this.oubCommandQueue.add(cmd);
+            
         }finally{
             commandLock.unlock();
         }

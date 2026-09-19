@@ -32,6 +32,10 @@ public class MudSession {
     // 玩家特有的出站命令队列
     private final CommandQue<IOubCommand> oubCommandQueue = new CommandQue<>();
 
+    // 玩家执行 #collect指令后开始收集，执行消费指令后清空，例如  #revert
+    private final CommandQue<IOubCommand> historyCommandQueue = new CommandQue<>();
+    private volatile boolean startCollect = false;
+
     private String mudWorldCode;
 
     private String host;
@@ -298,11 +302,20 @@ public class MudSession {
                 try {
                     // 抢占成功，开始消费队列中的所有命令
                     IOubCommand cmd = oubCommandQueue.pollCommand();
+                    if(cmd == null){
+                        break;
+                    }
                     while (cmd != null) {
                         if (cmd instanceof NormalOubCommand) {
                             this.oubMsgService.sendOutbound(this, cmd.getCommandStr());
                         } else {
                             cmd.exec();
+                        }
+
+                        //这里只需要记录原始输入的cmd就行，不需要记录由原始cmd派生出来的cmd
+                        //否则，指令会重复
+                        if(this.startCollect && cmd.isOiriginalCmd()){
+                            this.historyCommandQueue.add(cmd);
                         }
                         cmd = oubCommandQueue.pollCommand();
                     }
@@ -335,6 +348,21 @@ public class MudSession {
     public void refreshStatusBar(){
         ZmMudUI ui = SpringBeanUtil.getBean(ZmMudUI.class);
         ui.refreshStatusBar(this); 
+    }
+
+    public void startCollectCmd(){
+        this.clearCollectCmd();
+        this.startCollect = true;
+    }
+
+    public void stopCollectCmd(){
+        this.startCollect = false;
+    }
+    public void clearCollectCmd(){
+        this.historyCommandQueue.clearCommands();
+    }
+    public CommandQue<IOubCommand> getHistoryCommandQueue (){
+        return this.historyCommandQueue;
     }
     
 }

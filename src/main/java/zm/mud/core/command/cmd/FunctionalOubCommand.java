@@ -19,7 +19,15 @@ public class FunctionalOubCommand extends AbsOubCommand{
     protected List<IOubCommand> transferCommand(String originCommandStr) {
         List<IOubCommand> msgs = new ArrayList<>();
         FuncInfo funcInfo = new FuncInfo(originCommandStr);
-        msgs.addAll(this.doFunc(funcInfo));
+
+        List<IOubCommand> cmds = this.doFunc(funcInfo);
+        if( cmds != null){
+            for( IOubCommand cmd : cmds){
+                cmd.setOriginalCmd(false);
+                msgs.add(cmd);
+            }
+        }
+       
         return msgs;
     }
 
@@ -32,7 +40,7 @@ public class FunctionalOubCommand extends AbsOubCommand{
             funcCommand = IFuncCommand.getBean(funcInfo.getFuncCode(), funcInfo);
         }
         if(funcCommand != null){
-            return funcCommand.doFunc(this.getSession());
+            return funcCommand.doFunc(this.getSession(),this);
         }
         
         return Collections.emptyList();
@@ -52,4 +60,5 @@ public class FunctionalOubCommand extends AbsOubCommand{
         }
         return true;
     }
+
 }
