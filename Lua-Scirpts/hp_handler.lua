@@ -1,13 +1,14 @@
 -- scripts/hp_handler.lua
 
 -- 接收 Java 传过来的参数（... 代表入参列表）
-local trigger, ret, session = ...
+local actionContext, session = ...
 
 -- 打印调试信息，确认收到了 Java 对象
 --print("Lua 脚本启动成功！触发器名称: " .. trigger:getTriggerName())
 
 -- 调用 MatchResult 的 getMatchedRet() 获取抓取到的 6 组数字 List
-local rr = ret:getMatchedRet()
+local matcherRet = actionContext:get("MatchResult")
+local rr = matcherRet:getMatchedRet()
 -- 1. 获取 Java List 的大小
 local size = rr:size()
 --print("数组总长度: " .. size)
@@ -22,6 +23,8 @@ for i = 0, size - 1 do
     ssinfo = ssinfo .. tostring(value) .. ","
 end
 Sys:print(session,ssinfo .. "aaa")
+Sys:print(session,session:getSessionId().. "aaa")
+-- session:send("#wa 2300;climb tree")
 local cmd = "id"
 --LuaApi:sendCommand(cmd .. " ")
 -- 你可以在这里写你核心的 MUD 机器人逻辑（比如血量过低自动吃药等）

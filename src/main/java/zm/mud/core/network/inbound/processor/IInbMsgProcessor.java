@@ -6,6 +6,6 @@ import zm.mud.core.network.inbound.message.InbMsg;
 
 public interface IInbMsgProcessor extends Ordered {
 
-    boolean processMessage(InbMsg msg);
+    InbMsg processMessage(InbMsg msg);
 
 }

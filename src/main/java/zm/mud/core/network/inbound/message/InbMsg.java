@@ -12,6 +12,17 @@ public interface InbMsg {
 
     MudSession getSession();
 
+    /**
+     * 标记这个消息是否还可用
+     * @return
+     */
+    boolean isConsumable();
+
+    /**
+     * 将该消息设置为 不可用
+     */
+    void setUnconsumable();
+
     void setSession(MudSession session);
 
 

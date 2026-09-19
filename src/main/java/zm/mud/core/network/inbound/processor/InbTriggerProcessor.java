@@ -34,9 +34,9 @@ public class InbTriggerProcessor extends AbsSessionValidatingInbMsgProcessor {
     }
 
     @Override
-    protected boolean doProcess(InbMsg msg) {
+    protected InbMsg doProcess(InbMsg msg) {
         if (msg instanceof IACConfirmInbMsg) {
-            return true;
+            return msg;
         }
         this.lock.lock();
         try {
@@ -44,7 +44,7 @@ public class InbTriggerProcessor extends AbsSessionValidatingInbMsgProcessor {
             String sessionId = session.getSessionId();
             List<Trigger> triggerForCurrentSession = this.triggers.get(sessionId);
             if( triggerForCurrentSession == null){
-                return true;
+                return msg;
             }
             Iterator<Trigger> iterator = triggerForCurrentSession.iterator();
             while (iterator.hasNext()) {
@@ -72,7 +72,7 @@ public class InbTriggerProcessor extends AbsSessionValidatingInbMsgProcessor {
         } finally {
             this.lock.unlock();
         }
-        return true;
+        return msg;
     }
 
     private void tryInvokeTrigger(Trigger trigger, InbMsg msg) {

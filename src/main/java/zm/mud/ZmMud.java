@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import zm.mud.ui.ZmMudUI;
+import zm.mud.utils.FontUtil;
 
 /**
  * Zm MUD 主程序入口
@@ -16,6 +17,7 @@ public class ZmMud {
     public static ApplicationContext context = new AnnotationConfigApplicationContext("zm.mud");
 
     public static void main(String[] args) throws UnknownHostException, IOException {
+        FontUtil.registerFont();
         ZmMud app = new ZmMud();
         app.start();
     }

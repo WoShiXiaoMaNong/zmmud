@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import zm.mud.core.automation.action.ActionContext;
+import zm.mud.core.automation.action.ActionContextVariableNames;
 import zm.mud.core.automation.action.IAction;
 import zm.mud.core.automation.trigger.Trigger;
 import zm.mud.core.automation.trigger.cfg.MatchResult;
@@ -47,7 +49,9 @@ public class PrintUrlImgAction implements IAction {
     }
 
     @Override
-    public void execute(MudSession session,Trigger trigger, MatchResult ret) {
+    public void execute(ActionContext context) {
+        MatchResult ret = (MatchResult) context.get(ActionContextVariableNames.MATCHER_MATCHRET);
+        MudSession session = context.getSession();
         String fullmeUrl = ret.getOriginMsg();
         List<ImageInfo> imgUrls = new ArrayList<>();
         int fetchTimes = this.getFetchTimes(session);

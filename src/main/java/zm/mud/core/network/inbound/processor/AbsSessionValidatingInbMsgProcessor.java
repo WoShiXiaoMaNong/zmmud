@@ -8,9 +8,13 @@ public abstract class AbsSessionValidatingInbMsgProcessor implements IInbMsgProc
     private static final org.apache.logging.log4j.Logger logger = org.apache.logging.log4j.LogManager
             .getLogger(AbsSessionValidatingInbMsgProcessor.class);
     @Override
-    public final boolean processMessage(InbMsg msg) {
-        if(msg == null || msg.getSession() == null ){
-            return true;
+    public final InbMsg processMessage(InbMsg msg) {
+        if(msg == null ){
+            return msg;
+        }
+        if( msg.getSession() == null ){
+            msg.setUnconsumable();
+            return msg;
         }
         MudSession session = msg.getSession();
         if( SessionStatus.isAvailable(session.getStatus())){
@@ -18,9 +22,9 @@ public abstract class AbsSessionValidatingInbMsgProcessor implements IInbMsgProc
         }else{
             logger.debug("Session is inavailable! " +  session.getSessionId());
         }
-        return true;
+        return msg;
     }
 
-    protected abstract boolean doProcess(InbMsg msg);
+    protected abstract InbMsg doProcess(InbMsg msg);
 
 }

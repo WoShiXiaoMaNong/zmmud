@@ -3,9 +3,13 @@ package zm.mud.core.automation.trigger;
 
 
 
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import zm.mud.core.automation.action.ActionContext;
+import zm.mud.core.automation.action.ActionContextVariableNames;
 import zm.mud.core.automation.action.IAction;
 import zm.mud.core.automation.trigger.cfg.MatchResult;
 import zm.mud.core.automation.trigger.cfg.TriggerType;
@@ -93,7 +97,10 @@ public class Trigger {
             return;
         }
         try{
-            this.action.execute(this.session,this, ret);
+            ActionContext context = new ActionContext(session);
+            context.put(ActionContextVariableNames.TRIGGER_NAME, triggerName);
+            context.put(ActionContextVariableNames.MATCHER_MATCHRET, ret);
+            this.action.execute(context);
         }catch(Exception e){
             logger.error(this.getTriggerName() + " error!",e);
         }

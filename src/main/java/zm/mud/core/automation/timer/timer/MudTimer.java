@@ -1,4 +1,4 @@
-package zm.mud.core.automation.timer;
+package zm.mud.core.automation.timer.timer;
 
 import java.util.function.Consumer;
 

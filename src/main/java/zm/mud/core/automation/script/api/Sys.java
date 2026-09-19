@@ -5,8 +5,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import zm.mud.core.api.OubMsgService;
+
 import zm.mud.core.automation.script.lua.ILuaApi;
+import zm.mud.core.automation.timer.TimerService;
 import zm.mud.core.session.MudSession;
 
 
@@ -20,6 +21,14 @@ import zm.mud.core.session.MudSession;
 @Service
 public class Sys implements ILuaApi{
     private static final Logger logger = LogManager.getLogger(Sys.class);
+
+    @Autowired 
+    private TimerService timerService;
+
+
+    public void tick(MudSession session,String cmd,long delay){
+        this.timerService.commandTicker(session, cmd, delay);
+    }
     
     public void print(MudSession session,String msg){
         logger.info(msg);

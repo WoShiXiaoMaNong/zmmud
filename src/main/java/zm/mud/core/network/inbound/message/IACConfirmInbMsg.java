@@ -10,9 +10,12 @@ public class IACConfirmInbMsg implements InbMsg  {
 
     private MudSession session;
 
+    private boolean consumable;
+
     public IACConfirmInbMsg(MudSession session,byte[] content) {
         this.content = content;
         this.timestamp = LocalDateTime.now();
+        this.consumable = true;
     }
 
     @Override
@@ -40,6 +43,16 @@ public class IACConfirmInbMsg implements InbMsg  {
     @Override
     public void setSession(MudSession session) {
         this.session = session;
+    }
+
+    @Override
+    public boolean isConsumable() {
+        return this.consumable;
+    }
+
+    @Override
+    public void setUnconsumable() {
+       this.consumable = false;
     }
 
     

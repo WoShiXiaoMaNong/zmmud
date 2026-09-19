@@ -7,9 +7,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import zm.mud.core.automation.script.lua.LuaService;
-import zm.mud.core.automation.trigger.Trigger;
-import zm.mud.core.automation.trigger.cfg.MatchResult;
-import zm.mud.core.session.MudSession;
 
 @Component("ACTION_LuaScriptAction")
 @Scope("prototype")
@@ -34,10 +31,10 @@ public class LuaScriptAction implements IAction {
     }
 
     @Override
-    public void execute(MudSession session,Trigger trigger, MatchResult ret) {
+    public void execute(ActionContext context) {
         String script = this.getExpression();
         if (script == null || script.trim().isEmpty()) {
-            logger.error("Lua 脚本路径为空，无法执行！来自触发器：" + trigger.getTriggerName());
+            logger.error("Lua 脚本路径为空，无法执行！" );
             return;
         }
         try {
@@ -47,8 +44,8 @@ public class LuaScriptAction implements IAction {
             }
 
             // 2. 调用 Lua 引擎执行脚本，并将当前的 trigger 和正则匹配结果 ret 传进去
-            logger.debug("开始启动 Lua 脚本: {}, 触发器: {}", script, trigger.getTriggerName());
-            luaService.runScript(session, script, trigger, ret);
+            logger.debug("开始启动 Lua 脚本: {}", script);
+            luaService.runScript(context.getSession(), script, context);
 
         } catch (Exception e) {
             logger.error("启动 Lua 脚本失败: " + script, e);

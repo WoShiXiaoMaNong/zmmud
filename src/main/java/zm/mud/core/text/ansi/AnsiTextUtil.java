@@ -1,4 +1,4 @@
-package zm.mud.ui.util;
+package zm.mud.core.text.ansi;
 
 import java.awt.Color;
 import java.util.regex.Pattern;
