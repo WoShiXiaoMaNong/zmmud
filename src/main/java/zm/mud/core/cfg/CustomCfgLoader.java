@@ -68,7 +68,7 @@ public class CustomCfgLoader {
         return null;
     }
 
-    public static void saveConfig(String folder, String jsonFileName /* {mudName}.json */, String key, List<TriggerConfigEntry> configs) {
+    public static <T>void saveConfig(String folder, String jsonFileName /* {mudName}.json */, String key, List<T> configs) {
         try {
             // 1. 拼装标准的硬盘物理路径
             String fileFolder = (folder == null || folder.isEmpty()) ? "./" : folder;

@@ -7,7 +7,7 @@
       { "title": "界面设置", "type": "menuItem", "menuDialog": "zm.mud.ui.component.menu.setting.client.ClientConfigMenu" },
       { "title": "触发器 (Trigger)", "type": "menuItem", "menuDialog": "zm.mud.ui.component.menu.setting.TriggerConfigMenu" },
       { "title": "别名 (Alias)", "type": "menuItem", "menuDialog": "zm.mud.ui.component.menu.TBDMenu" },
-      { "title": "宏设置 (Macro)", "type": "menuItem", "menuDialog":  "zm.mud.ui.component.menu.TBDMenu" },
+      { "title": "定时器 (Timer)", "type": "menuItem", "menuDialog":  "zm.mud.ui.component.menu.setting.timer.TimerConfigMenu" },
       { "title": "", "type": "separator", "itemWindow": "" },
       {
         "title": "高级设置",

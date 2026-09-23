@@ -1,0 +1,21 @@
+{
+	"timers":[
+		{
+			"action":{
+				"expression":"climb tree",
+				"matchRawMsg":null,
+				"params":{
+					
+				},
+				"type":"SendCommand"
+			},
+			"enable":true,
+			"name":"测试用定时器",
+			"type":"delay",
+			"trigger_value":"3500",
+			"remainingCount":3,
+			"id":"timer_01"
+		
+		}
+	]
+}

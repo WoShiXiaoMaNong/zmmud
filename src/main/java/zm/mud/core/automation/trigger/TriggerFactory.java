@@ -14,7 +14,6 @@ import zm.mud.core.automation.trigger.cfg.MatcherAndActionConfigEntry;
 import zm.mud.core.automation.trigger.cfg.TriggerConfigEntry;
 import zm.mud.core.automation.trigger.cfg.TriggerType;
 import zm.mud.core.automation.trigger.matcher.AbsMatcher;
-import zm.mud.core.automation.trigger.matcher.IMatcher;
 import zm.mud.core.cfg.CustomCfgLoader;
 import zm.mud.core.consts.ConfigConsts;
 import zm.mud.core.session.MudSession;
